@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: 'Nunito', system-ui, sans-serif;
+  color: #e0e0f0;
+  overflow: hidden;
+  background: #1a1a2e;
+}
+
+h1, h2, h3 {
+  font-family: 'Cinzel', serif;
+}
+
+input, select, textarea {
+  font-family: 'Nunito', system-ui, sans-serif;
+}
+
+@keyframes epstein-particle {
+  0%   { opacity: 1; transform: translateX(0) translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateX(var(--dx)) translateY(100px) scale(0.3); }
+}
+
+@keyframes ad-pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.07); }
+  100% { transform: scale(1); }
+}
