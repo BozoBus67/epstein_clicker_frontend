@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Music_Player from './music_player';
 import { api_me } from '../../auth/api';
+import { api_fivemin_checkin } from '../api';
 import { update_game_data, update_premium_game_data } from '../../shared/store/sessionSlice';
 import { ACCOUNT_TIER_NAMES } from '../../shared/constants';
 import { tier_num } from '../../shared/utils';
@@ -12,6 +13,31 @@ export async function refresh_user_data(jwt, dispatch) {
   const data = await api_me(jwt);
   dispatch(update_game_data(data.user.game_data));
   dispatch(update_premium_game_data(data.user.premium_game_data));
+}
+
+function Test_Fivemin_Button() {
+  const dispatch = useDispatch();
+  const handle = async () => {
+    try {
+      const data = await api_fivemin_checkin();
+      if (data.already_checked_in) {
+        toast(`Already checked in (streak: ${data.streak})`);
+      } else {
+        toast.success(`+${data.tokens_granted} tokens (streak: ${data.streak})`);
+      }
+      if (data.premium_game_data) dispatch(update_premium_game_data(data.premium_game_data));
+    } catch (e) {
+      toast.error(e?.detail || e?.message || '5min checkin failed');
+    }
+  };
+  return (
+    <button
+      onClick={handle}
+      style={{ padding: '4px 10px', border: '1px solid #ef4444', borderRadius: '6px', background: '#ef4444', color: 'white', fontSize: '12px', cursor: 'pointer' }}
+    >
+      Test 5min
+    </button>
+  );
 }
 
 function Refresh_Button() {
@@ -105,6 +131,7 @@ export default function Top_Bar({ on_gamble_click }) {
       flexShrink: 0,
     }}>
       <Refresh_Button />
+      <Test_Fivemin_Button />
       <Account_Tier_Display />
       <Token_Display />
       <Nav_Button label="Buy Tokens" to="/game/buy-tokens" />
