@@ -22,7 +22,7 @@ export default function Auction_House_Screen() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh' }}>
-      <Page_Header title="Auction House" />
+      <Auction_House_Screen_Topbar />
       <Auction_House_Screen_Body listings={listings} on_select={set_selected_listing} />
       <button
         onClick={refresh}
@@ -48,6 +48,10 @@ export default function Auction_House_Screen() {
       )}
     </div>
   );
+}
+
+function Auction_House_Screen_Topbar() {
+  return <Page_Header title="Auction House" />;
 }
 
 function Auction_House_Screen_Body({ listings, on_select }) {
