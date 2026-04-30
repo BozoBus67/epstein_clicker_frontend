@@ -2,9 +2,7 @@ import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import Music_Player from './music_player';
-import Volume_Control from './volume_control';
-import Shuffle_Button from './shuffle_button';
+import { Audio_Controls } from '../../shared/components';
 import { api_me } from '../../auth/api';
 import { update_game_data, update_premium_game_data } from '../../shared/store/sessionSlice';
 import { ACCOUNT_TIER_NAMES } from '../../shared/constants';
@@ -130,16 +128,3 @@ function Auction_House_Nav_Button() {
   );
 }
 
-function Audio_Controls() {
-  return (
-    <Audio_Controls_Panel>
-      <Music_Player />
-      <Volume_Control />
-      <Shuffle_Button />
-    </Audio_Controls_Panel>
-  );
-}
-
-function Audio_Controls_Panel({ children }) {
-  return <div style={{ display: 'flex', gap: '5px' }}>{children}</div>;
-}

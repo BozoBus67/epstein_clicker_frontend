@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
-import { Back_Arrow_Button } from '../shared/components';
+import { Back_Arrow_Button, Audio_Controls } from '../shared/components';
 import { BOTS } from './constants';
 import { mark_bot_beaten } from './storage';
 import { Engine } from './engine';
@@ -87,6 +87,9 @@ export default function Chess_Game_Screen() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh', alignItems: 'center', padding: '12px 16px 16px', gap: '12px' }}>
       <Back_Arrow_Button to="/game/play-chess" />
+      <div style={{ position: 'fixed', top: '16px', right: '16px' }}>
+        <Audio_Controls />
+      </div>
       <Bot_Header bot={bot} engine_ready={engine_ready} thinking={thinking_ref.current} outcome={outcome} />
       <div style={{ width: 'min(60vh, 85vw)', maxWidth: '480px' }}>
         <Chessboard

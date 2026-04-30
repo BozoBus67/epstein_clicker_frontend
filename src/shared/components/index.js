@@ -1,3 +1,4 @@
+export { default as Audio_Controls } from './audio_controls';
 export { default as Back_Arrow_Button } from './back_arrow_button';
 export { default as Error_Boundary } from './error_boundary';
 export { default as Loading_Screen } from './loading_screen';
