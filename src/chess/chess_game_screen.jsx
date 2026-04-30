@@ -1,0 +1,137 @@
+import { useEffect, useRef, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Chess } from 'chess.js';
+import { Chessboard } from 'react-chessboard';
+import { Back_Arrow_Button } from '../shared/components';
+import { BOTS } from './constants';
+import { mark_bot_beaten } from './storage';
+import { Engine } from './engine';
+
+export default function Chess_Game_Screen() {
+  const { bot_id } = useParams();
+  const navigate = useNavigate();
+  const bot = BOTS.find(b => b.scroll_id === bot_id);
+
+  const chess_ref = useRef(new Chess());
+  const engine_ref = useRef(null);
+  const thinking_ref = useRef(false);
+  const [position, set_position] = useState(chess_ref.current.fen());
+  const [outcome, set_outcome] = useState(null); // null | 'win' | 'loss' | 'draw'
+  const [engine_ready, set_engine_ready] = useState(false);
+
+  useEffect(() => {
+    if (!bot) return;
+    const engine = new Engine();
+    engine_ref.current = engine;
+    engine.init(bot.elo).then(() => set_engine_ready(true));
+    return () => { engine.terminate(); };
+  }, [bot]);
+
+  if (!bot) {
+    return (
+      <div style={{ display: 'flex', width: '100vw', height: '100vh', justifyContent: 'center', alignItems: 'center', color: 'white' }}>
+        Unknown bot. <button onClick={() => navigate('/game/play-chess')}>Back</button>
+      </div>
+    );
+  }
+
+  const check_outcome = () => {
+    const chess = chess_ref.current;
+    if (chess.isCheckmate()) {
+      const won = chess.turn() === 'b';
+      set_outcome(won ? 'win' : 'loss');
+      if (won) mark_bot_beaten(bot.scroll_id);
+    } else if (chess.isDraw() || chess.isStalemate() || chess.isThreefoldRepetition()) {
+      set_outcome('draw');
+    }
+  };
+
+  const make_engine_move = async () => {
+    if (thinking_ref.current) return;
+    const chess = chess_ref.current;
+    if (chess.isGameOver()) return;
+    thinking_ref.current = true;
+    try {
+      const move = await engine_ref.current.best_move(chess.fen());
+      const from = move.slice(0, 2);
+      const to = move.slice(2, 4);
+      const promotion = move.length > 4 ? move[4] : undefined;
+      chess.move({ from, to, promotion });
+      set_position(chess.fen());
+      check_outcome();
+    } finally {
+      thinking_ref.current = false;
+    }
+  };
+
+  const on_drop = (sourceSquare, targetSquare) => {
+    const chess = chess_ref.current;
+    if (outcome || thinking_ref.current || !engine_ready) return false;
+    let move;
+    try {
+      move = chess.move({ from: sourceSquare, to: targetSquare, promotion: 'q' });
+    } catch { return false; }
+    if (!move) return false;
+    set_position(chess.fen());
+    check_outcome();
+    if (!chess.isGameOver()) make_engine_move();
+    return true;
+  };
+
+  const reset = () => {
+    chess_ref.current = new Chess();
+    set_position(chess_ref.current.fen());
+    set_outcome(null);
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh', alignItems: 'center', padding: '64px 16px 16px', gap: '16px' }}>
+      <Back_Arrow_Button to="/game/play-chess" />
+      <Bot_Header bot={bot} engine_ready={engine_ready} thinking={thinking_ref.current} outcome={outcome} />
+      <div style={{ width: 'min(72vh, 90vw)', maxWidth: '560px' }}>
+        <Chessboard
+          position={position}
+          onPieceDrop={on_drop}
+          boardOrientation="white"
+          arePiecesDraggable={!outcome && engine_ready}
+        />
+      </div>
+      {outcome && <Outcome_Banner outcome={outcome} on_reset={reset} />}
+    </div>
+  );
+}
+
+function Bot_Header({ bot, engine_ready, thinking, outcome }) {
+  const status =
+    outcome === 'win'  ? 'You won!' :
+    outcome === 'loss' ? 'You lost.' :
+    outcome === 'draw' ? 'Draw.' :
+    !engine_ready      ? 'Engine loading…' :
+    thinking           ? `${bot.name} is thinking…` :
+                         'Your move (white).';
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
+      <img src={bot.face} style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', border: '2px solid #facc15' }} />
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <span style={{ color: '#facc15', fontWeight: 'bold' }}>{bot.name} <span style={{ color: '#aaa', fontWeight: 'normal' }}>(ELO {bot.elo})</span></span>
+        <span style={{ fontSize: '13px', color: '#aaa' }}>{status}</span>
+      </div>
+    </div>
+  );
+}
+
+function Outcome_Banner({ outcome, on_reset }) {
+  const text = outcome === 'win' ? '🏆 Victory' : outcome === 'loss' ? '💀 Defeat' : '🤝 Draw';
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: 'white' }}>
+      <div style={{ fontWeight: 'bold', fontSize: '18px', color: '#facc15' }}>{text}</div>
+      <button
+        onClick={on_reset}
+        style={{ padding: '8px 24px', background: '#facc15', color: '#000', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
+      >
+        Play again
+      </button>
+    </div>
+  );
+}

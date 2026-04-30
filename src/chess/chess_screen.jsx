@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { Back_Arrow_Button } from '../shared/components';
 import { BOTS, REGULAR_BOT_IDS, EPSTEIN_BOT_ID } from './constants';
 import { get_beaten_bots } from './storage';
@@ -35,16 +36,19 @@ function Chess_Screen_Body({ bots, beaten, epstein_unlocked }) {
 }
 
 function Bot_Card({ bot, locked, beaten }) {
+  const navigate = useNavigate();
   return (
-    <div style={{
-      width: '180px', borderRadius: '10px', overflow: 'hidden',
-      background: '#1e1e2e',
-      border: `2px solid ${beaten ? '#facc15' : '#444'}`,
-      display: 'flex', flexDirection: 'column', flexShrink: 0,
-      cursor: locked ? 'default' : 'pointer',
-      transition: 'transform 0.15s, border-color 0.15s',
-      position: 'relative',
-    }}
+    <div
+      onClick={locked ? undefined : () => navigate(`/game/play-chess/${bot.scroll_id}`)}
+      style={{
+        width: '180px', borderRadius: '10px', overflow: 'hidden',
+        background: '#1e1e2e',
+        border: `2px solid ${beaten ? '#facc15' : '#444'}`,
+        display: 'flex', flexDirection: 'column', flexShrink: 0,
+        cursor: locked ? 'default' : 'pointer',
+        transition: 'transform 0.15s, border-color 0.15s',
+        position: 'relative',
+      }}
     className={locked ? '' : 'hover:scale-105 hover:border-yellow-400'}>
       <div style={{ width: '100%', height: '180px', overflow: 'hidden', position: 'relative' }}>
         <img
