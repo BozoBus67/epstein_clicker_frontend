@@ -14,16 +14,20 @@ export default function Chess_Game_Screen() {
 
   const chess_ref = useRef(new Chess());
   const engine_ref = useRef(null);
+  const init_promise_ref = useRef(null);
   const thinking_ref = useRef(false);
   const [position, set_position] = useState(chess_ref.current.fen());
   const [outcome, set_outcome] = useState(null); // null | 'win' | 'loss' | 'draw'
   const [engine_ready, set_engine_ready] = useState(false);
+  const [engine_error, set_engine_error] = useState(null);
 
   useEffect(() => {
     if (!bot) return;
     const engine = new Engine();
     engine_ref.current = engine;
-    engine.init(bot.elo).then(() => set_engine_ready(true));
+    init_promise_ref.current = engine.init(bot.elo)
+      .then(() => set_engine_ready(true))
+      .catch(e => set_engine_error(e?.message ?? String(e)));
     return () => { engine.terminate(); };
   }, [bot]);
 
@@ -47,11 +51,12 @@ export default function Chess_Game_Screen() {
   };
 
   const make_engine_move = async () => {
-    if (thinking_ref.current) return;
+    if (thinking_ref.current || engine_error) return;
     const chess = chess_ref.current;
     if (chess.isGameOver()) return;
     thinking_ref.current = true;
     try {
+      await init_promise_ref.current;
       const move = await engine_ref.current.best_move(chess.fen());
       const from = move.slice(0, 2);
       const to = move.slice(2, 4);
@@ -59,6 +64,8 @@ export default function Chess_Game_Screen() {
       chess.move({ from, to, promotion });
       set_position(chess.fen());
       check_outcome();
+    } catch (e) {
+      console.error('engine move failed', e);
     } finally {
       thinking_ref.current = false;
     }
@@ -66,7 +73,7 @@ export default function Chess_Game_Screen() {
 
   const on_drop = (sourceSquare, targetSquare) => {
     const chess = chess_ref.current;
-    if (outcome || thinking_ref.current || !engine_ready) return false;
+    if (outcome || thinking_ref.current) return false;
     let move;
     try {
       move = chess.move({ from: sourceSquare, to: targetSquare, promotion: 'q' });
@@ -90,13 +97,13 @@ export default function Chess_Game_Screen() {
       <div style={{ position: 'fixed', top: '16px', right: '16px' }}>
         <Audio_Controls />
       </div>
-      <Bot_Header bot={bot} engine_ready={engine_ready} thinking={thinking_ref.current} outcome={outcome} />
+      <Bot_Header bot={bot} engine_ready={engine_ready} engine_error={engine_error} thinking={thinking_ref.current} outcome={outcome} />
       <div style={{ width: 'min(60vh, 85vw)', maxWidth: '480px' }}>
         <Chessboard
           position={position}
           onPieceDrop={on_drop}
           boardOrientation="white"
-          arePiecesDraggable={!outcome && engine_ready}
+          arePiecesDraggable={!outcome}
         />
       </div>
       {outcome && <Outcome_Banner outcome={outcome} on_reset={reset} />}
@@ -104,13 +111,14 @@ export default function Chess_Game_Screen() {
   );
 }
 
-function Bot_Header({ bot, engine_ready, thinking, outcome }) {
+function Bot_Header({ bot, engine_ready, engine_error, thinking, outcome }) {
   const status =
     outcome === 'win'  ? 'You won!' :
     outcome === 'loss' ? 'You lost.' :
     outcome === 'draw' ? 'Draw.' :
-    !engine_ready      ? 'Engine loading…' :
+    engine_error       ? `Engine error: ${engine_error}` :
     thinking           ? `${bot.name} is thinking…` :
+    !engine_ready      ? 'Engine loading… (you can move)' :
                          'Your move (white).';
 
   return (

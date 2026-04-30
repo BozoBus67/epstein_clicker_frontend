@@ -11,7 +11,11 @@ export class Engine {
     this.handlers = new Set();
     this.worker.onmessage = (e) => {
       const line = typeof e.data === 'string' ? e.data : '';
+      if (import.meta.env.DEV) console.log('[sf]', line);
       this.handlers.forEach(h => h(line));
+    };
+    this.worker.onerror = (e) => {
+      console.error('[sf] worker error', e.message ?? e);
     };
   }
 
