@@ -89,6 +89,16 @@ function Nav_Button({ label, to, on_click }) {
   );
 }
 
+function Audio_Controls({ tier }) {
+  if (tier < 1) return null;
+  return (
+    <div style={{ display: 'flex', gap: '5px' }}>
+      <Music_Player />
+      {tier >= 4 && <Volume_Control />}
+    </div>
+  );
+}
+
 export default function Top_Bar({ on_gamble_click }) {
   const tier = tier_num(useSelector(state => state.session.premium_game_data?.account_tier));
 
@@ -114,12 +124,7 @@ export default function Top_Bar({ on_gamble_click }) {
       <Nav_Button label="Redeem Tokens" to="/game/redeem-tokens" />
       <Nav_Button label="Mastery Scrolls" to="/game/mastery-scrolls" />
       {tier >= 4 && <Nav_Button label="Auction House" to="/game/auction-house" />}
-      {tier >= 1 && (
-        <div style={{ display: 'flex', gap: '5px' }}>
-          <Music_Player />
-          {tier >= 4 && <Volume_Control />}
-        </div>
-      )}
+      <Audio_Controls tier={tier} />
     </div>
   );
 }
