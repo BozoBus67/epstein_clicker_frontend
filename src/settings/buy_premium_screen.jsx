@@ -15,6 +15,7 @@ const TIER_PERKS = {
   account_tier_2: [
     'Everything in Plus',
     'Gain the ability to close ads',
+    'Access to the trade market',
   ],
   account_tier_3: [
     'Everything in Pro',
@@ -25,7 +26,7 @@ const TIER_PERKS = {
   account_tier_4: [
     'Everything in Enterprise',
     'Gain the ability to adjust music volume',
-    'Access to the trade market',
+    'Gain the ability to scramble music playlist',
   ],
   account_tier_5: [
     'Everything in Premium',
