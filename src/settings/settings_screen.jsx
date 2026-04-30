@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { logout, update_game_data } from '../shared/store/sessionSlice';
 import { Back_Arrow_Button, X_Button } from '../shared/components';
-import { current_audio, set_current_audio } from '../shared/misc_info';
+import { current_audio, set_current_audio } from '../shared/audio_state';
 import { supabase } from '../shared/supabase_client';
 import { api_reset_game } from '../game';
 import { api_get_my_discord } from './api';

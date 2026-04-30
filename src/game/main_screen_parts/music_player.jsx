@@ -4,7 +4,7 @@ import {
   current_song_url, set_current_song_url,
   current_volume,
   playlist_entries, subscribe_playlist,
-} from '../../shared/misc_info';
+} from '../../shared/audio_state';
 import { useTierGate } from '../../shared/hooks';
 
 export default function Music_Player() {

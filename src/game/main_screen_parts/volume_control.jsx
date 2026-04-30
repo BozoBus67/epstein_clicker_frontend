@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { current_volume, set_current_volume } from '../../shared/misc_info';
+import { current_volume, set_current_volume } from '../../shared/audio_state';
 import { useTierGate } from '../../shared/hooks';
 
 export default function Volume_Control() {

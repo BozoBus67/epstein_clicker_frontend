@@ -37,9 +37,3 @@ export function shuffle_playlist(): void {
   }
   playlist_subscribers.forEach(fn => fn());
 }
-
-export interface AccountTier {
-  id: string;
-  label: string;
-  price: number;
-}
