@@ -1,14 +1,8 @@
 import { useSelector } from 'react-redux';
 import { useState, useRef } from 'react';
 import { Page_Header } from '../shared/components';
-import { SCROLL_NAMES, SCROLL_TIERS, SCROLL_DESCRIPTIONS } from '../shared/constants';
-
-const face_modules = import.meta.glob('../assets/master_scroll_faces/*', { eager: true });
-const FACES = Object.keys(face_modules).sort().map(k => face_modules[k].default);
-
-const TOOLTIP_W = 200;
-const TOOLTIP_H = 50;
-const GAP = 8;
+import { SCROLL_NAMES, SCROLL_DESCRIPTIONS } from '../shared/constants';
+import { FACES, TOOLTIP_W, get_tier, get_next_tier, get_tooltip_style } from './utils';
 
 export default function Mastery_Scrolls_Screen() {
   const premium_game_data = useSelector(state => state.session.premium_game_data);
@@ -86,35 +80,4 @@ function Scroll_Panel({ scroll_id, count, image }) {
       )}
     </div>
   );
-}
-
-function get_tier(count) {
-  for (const { min, tier } of SCROLL_TIERS) {
-    if (count >= min) return tier;
-  }
-  return 0;
-}
-
-function get_next_tier(count) {
-  const sorted = [...SCROLL_TIERS].sort((a, b) => a.min - b.min);
-  for (const { min, tier } of sorted) {
-    if (count < min) return { needed: min, tier };
-  }
-  return null;
-}
-
-function get_tooltip_style(rect) {
-  const { top, bottom, left, right } = rect;
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const cx = (left + right) / 2;
-  const cy = (top + bottom) / 2;
-
-  if (top >= TOOLTIP_H + GAP)
-    return { top: top - TOOLTIP_H - GAP, left: cx - TOOLTIP_W / 2 };
-  if (bottom + TOOLTIP_H + GAP <= vh)
-    return { top: bottom + GAP, left: cx - TOOLTIP_W / 2 };
-  if (right + TOOLTIP_W + GAP <= vw)
-    return { top: cy - TOOLTIP_H / 2, left: right + GAP };
-  return { top: cy - TOOLTIP_H / 2, left: left - TOOLTIP_W - GAP };
 }
