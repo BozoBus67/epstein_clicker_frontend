@@ -139,7 +139,7 @@ function Tier_Card({ tier, current_tier, on_click }) {
         cursor: is_owned ? 'default' : 'pointer',
         transition: 'transform 0.15s, box-shadow 0.15s',
         textAlign: 'left',
-        opacity: is_owned ? 0.7 : 1,
+        opacity: 1,
         userSelect: 'none',
       }}
       className={is_owned ? '' : 'hover:scale-105 hover:shadow-xl'}
