@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { update_premium_game_data } from '../shared/store/sessionSlice';
 import { api_redeem_tokens } from './api';
-import Back_Arrow_Button from '../shared/components/back_arrow_button';
+import { Back_Arrow_Button } from '../shared/components';
 
 function Redeem_Modal({ on_close, on_success }) {
   const [answers, set_answers] = useState(['', '', '']);

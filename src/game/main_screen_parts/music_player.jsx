@@ -5,7 +5,7 @@ import {
   current_volume,
   playlist_entries, subscribe_playlist,
 } from '../../misc_info';
-import { useTierGate } from '../../shared/hooks/useTierGate';
+import { useTierGate } from '../../shared/hooks';
 
 function Music_Player_Panel({ entries, on_song_click, current_url }) {
   const selected_ref = useRef(null);

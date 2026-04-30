@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { useState, useRef } from 'react';
-import Page_Header from '../shared/components/page_header';
+import { Page_Header } from '../shared/components';
 import { SCROLL_NAMES, SCROLL_TIERS, SCROLL_DESCRIPTIONS } from '../shared/constants';
 
 const face_modules = import.meta.glob('../assets/master_scroll_faces/*', { eager: true });

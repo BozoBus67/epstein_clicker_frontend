@@ -8,7 +8,7 @@ import Shuffle_Button from './shuffle_button';
 import { api_me } from '../../auth/api';
 import { update_game_data, update_premium_game_data } from '../../shared/store/sessionSlice';
 import { ACCOUNT_TIER_NAMES } from '../../shared/constants';
-import { useTierGate } from '../../shared/hooks/useTierGate';
+import { useTierGate } from '../../shared/hooks';
 
 export async function refresh_user_data(jwt, dispatch) {
   const data = await api_me(jwt);

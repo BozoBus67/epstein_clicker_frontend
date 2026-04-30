@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { current_volume, set_current_volume } from '../../misc_info';
-import { useTierGate } from '../../shared/hooks/useTierGate';
+import { useTierGate } from '../../shared/hooks';
 
 function Volume_Panel({ value, on_change }) {
   return (

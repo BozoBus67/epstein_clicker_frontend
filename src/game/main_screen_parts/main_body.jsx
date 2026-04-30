@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { increase_cookies } from '../game_utils';
 import { Building_Row } from '../buildings/buildings_components';
 import * as Constants from '../../shared/constants';
-import { useTierGate } from '../../shared/hooks/useTierGate';
+import { useTierGate } from '../../shared/hooks';
 
 const ad_modules = import.meta.glob('../../assets/clickbait_faces/*.png', { eager: true });
 const ADS = Object.values(ad_modules).map(m => m.default);

@@ -1,5 +1,5 @@
 import { shuffle_playlist } from '../../misc_info';
-import { useTierGate } from '../../shared/hooks/useTierGate';
+import { useTierGate } from '../../shared/hooks';
 
 export default function Shuffle_Button() {
   const { gate, lock_modal } = useTierGate(4);

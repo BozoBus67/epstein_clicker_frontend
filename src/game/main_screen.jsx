@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { useEscapeKey } from '../shared/hooks/useEscapeKey';
+import { useEscapeKey, useTierGate } from '../shared/hooks';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { update_game_data, update_premium_game_data } from '../shared/store/sessionSlice';
-import { useTierGate } from '../shared/hooks/useTierGate';
 import { save_game_data } from './game_utils';
 import { api_daily_checkin, api_hourly_checkin, api_fivemin_checkin } from './api';
 import Top_Bar from './main_screen_parts/top_bar';

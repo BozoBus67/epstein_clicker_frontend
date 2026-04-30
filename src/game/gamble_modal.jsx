@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { update_premium_game_data } from '../shared/store/sessionSlice';
 import { api_spin } from './api';
-import { useEscapeKey } from '../shared/hooks/useEscapeKey';
+import { useEscapeKey } from '../shared/hooks';
 
 const face_modules = import.meta.glob('../assets/master_scroll_faces/*', { eager: true });
 const SCROLL_FACES = Object.values(face_modules).map(m => m.default);

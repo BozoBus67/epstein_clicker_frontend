@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useEscapeKey } from '../shared/hooks/useEscapeKey';
+import { useEscapeKey, useTierGate } from '../shared/hooks';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout, update_game_data } from '../shared/store/sessionSlice';
-import Back_Arrow_Button from '../shared/components/back_arrow_button';
-import X_Button from '../shared/components/x_button';
+import { Back_Arrow_Button, X_Button } from '../shared/components';
 import { current_audio, set_current_audio } from '../misc_info';
 import { supabase } from '../supabase_client';
 import { api_reset_game } from '../game';
 import { api_get_my_discord } from './api';
-import { useTierGate } from '../shared/hooks/useTierGate';
 import toast from 'react-hot-toast';
 
 function Reset_Save_Confirmation_Panel({ on_confirm, on_cancel }) {

@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import Back_Arrow_Button from '../shared/components/back_arrow_button';
+import { Back_Arrow_Button } from '../shared/components';
 
 const STRIPE_LINK = import.meta.env.VITE_STRIPE_PAYMENT_LINK;
 
