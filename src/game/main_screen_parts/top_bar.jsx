@@ -10,6 +10,34 @@ import { update_game_data, update_premium_game_data } from '../../shared/store/s
 import { ACCOUNT_TIER_NAMES } from '../../shared/constants';
 import { useTierGate } from '../../shared/hooks';
 
+export default function Top_Bar({ on_gamble_click }) {
+  return (
+    <div style={{
+      width: '100%',
+      height: '60px',
+      background: 'linear-gradient(to bottom, #1c1c30, #141422)',
+      borderBottom: '2px solid #facc15',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-evenly',
+      padding: '0 12px',
+      boxSizing: 'border-box',
+      flexShrink: 0,
+    }}>
+      <Refresh_Button />
+      <Account_Tier_Display />
+      <Token_Display />
+      <Nav_Button label="Buy Tokens" to="/game/buy-tokens" />
+      <Nav_Button label="Buy Premium" to="/game/buy-premium" />
+      <Nav_Button label="Gamble Tokens" on_click={on_gamble_click} />
+      <Nav_Button label="Redeem Tokens" to="/game/redeem-tokens" />
+      <Nav_Button label="Mastery Scrolls" to="/game/mastery-scrolls" />
+      <Auction_House_Nav_Button />
+      <Audio_Controls />
+    </div>
+  );
+}
+
 export async function refresh_user_data(jwt, dispatch) {
   const data = await api_me(jwt);
   dispatch(update_game_data(data.user.game_data));
@@ -90,8 +118,15 @@ function Nav_Button({ label, to, on_click }) {
   );
 }
 
-function Audio_Controls_Panel({ children }) {
-  return <div style={{ display: 'flex', gap: '5px' }}>{children}</div>;
+function Auction_House_Nav_Button() {
+  const navigate = useNavigate();
+  const { gate, lock_modal } = useTierGate(2);
+  return (
+    <>
+      <Nav_Button label="Auction House" on_click={() => gate(() => navigate('/game/auction-house'))} />
+      {lock_modal}
+    </>
+  );
 }
 
 function Audio_Controls() {
@@ -104,41 +139,6 @@ function Audio_Controls() {
   );
 }
 
-function Auction_House_Nav_Button() {
-  const navigate = useNavigate();
-  const { gate, lock_modal } = useTierGate(2);
-  return (
-    <>
-      <Nav_Button label="Auction House" on_click={() => gate(() => navigate('/game/auction-house'))} />
-      {lock_modal}
-    </>
-  );
-}
-
-export default function Top_Bar({ on_gamble_click }) {
-  return (
-    <div style={{
-      width: '100%',
-      height: '60px',
-      background: 'linear-gradient(to bottom, #1c1c30, #141422)',
-      borderBottom: '2px solid #facc15',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-evenly',
-      padding: '0 12px',
-      boxSizing: 'border-box',
-      flexShrink: 0,
-    }}>
-      <Refresh_Button />
-      <Account_Tier_Display />
-      <Token_Display />
-      <Nav_Button label="Buy Tokens" to="/game/buy-tokens" />
-      <Nav_Button label="Buy Premium" to="/game/buy-premium" />
-      <Nav_Button label="Gamble Tokens" on_click={on_gamble_click} />
-      <Nav_Button label="Redeem Tokens" to="/game/redeem-tokens" />
-      <Nav_Button label="Mastery Scrolls" to="/game/mastery-scrolls" />
-      <Auction_House_Nav_Button />
-      <Audio_Controls />
-    </div>
-  );
+function Audio_Controls_Panel({ children }) {
+  return <div style={{ display: 'flex', gap: '5px' }}>{children}</div>;
 }

@@ -8,21 +8,6 @@ import { supabase } from '../supabase_client';
 import { patch_session_data } from '../shared/store/sessionSlice';
 import { api_update_username } from './api';
 
-function Field({ label, type, value, on_change, placeholder }) {
-  return (
-    <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '14px', color: 'white', width: '100%' }}>
-      {label}
-      <input
-        type={type}
-        value={value}
-        onChange={e => on_change(e.target.value)}
-        placeholder={placeholder}
-        style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #444', background: '#1e1e2e', color: 'white', fontSize: '14px', outline: 'none' }}
-      />
-    </label>
-  );
-}
-
 export default function Login_Details_Screen() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -87,32 +72,75 @@ export default function Login_Details_Screen() {
 
   return (
     <div style={{ display: 'flex', width: '100vw', height: '100vh', justifyContent: 'center', alignItems: 'center' }}>
+      <Login_Details_Screen_Topbar />
+      <Login_Details_Screen_Body
+        username={username} set_username={set_username}
+        email={email} set_email={set_email}
+        old_password={old_password} set_old_password={set_old_password}
+        password={password} set_password={set_password}
+        confirm_password={confirm_password} set_confirm_password={set_confirm_password}
+        loading={loading}
+        on_submit={handle_submit}
+        on_cancel={() => navigate('/game/settings')}
+      />
+    </div>
+  );
+}
+
+function Login_Details_Screen_Topbar() {
+  return (
+    <>
       <Back_Arrow_Button to="/game/settings" />
       <X_Button to="/game/settings" />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '340px' }}>
-        <h2 style={{ color: 'white', margin: 0, textAlign: 'center' }}>Change Login Details</h2>
-        <Field label="Username" type="text" value={username} on_change={set_username} placeholder="Username" />
-        <Field label="Email" type="email" value={email} on_change={set_email} placeholder="Email" />
-        <Field label="Current password" type="password" value={old_password} on_change={set_old_password} placeholder="Required to set a new password" />
-        <Field label="New password" type="password" value={password} on_change={set_password} placeholder="Leave blank to keep current" />
-        <Field label="Confirm new password" type="password" value={confirm_password} on_change={set_confirm_password} placeholder="" />
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button
-            onClick={() => navigate('/game/settings')}
-            disabled={loading}
-            style={{ flex: 1, padding: '10px', borderRadius: '8px', background: '#333', color: 'white', fontWeight: 'bold', fontSize: '14px', border: '1px solid #555', cursor: 'pointer' }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handle_submit}
-            disabled={loading}
-            style={{ flex: 1, padding: '10px', borderRadius: '8px', background: '#facc15', color: '#000', fontWeight: 'bold', fontSize: '14px', border: 'none', cursor: 'pointer' }}
-          >
-            {loading ? 'Saving...' : 'Save Changes'}
-          </button>
-        </div>
+    </>
+  );
+}
+
+function Login_Details_Screen_Body({
+  username, set_username, email, set_email,
+  old_password, set_old_password, password, set_password,
+  confirm_password, set_confirm_password,
+  loading, on_submit, on_cancel,
+}) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '340px' }}>
+      <h2 style={{ color: 'white', margin: 0, textAlign: 'center' }}>Change Login Details</h2>
+      <Field label="Username" type="text" value={username} on_change={set_username} placeholder="Username" />
+      <Field label="Email" type="email" value={email} on_change={set_email} placeholder="Email" />
+      <Field label="Current password" type="password" value={old_password} on_change={set_old_password} placeholder="Required to set a new password" />
+      <Field label="New password" type="password" value={password} on_change={set_password} placeholder="Leave blank to keep current" />
+      <Field label="Confirm new password" type="password" value={confirm_password} on_change={set_confirm_password} placeholder="" />
+      <div style={{ display: 'flex', gap: '12px' }}>
+        <button
+          onClick={on_cancel}
+          disabled={loading}
+          style={{ flex: 1, padding: '10px', borderRadius: '8px', background: '#333', color: 'white', fontWeight: 'bold', fontSize: '14px', border: '1px solid #555', cursor: 'pointer' }}
+        >
+          Cancel
+        </button>
+        <button
+          onClick={on_submit}
+          disabled={loading}
+          style={{ flex: 1, padding: '10px', borderRadius: '8px', background: '#facc15', color: '#000', fontWeight: 'bold', fontSize: '14px', border: 'none', cursor: 'pointer' }}
+        >
+          {loading ? 'Saving...' : 'Save Changes'}
+        </button>
       </div>
     </div>
+  );
+}
+
+function Field({ label, type, value, on_change, placeholder }) {
+  return (
+    <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '14px', color: 'white', width: '100%' }}>
+      {label}
+      <input
+        type={type}
+        value={value}
+        onChange={e => on_change(e.target.value)}
+        placeholder={placeholder}
+        style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #444', background: '#1e1e2e', color: 'white', fontSize: '14px', outline: 'none' }}
+      />
+    </label>
   );
 }

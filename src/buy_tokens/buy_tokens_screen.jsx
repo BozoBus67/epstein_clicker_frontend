@@ -12,11 +12,23 @@ export default function Buy_Tokens_Screen() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh', alignItems: 'center', justifyContent: 'center', gap: '20px' }}>
-      <Back_Arrow_Button to="/game" />
+      <Buy_Tokens_Screen_Topbar />
+      <Buy_Tokens_Screen_Body on_buy={handle_buy} />
+    </div>
+  );
+}
+
+function Buy_Tokens_Screen_Topbar() {
+  return <Back_Arrow_Button to="/game" />;
+}
+
+function Buy_Tokens_Screen_Body({ on_buy }) {
+  return (
+    <>
       <h1 style={{ color: '#facc15', margin: 0 }}>Buy Tokens</h1>
       <p style={{ color: '#aaa', margin: 0 }}>$1 per token — choose quantity on the next page</p>
       <button
-        onClick={handle_buy}
+        onClick={on_buy}
         style={{
           padding: '10px 32px', background: '#facc15', color: '#000',
           border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer',
@@ -24,6 +36,6 @@ export default function Buy_Tokens_Screen() {
       >
         Buy Tokens
       </button>
-    </div>
+    </>
   );
 }

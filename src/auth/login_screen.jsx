@@ -5,59 +5,6 @@ import { login } from '../shared/store/sessionSlice';
 import { api_login } from './api';
 import { supabase } from '../supabase_client';
 
-function Login_Panel({ on_submit, username_or_email, set_username_or_email, password, set_password, error, loading, go_to_signup }) {
-  return (
-    <div style={{
-      width: '384px', padding: '32px', borderRadius: '12px',
-      background: 'rgba(9, 14, 28, 0.88)',
-      border: '1px solid rgba(250, 204, 21, 0.5)',
-      backdropFilter: 'blur(12px)',
-      color: '#e0e0f0',
-    }}>
-      <h2 style={{ margin: '0 0 20px', color: '#facc15' }}>Login</h2>
-
-      <input
-        type="text"
-        placeholder="Username or Email"
-        className="w-full mb-2 rounded-lg"
-        style={{ display: 'block', padding: '8px 10px', background: 'rgba(255,255,255,0.1)', color: '#e0e0f0', border: '1px solid rgba(255,255,255,0.25)' }}
-        value={username_or_email}
-        onChange={(e) => set_username_or_email(e.target.value)}
-      />
-
-      <input
-        type="password"
-        placeholder="Password"
-        className="w-full mb-4 rounded-lg"
-        style={{ display: 'block', padding: '8px 10px', background: 'rgba(255,255,255,0.1)', color: '#e0e0f0', border: '1px solid rgba(255,255,255,0.25)' }}
-        value={password}
-        onChange={(e) => set_password(e.target.value)}
-      />
-
-      {error && (
-        <p style={{ color: '#f87171', marginBottom: '8px', fontSize: '14px' }}>{error}</p>
-      )}
-
-      <button
-        className="w-full rounded-lg transition"
-        style={{ padding: '8px', background: '#facc15', color: '#000', fontWeight: 'bold', cursor: 'pointer', border: 'none' }}
-        onClick={on_submit}
-        disabled={loading}
-      >
-        {loading ? 'Logging in...' : 'Login'}
-      </button>
-
-      <button
-        className="w-full rounded-lg transition hover:underline"
-        style={{ padding: '8px', background: 'transparent', color: '#facc15', border: 'none', cursor: 'pointer', marginTop: '4px' }}
-        onClick={go_to_signup}
-      >
-        I want to sign up instead
-      </button>
-    </div>
-  );
-}
-
 export default function Login_Screen() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -122,6 +69,59 @@ export default function Login_Screen() {
         loading={loading}
         go_to_signup={() => navigate('/signup')}
       />
+    </div>
+  );
+}
+
+function Login_Panel({ on_submit, username_or_email, set_username_or_email, password, set_password, error, loading, go_to_signup }) {
+  return (
+    <div style={{
+      width: '384px', padding: '32px', borderRadius: '12px',
+      background: 'rgba(9, 14, 28, 0.88)',
+      border: '1px solid rgba(250, 204, 21, 0.5)',
+      backdropFilter: 'blur(12px)',
+      color: '#e0e0f0',
+    }}>
+      <h2 style={{ margin: '0 0 20px', color: '#facc15' }}>Login</h2>
+
+      <input
+        type="text"
+        placeholder="Username or Email"
+        className="w-full mb-2 rounded-lg"
+        style={{ display: 'block', padding: '8px 10px', background: 'rgba(255,255,255,0.1)', color: '#e0e0f0', border: '1px solid rgba(255,255,255,0.25)' }}
+        value={username_or_email}
+        onChange={(e) => set_username_or_email(e.target.value)}
+      />
+
+      <input
+        type="password"
+        placeholder="Password"
+        className="w-full mb-4 rounded-lg"
+        style={{ display: 'block', padding: '8px 10px', background: 'rgba(255,255,255,0.1)', color: '#e0e0f0', border: '1px solid rgba(255,255,255,0.25)' }}
+        value={password}
+        onChange={(e) => set_password(e.target.value)}
+      />
+
+      {error && (
+        <p style={{ color: '#f87171', marginBottom: '8px', fontSize: '14px' }}>{error}</p>
+      )}
+
+      <button
+        className="w-full rounded-lg transition"
+        style={{ padding: '8px', background: '#facc15', color: '#000', fontWeight: 'bold', cursor: 'pointer', border: 'none' }}
+        onClick={on_submit}
+        disabled={loading}
+      >
+        {loading ? 'Logging in...' : 'Login'}
+      </button>
+
+      <button
+        className="w-full rounded-lg transition hover:underline"
+        style={{ padding: '8px', background: 'transparent', color: '#facc15', border: 'none', cursor: 'pointer', marginTop: '4px' }}
+        onClick={go_to_signup}
+      >
+        I want to sign up instead
+      </button>
     </div>
   );
 }

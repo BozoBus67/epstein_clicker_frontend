@@ -10,69 +10,6 @@ import Top_Bar from './main_screen_parts/top_bar';
 import Main_Body from './main_screen_parts/main_body';
 import Gamble_Modal from './gamble_modal';
 
-function Reward_Popup({ title, streak_label, data, on_close }) {
-  useEscapeKey(on_close);
-  return (
-    <div style={{
-      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
-    }}>
-      <div style={{
-        background: '#1e1e2e', border: '2px solid #facc15', borderRadius: '12px',
-        padding: '32px', minWidth: '280px', textAlign: 'center', color: 'white',
-      }}>
-        <h2 style={{ color: '#facc15', marginBottom: '8px' }}>{title}</h2>
-        <p>Streak: {streak_label} {data.streak}</p>
-        <p>Tokens granted: {data.tokens_granted}</p>
-        <button
-          onClick={on_close}
-          style={{
-            marginTop: '20px', padding: '8px 24px', background: '#facc15',
-            color: '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold',
-          }}
-        >
-          OK
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Settings_Button() {
-  const navigate = useNavigate();
-  const { gate, lock_modal } = useTierGate(1);
-  const [hovered, set_hovered] = useState(false);
-
-  return (
-    <>
-      <button
-        onClick={() => gate(() => navigate('/game/settings'))}
-        onMouseEnter={() => set_hovered(true)}
-        onMouseLeave={() => set_hovered(false)}
-        style={{
-          position: 'fixed',
-          bottom: '16px',
-          left: '16px',
-          width: '44px',
-          height: '44px',
-          border: '2px solid #facc15',
-          borderRadius: '8px',
-          background: '#1e1e2e',
-          color: '#facc15',
-          fontSize: '24px',
-          lineHeight: 1,
-          cursor: 'pointer',
-          transform: hovered ? 'scale(1.08)' : 'scale(1)',
-          transition: 'all 0.1s ease',
-        }}
-      >
-        ⚙️
-      </button>
-      {lock_modal}
-    </>
-  );
-}
-
 export default function Main_Screen() {
   const dispatch = useDispatch();
   const jwt = useSelector(state => state.session.jwt);
@@ -166,9 +103,76 @@ export default function Main_Screen() {
       {hourly_reward_data && <Reward_Popup title="Hourly Reward!" streak_label="Hour" data={hourly_reward_data} on_close={() => set_hourly_reward_data(null)} />}
       {fivemin_reward_data && <Reward_Popup title="5 Minute Reward!" streak_label="x" data={fivemin_reward_data} on_close={() => set_fivemin_reward_data(null)} />}
       {show_gamble && <Gamble_Modal on_close={() => set_show_gamble(false)} />}
-      <Top_Bar on_gamble_click={() => set_show_gamble(true)} />
+      <Main_Screen_Topbar on_gamble_click={() => set_show_gamble(true)} />
       <Main_Body />
       <Settings_Button />
+    </div>
+  );
+}
+
+function Main_Screen_Topbar({ on_gamble_click }) {
+  return <Top_Bar on_gamble_click={on_gamble_click} />;
+}
+
+function Settings_Button() {
+  const navigate = useNavigate();
+  const { gate, lock_modal } = useTierGate(1);
+  const [hovered, set_hovered] = useState(false);
+
+  return (
+    <>
+      <button
+        onClick={() => gate(() => navigate('/game/settings'))}
+        onMouseEnter={() => set_hovered(true)}
+        onMouseLeave={() => set_hovered(false)}
+        style={{
+          position: 'fixed',
+          bottom: '16px',
+          left: '16px',
+          width: '44px',
+          height: '44px',
+          border: '2px solid #facc15',
+          borderRadius: '8px',
+          background: '#1e1e2e',
+          color: '#facc15',
+          fontSize: '24px',
+          lineHeight: 1,
+          cursor: 'pointer',
+          transform: hovered ? 'scale(1.08)' : 'scale(1)',
+          transition: 'all 0.1s ease',
+        }}
+      >
+        ⚙️
+      </button>
+      {lock_modal}
+    </>
+  );
+}
+
+function Reward_Popup({ title, streak_label, data, on_close }) {
+  useEscapeKey(on_close);
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
+    }}>
+      <div style={{
+        background: '#1e1e2e', border: '2px solid #facc15', borderRadius: '12px',
+        padding: '32px', minWidth: '280px', textAlign: 'center', color: 'white',
+      }}>
+        <h2 style={{ color: '#facc15', marginBottom: '8px' }}>{title}</h2>
+        <p>Streak: {streak_label} {data.streak}</p>
+        <p>Tokens granted: {data.tokens_granted}</p>
+        <button
+          onClick={on_close}
+          style={{
+            marginTop: '20px', padding: '8px 24px', background: '#facc15',
+            color: '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold',
+          }}
+        >
+          OK
+        </button>
+      </div>
     </div>
   );
 }

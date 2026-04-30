@@ -6,39 +6,36 @@ import { SCROLL_NAMES, SCROLL_TIERS, SCROLL_DESCRIPTIONS } from '../shared/const
 const face_modules = import.meta.glob('../assets/master_scroll_faces/*', { eager: true });
 const FACES = Object.keys(face_modules).sort().map(k => face_modules[k].default);
 
-function get_tier(count) {
-  for (const { min, tier } of SCROLL_TIERS) {
-    if (count >= min) return tier;
-  }
-  return 0;
-}
-
-function get_next_tier(count) {
-  const sorted = [...SCROLL_TIERS].sort((a, b) => a.min - b.min);
-  for (const { min, tier } of sorted) {
-    if (count < min) return { needed: min, tier };
-  }
-  return null;
-}
-
 const TOOLTIP_W = 200;
 const TOOLTIP_H = 50;
 const GAP = 8;
 
-function get_tooltip_style(rect) {
-  const { top, bottom, left, right } = rect;
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const cx = (left + right) / 2;
-  const cy = (top + bottom) / 2;
+export default function Mastery_Scrolls_Screen() {
+  const premium_game_data = useSelector(state => state.session.premium_game_data);
+  const scrolls = useSelector(state => state.session.scrolls);
 
-  if (top >= TOOLTIP_H + GAP)
-    return { top: top - TOOLTIP_H - GAP, left: cx - TOOLTIP_W / 2 };
-  if (bottom + TOOLTIP_H + GAP <= vh)
-    return { top: bottom + GAP, left: cx - TOOLTIP_W / 2 };
-  if (right + TOOLTIP_W + GAP <= vw)
-    return { top: cy - TOOLTIP_H / 2, left: right + GAP };
-  return { top: cy - TOOLTIP_H / 2, left: left - TOOLTIP_W - GAP };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh' }}>
+      <Mastery_Scrolls_Screen_Topbar />
+      <Mastery_Scrolls_Screen_Body premium_game_data={premium_game_data} scrolls={scrolls} />
+    </div>
+  );
+}
+
+function Mastery_Scrolls_Screen_Topbar() {
+  return <Page_Header title="Mastery Scrolls" />;
+}
+
+function Mastery_Scrolls_Screen_Body({ premium_game_data, scrolls }) {
+  return (
+    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 40px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+        {Object.entries(scrolls).map(([id], i) => (
+          <Scroll_Panel key={id} scroll_id={id} count={premium_game_data?.[id] ?? 0} image={FACES[i]} />
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function Scroll_Panel({ scroll_id, count, image }) {
@@ -91,26 +88,33 @@ function Scroll_Panel({ scroll_id, count, image }) {
   );
 }
 
-function Mastery_Scrolls_Screen_Body({ premium_game_data, scrolls }) {
-  return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 40px' }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-        {Object.entries(scrolls).map(([id], i) => (
-          <Scroll_Panel key={id} scroll_id={id} count={premium_game_data?.[id] ?? 0} image={FACES[i]} />
-        ))}
-      </div>
-    </div>
-  );
+function get_tier(count) {
+  for (const { min, tier } of SCROLL_TIERS) {
+    if (count >= min) return tier;
+  }
+  return 0;
 }
 
-export default function Mastery_Scrolls_Screen() {
-  const premium_game_data = useSelector(state => state.session.premium_game_data);
-  const scrolls = useSelector(state => state.session.scrolls);
+function get_next_tier(count) {
+  const sorted = [...SCROLL_TIERS].sort((a, b) => a.min - b.min);
+  for (const { min, tier } of sorted) {
+    if (count < min) return { needed: min, tier };
+  }
+  return null;
+}
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh' }}>
-      <Page_Header title="Mastery Scrolls" />
-      <Mastery_Scrolls_Screen_Body premium_game_data={premium_game_data} scrolls={scrolls} />
-    </div>
-  );
+function get_tooltip_style(rect) {
+  const { top, bottom, left, right } = rect;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const cx = (left + right) / 2;
+  const cy = (top + bottom) / 2;
+
+  if (top >= TOOLTIP_H + GAP)
+    return { top: top - TOOLTIP_H - GAP, left: cx - TOOLTIP_W / 2 };
+  if (bottom + TOOLTIP_H + GAP <= vh)
+    return { top: bottom + GAP, left: cx - TOOLTIP_W / 2 };
+  if (right + TOOLTIP_W + GAP <= vw)
+    return { top: cy - TOOLTIP_H / 2, left: right + GAP };
+  return { top: cy - TOOLTIP_H / 2, left: left - TOOLTIP_W - GAP };
 }

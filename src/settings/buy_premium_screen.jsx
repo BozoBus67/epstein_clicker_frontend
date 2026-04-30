@@ -54,35 +54,93 @@ const TIER_IMAGES = Object.fromEntries(
   ])
 );
 
-function Confirm_Modal({ tier, on_confirm, on_cancel, loading }) {
+export default function Buy_Premium_Screen() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const account_tiers = useSelector(state => state.session.account_tiers);
+  const current_tier_str = useSelector(state => state.session.premium_game_data?.account_tier ?? 'account_tier_0');
+  const current_tier = tier_num(current_tier_str);
+  const paid_tiers = account_tiers.filter(t => t.id !== 'account_tier_0');
+
+  const [selected, set_selected] = useState(null);
+  const [loading, set_loading] = useState(false);
+
+  useEffect(() => {
+    const handle_key = (e) => {
+      if (e.key === 'Escape') {
+        if (selected) set_selected(null);
+        else navigate('/game');
+      }
+    };
+    window.addEventListener('keydown', handle_key);
+    return () => window.removeEventListener('keydown', handle_key);
+  }, [navigate, selected]);
+
+  const handle_confirm = async () => {
+    set_loading(true);
+    try {
+      const data = await api_buy_account_tier(selected.id);
+      dispatch(update_premium_game_data(data.premium_game_data));
+      toast.success(`Upgraded to ${ACCOUNT_TIER_NAMES[selected.id]}!`);
+      set_selected(null);
+    } catch (e) {
+      toast.error(e?.message || 'Purchase failed.');
+    } finally {
+      set_loading(false);
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh', overflow: 'hidden' }}>
+      <Buy_Premium_Screen_Topbar on_back={() => navigate('/game')} />
+      <Buy_Premium_Screen_Body
+        tiers={paid_tiers}
+        current_tier={current_tier}
+        on_select={set_selected}
+      />
+      {selected && (
+        <Confirm_Modal
+          tier={selected}
+          on_confirm={handle_confirm}
+          on_cancel={() => set_selected(null)}
+          loading={loading}
+        />
+      )}
+    </div>
+  );
+}
+
+function Buy_Premium_Screen_Topbar({ on_back }) {
+  return (
+    <>
+      <button
+        onClick={on_back}
+        style={{ position: 'fixed', top: '16px', left: '16px', border: '1px solid gray', borderRadius: '50%', width: '32px', height: '32px' }}
+        className="text-gray-700 hover:text-gray-900 transition font-bold"
+      >←</button>
+      <button
+        onClick={on_back}
+        style={{ position: 'fixed', top: '16px', right: '16px', border: '1px solid gray', borderRadius: '50%', width: '32px', height: '32px' }}
+        className="text-gray-700 hover:text-gray-900 transition font-bold"
+      >✕</button>
+    </>
+  );
+}
+
+function Buy_Premium_Screen_Body({ tiers, current_tier, on_select }) {
   return (
     <div style={{
-      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
+      display: 'flex', flexDirection: 'row', alignItems: 'center',
+      gap: '24px', padding: '80px 48px', overflowX: 'auto', height: '100%',
     }}>
-      <div style={{
-        background: 'white', borderRadius: '12px', padding: '32px',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', minWidth: '300px',
-      }}>
-        <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>Buy {ACCOUNT_TIER_NAMES[tier.id]}?</p>
-        <p style={{ margin: 0, color: '#555' }}>This will cost {tier.token_price} tokens.</p>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button
-            onClick={on_cancel}
-            disabled={loading}
-            className="bg-gray-300 text-black py-2 px-6 rounded-lg hover:bg-gray-400 transition"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={on_confirm}
-            disabled={loading}
-            className="bg-yellow-400 text-black font-bold py-2 px-6 rounded-lg hover:bg-yellow-500 transition"
-          >
-            {loading ? 'Buying...' : 'Confirm'}
-          </button>
-        </div>
-      </div>
+      {tiers.map((tier) => (
+        <Tier_Card
+          key={tier.id}
+          tier={tier}
+          current_tier={current_tier}
+          on_click={() => on_select(tier)}
+        />
+      ))}
     </div>
   );
 }
@@ -131,77 +189,35 @@ function Tier_Card({ tier, current_tier, on_click }) {
   );
 }
 
-export default function Buy_Premium_Screen() {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const account_tiers = useSelector(state => state.session.account_tiers);
-  const current_tier_str = useSelector(state => state.session.premium_game_data?.account_tier ?? 'account_tier_0');
-  const current_tier = tier_num(current_tier_str);
-  const paid_tiers = account_tiers.filter(t => t.id !== 'account_tier_0');
-
-  const [selected, set_selected] = useState(null);
-  const [loading, set_loading] = useState(false);
-
-  useEffect(() => {
-    const handle_key = (e) => {
-      if (e.key === 'Escape') {
-        if (selected) set_selected(null);
-        else navigate('/game');
-      }
-    };
-    window.addEventListener('keydown', handle_key);
-    return () => window.removeEventListener('keydown', handle_key);
-  }, [navigate, selected]);
-
-  const handle_confirm = async () => {
-    set_loading(true);
-    try {
-      const data = await api_buy_account_tier(selected.id);
-      dispatch(update_premium_game_data(data.premium_game_data));
-      toast.success(`Upgraded to ${ACCOUNT_TIER_NAMES[selected.id]}!`);
-      set_selected(null);
-    } catch (e) {
-      toast.error(e?.message || 'Purchase failed.');
-    } finally {
-      set_loading(false);
-    }
-  };
-
+function Confirm_Modal({ tier, on_confirm, on_cancel, loading }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh', overflow: 'hidden' }}>
-      <button
-        onClick={() => navigate('/game')}
-        style={{ position: 'fixed', top: '16px', left: '16px', border: '1px solid gray', borderRadius: '50%', width: '32px', height: '32px' }}
-        className="text-gray-700 hover:text-gray-900 transition font-bold"
-      >←</button>
-      <button
-        onClick={() => navigate('/game')}
-        style={{ position: 'fixed', top: '16px', right: '16px', border: '1px solid gray', borderRadius: '50%', width: '32px', height: '32px' }}
-        className="text-gray-700 hover:text-gray-900 transition font-bold"
-      >✕</button>
-
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
+    }}>
       <div style={{
-        display: 'flex', flexDirection: 'row', alignItems: 'center',
-        gap: '24px', padding: '80px 48px', overflowX: 'auto', height: '100%',
+        background: 'white', borderRadius: '12px', padding: '32px',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', minWidth: '300px',
       }}>
-        {paid_tiers.map((tier) => (
-          <Tier_Card
-            key={tier.id}
-            tier={tier}
-            current_tier={current_tier}
-            on_click={() => set_selected(tier)}
-          />
-        ))}
+        <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>Buy {ACCOUNT_TIER_NAMES[tier.id]}?</p>
+        <p style={{ margin: 0, color: '#555' }}>This will cost {tier.token_price} tokens.</p>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            onClick={on_cancel}
+            disabled={loading}
+            className="bg-gray-300 text-black py-2 px-6 rounded-lg hover:bg-gray-400 transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={on_confirm}
+            disabled={loading}
+            className="bg-yellow-400 text-black font-bold py-2 px-6 rounded-lg hover:bg-yellow-500 transition"
+          >
+            {loading ? 'Buying...' : 'Confirm'}
+          </button>
+        </div>
       </div>
-
-      {selected && (
-        <Confirm_Modal
-          tier={selected}
-          on_confirm={handle_confirm}
-          on_cancel={() => set_selected(null)}
-          loading={loading}
-        />
-      )}
     </div>
   );
 }

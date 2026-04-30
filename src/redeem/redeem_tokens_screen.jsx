@@ -5,6 +5,55 @@ import { update_premium_game_data } from '../shared/store/sessionSlice';
 import { api_redeem_tokens } from './api';
 import { Back_Arrow_Button } from '../shared/components';
 
+export default function Redeem_Tokens_Screen() {
+  const dispatch = useDispatch();
+  const premium_game_data = useSelector(state => state.session.premium_game_data);
+  const [show_modal, set_show_modal] = useState(false);
+
+  const handle_success = (tokens_awarded) => {
+    dispatch(update_premium_game_data({
+      ...premium_game_data,
+      tokens: (premium_game_data?.tokens ?? 0) + tokens_awarded,
+      redeemed: { ...premium_game_data?.redeemed, poisson: true },
+    }));
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>
+      <Redeem_Tokens_Screen_Topbar />
+      {show_modal && (
+        <Redeem_Modal
+          on_close={() => set_show_modal(false)}
+          on_success={handle_success}
+        />
+      )}
+      <Redeem_Tokens_Screen_Body on_open_modal={() => set_show_modal(true)} />
+    </div>
+  );
+}
+
+function Redeem_Tokens_Screen_Topbar() {
+  return <Back_Arrow_Button to="/game" />;
+}
+
+function Redeem_Tokens_Screen_Body({ on_open_modal }) {
+  return (
+    <>
+      <h1 style={{ color: '#facc15', marginBottom: '8px' }}>Redeem Tokens</h1>
+      <p style={{ color: '#aaa', marginBottom: '24px' }}>Placeholder description text.</p>
+      <button
+        onClick={on_open_modal}
+        style={{
+          padding: '10px 28px', background: '#facc15', color: '#000',
+          border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer',
+        }}
+      >
+        Answer a Question
+      </button>
+    </>
+  );
+}
+
 function Redeem_Modal({ on_close, on_success }) {
   const [answers, set_answers] = useState(['', '', '']);
   const [loading, set_loading] = useState(false);
@@ -23,7 +72,7 @@ function Redeem_Modal({ on_close, on_success }) {
         toast.error('Incorrect — try again.');
       }
     } catch (err) {
-      set_result({ error: err?.detail || 'Something went wrong.' });
+      toast.error(err?.detail || 'Something went wrong.');
     } finally {
       set_loading(false);
     }
@@ -78,46 +127,6 @@ function Redeem_Modal({ on_close, on_success }) {
           </button>
         </div>
       </div>
-    </div>
-  );
-}
-
-export default function Redeem_Tokens_Screen() {
-  const dispatch = useDispatch();
-  const premium_game_data = useSelector(state => state.session.premium_game_data);
-  const [show_modal, set_show_modal] = useState(false);
-
-  const handle_success = (tokens_awarded) => {
-    dispatch(update_premium_game_data({
-      ...premium_game_data,
-      tokens: (premium_game_data?.tokens ?? 0) + tokens_awarded,
-      redeemed: { ...premium_game_data?.redeemed, poisson: true },
-    }));
-  };
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>
-      <Back_Arrow_Button to="/game" />
-
-      {show_modal && (
-        <Redeem_Modal
-          on_close={() => set_show_modal(false)}
-          on_success={handle_success}
-        />
-      )}
-
-      <h1 style={{ color: '#facc15', marginBottom: '8px' }}>Redeem Tokens</h1>
-      <p style={{ color: '#aaa', marginBottom: '24px' }}>Placeholder description text.</p>
-
-      <button
-        onClick={() => set_show_modal(true)}
-        style={{
-          padding: '10px 28px', background: '#facc15', color: '#000',
-          border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer',
-        }}
-      >
-        Answer a Question
-      </button>
     </div>
   );
 }

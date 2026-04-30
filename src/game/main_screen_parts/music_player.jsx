@@ -7,83 +7,6 @@ import {
 } from '../../misc_info';
 import { useTierGate } from '../../shared/hooks';
 
-function Music_Player_Panel({ entries, on_song_click, current_url }) {
-  const selected_ref = useRef(null);
-
-  useEffect(() => {
-    if (selected_ref.current) {
-      selected_ref.current.scrollIntoView({ block: 'start' });
-    }
-  }, []);
-
-  return (
-    <div style={{
-      position: 'absolute',
-      top: '100%',
-      right: 0,
-      width: '260px',
-      height: '200px',
-      overflowY: 'scroll',
-      background: 'white',
-      border: '1px solid #ddd',
-      borderRadius: '8px',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-      padding: '8px',
-      zIndex: 100,
-    }}>
-      {entries.map(([path, url]) => {
-        const filename = path.split('/').pop().replace('.mp3', '').replace(/\s*\[[^\]]+\]$/, '');
-        return (
-          <button
-            key={path}
-            ref={current_url === url ? selected_ref : null}
-            onClick={() => on_song_click(url)}
-            style={{
-              display: 'block',
-              width: '100%',
-              textAlign: 'left',
-              background: current_url === url ? '#f0f0f0' : 'none',
-              border: 'none',
-              padding: '6px 4px',
-              cursor: 'pointer',
-              fontSize: '13px',
-              fontWeight: 'bold',
-              color: '#111',
-              borderBottom: '1px solid #ccc',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-            className="hover:bg-gray-100"
-          >
-            {filename}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function Music_Player_Button({ onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className="hover:outline hover:outline-1 hover:outline-yellow-400 hover:cursor-pointer"
-      style={{
-        background: '#facc15',
-        border: '1px solid #facc15',
-        fontSize: '16px',
-        lineHeight: 1,
-        padding: '4px 10px',
-        borderRadius: '6px',
-        cursor: 'pointer',
-      }}
-    >
-      🎵
-    </button>
-  );
-}
-
 export default function Music_Player() {
   const [open, setOpen] = useState(false);
   const [current_url, set_current_url] = useState(() => current_song_url);
@@ -147,6 +70,83 @@ export default function Music_Player() {
       <Music_Player_Button onClick={() => gate(() => setOpen(!open))} />
       {open && <Music_Player_Panel entries={playlist_entries} on_song_click={on_song_click} current_url={current_url} />}
       {lock_modal}
+    </div>
+  );
+}
+
+function Music_Player_Button({ onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="hover:outline hover:outline-1 hover:outline-yellow-400 hover:cursor-pointer"
+      style={{
+        background: '#facc15',
+        border: '1px solid #facc15',
+        fontSize: '16px',
+        lineHeight: 1,
+        padding: '4px 10px',
+        borderRadius: '6px',
+        cursor: 'pointer',
+      }}
+    >
+      🎵
+    </button>
+  );
+}
+
+function Music_Player_Panel({ entries, on_song_click, current_url }) {
+  const selected_ref = useRef(null);
+
+  useEffect(() => {
+    if (selected_ref.current) {
+      selected_ref.current.scrollIntoView({ block: 'start' });
+    }
+  }, []);
+
+  return (
+    <div style={{
+      position: 'absolute',
+      top: '100%',
+      right: 0,
+      width: '260px',
+      height: '200px',
+      overflowY: 'scroll',
+      background: 'white',
+      border: '1px solid #ddd',
+      borderRadius: '8px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+      padding: '8px',
+      zIndex: 100,
+    }}>
+      {entries.map(([path, url]) => {
+        const filename = path.split('/').pop().replace('.mp3', '').replace(/\s*\[[^\]]+\]$/, '');
+        return (
+          <button
+            key={path}
+            ref={current_url === url ? selected_ref : null}
+            onClick={() => on_song_click(url)}
+            style={{
+              display: 'block',
+              width: '100%',
+              textAlign: 'left',
+              background: current_url === url ? '#f0f0f0' : 'none',
+              border: 'none',
+              padding: '6px 4px',
+              cursor: 'pointer',
+              fontSize: '13px',
+              fontWeight: 'bold',
+              color: '#111',
+              borderBottom: '1px solid #ccc',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+            className="hover:bg-gray-100"
+          >
+            {filename}
+          </button>
+        );
+      })}
     </div>
   );
 }

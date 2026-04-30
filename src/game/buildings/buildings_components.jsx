@@ -3,27 +3,6 @@ import { useSelector } from 'react-redux';
 import { buy_building } from '../game_utils';
 import { BUILDING_NAMES } from '../../shared/constants';
 
-function Building_Tooltip({ building, owned, row_top, row_height }) {
-  return (
-    <div style={{
-      position: 'fixed',
-      top: row_top + row_height / 2,
-      transform: 'translateX(-110%) translateY(-50%)',
-      background: 'rgba(0,0,0,0.75)',
-      color: 'white',
-      borderRadius: '6px',
-      padding: '6px 10px',
-      fontSize: '12px',
-      whiteSpace: 'nowrap',
-      pointerEvents: 'none',
-      zIndex: 10,
-    }}>
-      <div>Each: {building.cps} cps</div>
-      <div>Total: {building.cps * owned} cps</div>
-    </div>
-  );
-}
-
 export function Building_Row({ name }) {
   const [hovered, set_hovered] = useState(false);
   const [rect, set_rect] = useState(null);
@@ -48,6 +27,27 @@ export function Building_Row({ name }) {
       <span style={{ marginLeft: 'auto', fontSize: '14px' }}>
         Owned: {owned}
       </span>
+    </div>
+  );
+}
+
+function Building_Tooltip({ building, owned, row_top, row_height }) {
+  return (
+    <div style={{
+      position: 'fixed',
+      top: row_top + row_height / 2,
+      transform: 'translateX(-110%) translateY(-50%)',
+      background: 'rgba(0,0,0,0.75)',
+      color: 'white',
+      borderRadius: '6px',
+      padding: '6px 10px',
+      fontSize: '12px',
+      whiteSpace: 'nowrap',
+      pointerEvents: 'none',
+      zIndex: 10,
+    }}>
+      <div>Each: {building.cps} cps</div>
+      <div>Total: {building.cps * owned} cps</div>
     </div>
   );
 }

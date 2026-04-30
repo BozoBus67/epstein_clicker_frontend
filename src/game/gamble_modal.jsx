@@ -8,46 +8,6 @@ import { useEscapeKey } from '../shared/hooks';
 const face_modules = import.meta.glob('../assets/master_scroll_faces/*', { eager: true });
 const SCROLL_FACES = Object.values(face_modules).map(m => m.default);
 
-function Lever({ on_pull }) {
-  const [down, set_down] = useState(false);
-
-  const handle_click = () => {
-    if (down) return;
-    set_down(true);
-    on_pull();
-    setTimeout(() => set_down(false), 2000);
-  };
-
-  return (
-    <div onClick={handle_click} style={{ cursor: down ? 'default' : 'pointer', userSelect: 'none', position: 'relative', width: 0, height: 0 }}>
-      <div style={{ position: 'absolute', width: 14, height: 14, borderRadius: '50%', background: '#555', top: -7, left: -7 }} />
-      <div style={{
-        position: 'absolute', bottom: 0, left: -4,
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-        transformOrigin: 'bottom center',
-        transform: `rotate(${down ? 150 : 30}deg)`,
-        transition: down ? 'transform 0.15s ease-in' : 'transform 0.4s ease-out',
-      }}>
-        <div style={{ width: 26, height: 26, borderRadius: '50%', background: down ? '#ef4444' : '#facc15', border: '3px solid #fff' }} />
-        <div style={{ width: 8, height: 80, background: '#888', borderRadius: 4 }} />
-      </div>
-    </div>
-  );
-}
-
-function Slot_Card({ digit }) {
-  return (
-    <div style={{
-      width: '90px', height: '90px', borderRadius: '8px', overflow: 'hidden',
-      border: '2px solid #444', background: '#0f0f1a',
-    }}>
-      {digit !== null && (
-        <img src={SCROLL_FACES[digit]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-      )}
-    </div>
-  );
-}
-
 export default function Gamble_Modal({ on_close }) {
   const dispatch = useDispatch();
   const premium_game_data = useSelector(state => state.session.premium_game_data);
@@ -125,6 +85,46 @@ export default function Gamble_Modal({ on_close }) {
         <div style={{ position: 'absolute', right: 0, top: '50%' }}>
           <Lever on_pull={handle_pull} />
         </div>
+      </div>
+    </div>
+  );
+}
+
+function Slot_Card({ digit }) {
+  return (
+    <div style={{
+      width: '90px', height: '90px', borderRadius: '8px', overflow: 'hidden',
+      border: '2px solid #444', background: '#0f0f1a',
+    }}>
+      {digit !== null && (
+        <img src={SCROLL_FACES[digit]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      )}
+    </div>
+  );
+}
+
+function Lever({ on_pull }) {
+  const [down, set_down] = useState(false);
+
+  const handle_click = () => {
+    if (down) return;
+    set_down(true);
+    on_pull();
+    setTimeout(() => set_down(false), 2000);
+  };
+
+  return (
+    <div onClick={handle_click} style={{ cursor: down ? 'default' : 'pointer', userSelect: 'none', position: 'relative', width: 0, height: 0 }}>
+      <div style={{ position: 'absolute', width: 14, height: 14, borderRadius: '50%', background: '#555', top: -7, left: -7 }} />
+      <div style={{
+        position: 'absolute', bottom: 0, left: -4,
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        transformOrigin: 'bottom center',
+        transform: `rotate(${down ? 150 : 30}deg)`,
+        transition: down ? 'transform 0.15s ease-in' : 'transform 0.4s ease-out',
+      }}>
+        <div style={{ width: 26, height: 26, borderRadius: '50%', background: down ? '#ef4444' : '#facc15', border: '3px solid #fff' }} />
+        <div style={{ width: 8, height: 80, background: '#888', borderRadius: 4 }} />
       </div>
     </div>
   );

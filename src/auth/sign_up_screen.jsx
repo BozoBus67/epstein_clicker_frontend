@@ -5,6 +5,76 @@ import { api_signup } from './api';
 import { login } from '../shared/store/sessionSlice';
 import { supabase } from '../supabase_client';
 
+export default function Sign_Up_Screen() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const [username, set_username] = useState('');
+  const [email, set_email] = useState('');
+  const [password, set_password] = useState('');
+  const [confirm_password, set_confirm_password] = useState('');
+  const [error, set_error] = useState('');
+  const [success, set_success] = useState('');
+  const [loading, set_loading] = useState(false);
+
+  const try_sign_up = async () => {
+    set_error('');
+    set_success('');
+
+    if (!username || !email || !password || !confirm_password) {
+      set_error('Please fill in all fields.');
+      return;
+    }
+
+    if (password !== confirm_password) {
+      set_error('Passwords do not match.');
+      return;
+    }
+
+    set_loading(true);
+
+    try {
+      const data = await api_signup(email, username, password);
+      await supabase.auth.setSession({ access_token: data.jwt, refresh_token: data.refresh_token });
+      dispatch(login({ user: data.user, token: data.jwt }));
+      navigate('/game');
+    } catch (err) {
+      set_error(err?.detail || 'An unknown error occurred — please try again.');
+    } finally {
+      set_loading(false);
+    }
+  };
+
+  return (
+    <div style={{
+      display: 'flex',
+      width: '100vw',
+      height: '100vh',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundImage: 'url(/images/jeffery_epstein_blurry.png)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+    }}>
+      <Sign_Up_Panel
+        on_submit={try_sign_up}
+        username={username}
+        set_username={set_username}
+        email={email}
+        set_email={set_email}
+        password={password}
+        set_password={set_password}
+        confirm_password={confirm_password}
+        set_confirm_password={set_confirm_password}
+        error={error}
+        success={success}
+        loading={loading}
+        go_to_login={() => navigate('/login')}
+      />
+    </div>
+  );
+}
+
 function Sign_Up_Panel({ on_submit, username, set_username, email, set_email, password, set_password, confirm_password, set_confirm_password, error, success, loading, go_to_login }) {
   return (
     <div style={{
@@ -79,76 +149,6 @@ function Sign_Up_Panel({ on_submit, username, set_username, email, set_email, pa
       >
         I already have an account
       </button>
-    </div>
-  );
-}
-
-export default function Sign_Up_Screen() {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-  const [username, set_username] = useState('');
-  const [email, set_email] = useState('');
-  const [password, set_password] = useState('');
-  const [confirm_password, set_confirm_password] = useState('');
-  const [error, set_error] = useState('');
-  const [success, set_success] = useState('');
-  const [loading, set_loading] = useState(false);
-
-  const try_sign_up = async () => {
-    set_error('');
-    set_success('');
-
-    if (!username || !email || !password || !confirm_password) {
-      set_error('Please fill in all fields.');
-      return;
-    }
-
-    if (password !== confirm_password) {
-      set_error('Passwords do not match.');
-      return;
-    }
-
-    set_loading(true);
-
-    try {
-      const data = await api_signup(email, username, password);
-      await supabase.auth.setSession({ access_token: data.jwt, refresh_token: data.refresh_token });
-      dispatch(login({ user: data.user, token: data.jwt }));
-      navigate('/game');
-    } catch (err) {
-      set_error(err?.detail || 'An unknown error occurred — please try again.');
-    } finally {
-      set_loading(false);
-    }
-  };
-
-  return (
-    <div style={{
-      display: 'flex',
-      width: '100vw',
-      height: '100vh',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundImage: 'url(/images/jeffery_epstein_blurry.png)',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-    }}>
-      <Sign_Up_Panel
-        on_submit={try_sign_up}
-        username={username}
-        set_username={set_username}
-        email={email}
-        set_email={set_email}
-        password={password}
-        set_password={set_password}
-        confirm_password={confirm_password}
-        set_confirm_password={set_confirm_password}
-        error={error}
-        success={success}
-        loading={loading}
-        go_to_login={() => navigate('/login')}
-      />
     </div>
   );
 }

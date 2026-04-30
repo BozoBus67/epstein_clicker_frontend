@@ -4,22 +4,27 @@ import { increase_cookies } from '../game_utils';
 import { Building_Row } from '../buildings/buildings_components';
 import * as Constants from '../../shared/constants';
 import { useTierGate } from '../../shared/hooks';
-
-const ad_modules = import.meta.glob('../../assets/clickbait_faces/*.png', { eager: true });
-const ADS = Object.values(ad_modules).map(m => m.default);
 import epstein from '../../assets/game_screen/epstein.png';
 import temple from '../../assets/game_screen/epstein_island_temple_extended_sky.jpg';
 import cc_bg from '../../assets/game_screen/cookie_clicker_background_art.jpg';
 
-function Epstein_Head({ on_click }) {
+const ad_modules = import.meta.glob('../../assets/clickbait_faces/*.png', { eager: true });
+const ADS = Object.values(ad_modules).map(m => m.default);
+
+const CORNERS = [
+  { top: '8px', left: '8px' },
+  { top: '8px', right: '8px' },
+  { bottom: '8px', left: '8px' },
+  { bottom: '8px', right: '8px' },
+];
+
+export default function Main_Body() {
   return (
-    <button
-      onClick={on_click}
-      className="cursor-pointer transition-transform duration-100 hover:scale-[1.02] active:scale-[0.98]"
-      style={{ width: '280px', height: '280px', borderRadius: '50%', overflow: 'hidden', display: 'block' }}
-    >
-      <img src={epstein} draggable={false} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
-    </button>
+    <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+      <Left_Part_Of_Screen />
+      <Middle_Part_Of_Screen />
+      <Right_Part_Of_Screen />
+    </div>
   );
 }
 
@@ -79,19 +84,6 @@ function Left_Part_Of_Screen() {
       ))}
     </div>
   );
-}
-
-const CORNERS = [
-  { top: '8px', left: '8px' },
-  { top: '8px', right: '8px' },
-  { bottom: '8px', left: '8px' },
-  { bottom: '8px', right: '8px' },
-];
-
-function random_next_index(current) {
-  let next;
-  do { next = Math.floor(Math.random() * ADS.length); } while (next === current);
-  return next;
 }
 
 function Middle_Part_Of_Screen() {
@@ -167,12 +159,20 @@ function Right_Part_Of_Screen() {
   );
 }
 
-export default function Main_Body() {
+function Epstein_Head({ on_click }) {
   return (
-    <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-      <Left_Part_Of_Screen />
-      <Middle_Part_Of_Screen />
-      <Right_Part_Of_Screen />
-    </div>
+    <button
+      onClick={on_click}
+      className="cursor-pointer transition-transform duration-100 hover:scale-[1.02] active:scale-[0.98]"
+      style={{ width: '280px', height: '280px', borderRadius: '50%', overflow: 'hidden', display: 'block' }}
+    >
+      <img src={epstein} draggable={false} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
+    </button>
   );
+}
+
+function random_next_index(current) {
+  let next;
+  do { next = Math.floor(Math.random() * ADS.length); } while (next === current);
+  return next;
 }
