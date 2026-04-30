@@ -34,12 +34,7 @@ const TIER_PERKS = {
   ],
   account_tier_6: [
     'Everything in Luxurious',
-    '50× token rewards',
-    'Jewish badge',
-    'Offshore account UI skin',
-    'Placeholder perk 5',
-    'Placeholder perk 6',
-    'Placeholder perk 7',
+    'Enter the hall of fame of stupid people',
   ],
   account_tier_7: [
     'Everything in Jewish',
