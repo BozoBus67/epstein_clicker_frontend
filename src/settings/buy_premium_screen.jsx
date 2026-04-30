@@ -123,7 +123,7 @@ function Tier_Card({ tier, current_tier, on_click }) {
     <div
       onClick={is_owned ? undefined : on_click}
       style={{
-        minWidth: '240px',
+        width: '240px',
         height: '520px',
         border: `2px solid ${is_owned ? '#facc15' : '#ccc'}`,
         borderRadius: '12px',
