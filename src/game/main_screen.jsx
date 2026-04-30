@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { update_game_data, update_premium_game_data } from '../shared/store/sessionSlice';
 import { save_game_data } from './game_utils';
 import { api_daily_checkin, api_hourly_checkin, api_fivemin_checkin } from './api';
+import { SAVE_INTERVAL_MS, CPS_TICK_MS, FIVEMIN_CHECKIN_MS, HOURLY_CHECKIN_MS } from './constants';
 import Top_Bar from './main_screen_parts/top_bar';
 import Main_Body from './main_screen_parts/main_body';
 import Gamble_Modal from './gamble_modal';
@@ -31,7 +32,7 @@ export default function Main_Screen() {
   };
 
   useEffect(() => {
-    const interval = setInterval(trigger_save, 60000);
+    const interval = setInterval(trigger_save, SAVE_INTERVAL_MS);
     return () => clearInterval(interval);
   }, []);
 
@@ -78,8 +79,8 @@ export default function Main_Screen() {
       do_checkin(api_hourly_checkin, set_hourly_reward_data);
     };
 
-    const fivemin_interval = setInterval(() => do_checkin(api_fivemin_checkin, set_fivemin_reward_data), 5 * 60 * 1000);
-    const hourly_interval = setInterval(() => do_checkin(api_hourly_checkin, set_hourly_reward_data), 60 * 60 * 1000);
+    const fivemin_interval = setInterval(() => do_checkin(api_fivemin_checkin, set_fivemin_reward_data), FIVEMIN_CHECKIN_MS);
+    const hourly_interval = setInterval(() => do_checkin(api_hourly_checkin, set_hourly_reward_data), HOURLY_CHECKIN_MS);
     document.addEventListener('visibilitychange', on_visibility);
 
     return () => {
@@ -94,7 +95,7 @@ export default function Main_Screen() {
       const gd = game_data_ref.current;
       if (!gd) return;
       dispatch(update_game_data({ ...gd, quantity: gd.quantity + gd.cps }));
-    }, 1000);
+    }, CPS_TICK_MS);
     return () => clearInterval(interval);
   }, [dispatch]);
 

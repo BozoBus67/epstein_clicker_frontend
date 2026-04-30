@@ -4,6 +4,7 @@ import { increase_cookies } from '../game_utils';
 import { Building_Row } from '../buildings/buildings_components';
 import * as Constants from '../../shared/constants';
 import { useTierGate } from '../../shared/hooks';
+import { AD_ROTATION_MS } from '../constants';
 import epstein from '../../assets/game_screen/epstein.png';
 import temple from '../../assets/game_screen/epstein_island_temple_extended_sky.jpg';
 import cc_bg from '../../assets/game_screen/cookie_clicker_background_art.jpg';
@@ -100,7 +101,7 @@ function Middle_Part_Of_Screen() {
   };
 
   useEffect(() => {
-    const interval = setInterval(advance, 5000);
+    const interval = setInterval(advance, AD_ROTATION_MS);
     return () => clearInterval(interval);
   }, []);
 

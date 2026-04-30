@@ -82,9 +82,6 @@ function Account_Tier_Display() {
 }
 
 function Token_Display() {
-  // DELIBERATE TEST BUG — REMOVE TO RESTORE NORMAL BEHAVIOR
-  throw new Error('Test crash from Token_Display — Error_Boundary should catch this.');
-
   const tokens = useSelector(state => state.session.premium_game_data?.tokens ?? null);
   if (tokens === null) return null;
   return (

@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { update_premium_game_data } from '../shared/store/sessionSlice';
 import { api_spin } from './api';
 import { useEscapeKey } from '../shared/hooks';
+import { SLOT_FRAME_MS, LEVER_RESET_MS } from './constants';
 
 const face_modules = import.meta.glob('../assets/master_scroll_faces/*', { eager: true });
 const SCROLL_FACES = Object.values(face_modules).map(m => m.default);
@@ -51,7 +52,7 @@ export default function Gamble_Modal({ on_close }) {
       apply_pending_win();
       return;
     }
-    const t = setTimeout(() => set_frame(f => f + 1), 200);
+    const t = setTimeout(() => set_frame(f => f + 1), SLOT_FRAME_MS);
     return () => clearTimeout(t);
   }, [frame, sequences]);
 
@@ -114,7 +115,7 @@ function Lever({ on_pull }) {
     if (down) return;
     set_down(true);
     on_pull();
-    setTimeout(() => set_down(false), 2000);
+    setTimeout(() => set_down(false), LEVER_RESET_MS);
   };
 
   return (
