@@ -89,13 +89,17 @@ function Nav_Button({ label, to, on_click }) {
   );
 }
 
+function Audio_Controls_Panel({ children }) {
+  return <div style={{ display: 'flex', gap: '5px' }}>{children}</div>;
+}
+
 function Audio_Controls({ tier }) {
   if (tier < 1) return null;
   return (
-    <div style={{ display: 'flex', gap: '5px' }}>
+    <Audio_Controls_Panel>
       <Music_Player />
       {tier >= 4 && <Volume_Control />}
-    </div>
+    </Audio_Controls_Panel>
   );
 }
 
