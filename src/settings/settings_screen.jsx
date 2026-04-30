@@ -7,7 +7,7 @@ import Back_Arrow_Button from '../shared/components/back_arrow_button';
 import X_Button from '../shared/components/x_button';
 import { current_audio, set_current_audio } from '../misc_info';
 import { supabase } from '../supabase_client';
-import { api_reset_game } from '../game/api';
+import { api_reset_game } from '../game';
 import { api_get_my_discord } from './api';
 import { useTierGate } from '../shared/hooks/useTierGate';
 import toast from 'react-hot-toast';

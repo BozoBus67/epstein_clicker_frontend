@@ -3,7 +3,7 @@ import { useEscapeKey } from '../shared/hooks/useEscapeKey';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import Page_Header from '../shared/components/page_header';
-import { api_create_listing, api_get_listings, api_buy_listing } from './api';
+import { api_create_listing, api_get_listings, api_buy_listing, api_cancel_listing } from './api';
 import { update_game_data, update_premium_game_data } from '../shared/store/sessionSlice';
 import { CURRENCIES, opposite_currency } from './auction_house_constants';
 
@@ -86,6 +86,53 @@ function Buy_Listing_Modal({ listing, on_close, on_bought }) {
           </button>
           <button onClick={handle_buy} disabled={loading}
             style={{ padding: '8px 28px', borderRadius: '6px', background: '#facc15', color: '#000', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+            {loading ? '...' : 'Yes'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Cancel_Listing_Modal({ listing, on_close, on_cancelled }) {
+  const dispatch = useDispatch();
+  const [loading, set_loading] = useState(false);
+  useEscapeKey(on_close, !loading);
+
+  const handle_cancel = async () => {
+    set_loading(true);
+    try {
+      const data = await api_cancel_listing(listing.id);
+      dispatch(update_game_data(data.game_data));
+      dispatch(update_premium_game_data(data.premium_game_data));
+      toast.success('Listing cancelled, items refunded');
+      on_cancelled();
+    } catch (e) {
+      toast.error(e?.detail || 'Something went wrong.');
+      set_loading(false);
+    }
+  };
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
+    }}>
+      <div style={{
+        background: '#1e1e2e', border: '2px solid #facc15', borderRadius: '12px',
+        padding: '32px', minWidth: '320px', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px',
+      }}>
+        <h2 style={{ color: '#facc15', margin: 0, textAlign: 'center' }}>Cancel Listing?</h2>
+        <p style={{ margin: 0, textAlign: 'center', color: '#ccc' }}>
+          You'll get back {listing.amount} {listing.selling_item_type}.
+        </p>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button onClick={on_close} disabled={loading}
+            style={{ padding: '8px 28px', borderRadius: '6px', background: '#333', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+            No
+          </button>
+          <button onClick={handle_cancel} disabled={loading}
+            style={{ padding: '8px 28px', borderRadius: '6px', background: '#ef4444', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
             {loading ? '...' : 'Yes'}
           </button>
         </div>
@@ -224,6 +271,7 @@ function Auction_House_Screen_Body({ listings, on_select }) {
 }
 
 export default function Auction_House_Screen() {
+  const username = useSelector(state => state.session.session_data?.username ?? '');
   const [show_create_modal, set_show_create_modal] = useState(false);
   const [selected_listing, set_selected_listing] = useState(null);
   const [listings, set_listings] = useState([]);
@@ -233,6 +281,7 @@ export default function Auction_House_Screen() {
   }, []);
 
   const refresh = () => api_get_listings().then(set_listings).catch(console.error);
+  const is_own_listing = selected_listing?.seller_username === username;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh' }}>
@@ -246,7 +295,20 @@ export default function Auction_House_Screen() {
       </button>
       <Add_Auction_Button on_click={() => set_show_create_modal(true)} />
       {show_create_modal && <Create_Listing_Modal on_close={() => set_show_create_modal(false)} />}
-      {selected_listing && <Buy_Listing_Modal listing={selected_listing} on_close={() => set_selected_listing(null)} on_bought={() => { set_selected_listing(null); refresh(); }} />}
+      {selected_listing && is_own_listing && (
+        <Cancel_Listing_Modal
+          listing={selected_listing}
+          on_close={() => set_selected_listing(null)}
+          on_cancelled={() => { set_selected_listing(null); refresh(); }}
+        />
+      )}
+      {selected_listing && !is_own_listing && (
+        <Buy_Listing_Modal
+          listing={selected_listing}
+          on_close={() => set_selected_listing(null)}
+          on_bought={() => { set_selected_listing(null); refresh(); }}
+        />
+      )}
     </div>
   );
 }

@@ -1,3 +1,3 @@
 export { default as Login_Screen } from './login_screen';
 export { default as Sign_Up_Screen } from './sign_up_screen';
-export { api_me, api_login, api_signup } from './api';
+export { api_me } from './api';

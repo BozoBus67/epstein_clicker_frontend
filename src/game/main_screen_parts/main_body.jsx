@@ -5,11 +5,11 @@ import { Building_Row } from '../buildings/buildings_components';
 import * as Constants from '../../shared/constants';
 import { useTierGate } from '../../shared/hooks/useTierGate';
 
-const ad_modules = import.meta.glob('../../assets/faces/*.png', { eager: true });
+const ad_modules = import.meta.glob('../../assets/clickbait_faces/*.png', { eager: true });
 const ADS = Object.values(ad_modules).map(m => m.default);
-import epstein from '../../assets/epstein.png';
-import temple from '../../assets/epstein_island_temple_extended_sky.jpg';
-import cc_bg from '../../assets/cookie_clicker_background_art.jpg';
+import epstein from '../../assets/game_screen/epstein.png';
+import temple from '../../assets/game_screen/epstein_island_temple_extended_sky.jpg';
+import cc_bg from '../../assets/game_screen/cookie_clicker_background_art.jpg';
 
 function Epstein_Head({ on_click }) {
   return (
