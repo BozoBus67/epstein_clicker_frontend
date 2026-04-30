@@ -24,10 +24,11 @@ const TIER_PERKS = {
   ],
   account_tier_4: [
     'Everything in Enterprise',
+    'Gain the ability to adjust music volume',
+    'Access to the trade market',
     '10× token rewards',
     'Premium badge',
     'Exclusive skin pack',
-    'Placeholder perk 5',
   ],
   account_tier_5: [
     'Everything in Premium',
