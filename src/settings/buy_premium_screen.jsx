@@ -122,9 +122,8 @@ function Tier_Card({ tier, current_tier, on_click }) {
   const is_owned = tier_num(tier.id) <= current_tier;
 
   return (
-    <button
+    <div
       onClick={is_owned ? undefined : on_click}
-      disabled={is_owned}
       style={{
         minWidth: '240px',
         height: '520px',
@@ -136,11 +135,12 @@ function Tier_Card({ tier, current_tier, on_click }) {
         padding: '20px',
         gap: '12px',
         flexShrink: 0,
-        background: 'white',
+        background: '#ffffff',
         cursor: is_owned ? 'default' : 'pointer',
         transition: 'transform 0.15s, box-shadow 0.15s',
         textAlign: 'left',
         opacity: is_owned ? 0.7 : 1,
+        userSelect: 'none',
       }}
       className={is_owned ? '' : 'hover:scale-105 hover:shadow-xl'}
     >
@@ -157,7 +157,7 @@ function Tier_Card({ tier, current_tier, on_click }) {
           ))}
         </ul>
       </div>
-    </button>
+    </div>
   );
 }
 
