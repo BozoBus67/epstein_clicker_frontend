@@ -85,10 +85,10 @@ export default function Chess_Game_Screen() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh', alignItems: 'center', padding: '64px 16px 16px', gap: '16px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh', alignItems: 'center', padding: '12px 16px 16px', gap: '12px' }}>
       <Back_Arrow_Button to="/game/play-chess" />
       <Bot_Header bot={bot} engine_ready={engine_ready} thinking={thinking_ref.current} outcome={outcome} />
-      <div style={{ width: 'min(72vh, 90vw)', maxWidth: '560px' }}>
+      <div style={{ width: 'min(60vh, 85vw)', maxWidth: '480px' }}>
         <Chessboard
           position={position}
           onPieceDrop={on_drop}
@@ -112,7 +112,7 @@ function Bot_Header({ bot, engine_ready, thinking, outcome }) {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
-      <img src={bot.face} style={{ width: '96px', height: '96px', borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', border: '3px solid #facc15' }} />
+      <img src={bot.face} style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', border: '3px solid #facc15' }} />
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <span style={{ color: '#facc15', fontWeight: 'bold' }}>{bot.name} <span style={{ color: '#aaa', fontWeight: 'normal' }}>(ELO {bot.elo})</span></span>
         <span style={{ fontSize: '13px', color: '#aaa' }}>{status}</span>
