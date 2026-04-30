@@ -112,7 +112,7 @@ export default function Top_Bar({ on_gamble_click }) {
       <Nav_Button label="Gamble Tokens" on_click={on_gamble_click} />
       <Nav_Button label="Redeem Tokens" to="/game/redeem-tokens" />
       <Nav_Button label="Mastery Scrolls" to="/game/mastery-scrolls" />
-      <Nav_Button label="Auction House" to="/game/auction-house" />
+      {tier >= 4 && <Nav_Button label="Auction House" to="/game/auction-house" />}
       {tier >= 1 && <Music_Player />}
     </div>
   );
