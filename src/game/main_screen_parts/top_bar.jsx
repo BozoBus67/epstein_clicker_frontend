@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Music_Player from './music_player';
 import { api_me } from '../../auth/api';
 import { update_game_data, update_premium_game_data } from '../../shared/store/sessionSlice';
+import { ACCOUNT_TIER_NAMES } from '../../shared/constants';
 
 export async function refresh_user_data(jwt, dispatch) {
   const data = await api_me(jwt);
@@ -30,6 +31,17 @@ function Refresh_Button() {
     >
       ↻
     </button>
+  );
+}
+
+function Account_Tier_Display() {
+  const tier = useSelector(state => state.session.premium_game_data?.account_tier ?? null);
+  if (tier === null) return null;
+  const name = ACCOUNT_TIER_NAMES[tier] ?? 'Free';
+  return (
+    <span style={{ fontWeight: 'bold', color: '#facc15', fontSize: '14px' }}>
+      Account: {name}
+    </span>
   );
 }
 
@@ -84,14 +96,15 @@ export default function Top_Bar({ on_gamble_click }) {
       boxSizing: 'border-box',
       flexShrink: 0,
     }}>
-      <Token_Display />
       <Refresh_Button />
-      <Nav_Button label="Gamble Tokens" on_click={on_gamble_click} />
-      <Nav_Button label="Mastery Scrolls" to="/game/mastery-scrolls" />
-      <Nav_Button label="Auction House" to="/game/auction-house" />
-      <Nav_Button label="Redeem Tokens" to="/game/redeem-tokens" />
+      <Account_Tier_Display />
+      <Token_Display />
       <Nav_Button label="Buy Tokens" to="/game/buy-tokens" />
       <Nav_Button label="Buy Premium" to="/game/buy-premium" />
+      <Nav_Button label="Gamble Tokens" on_click={on_gamble_click} />
+      <Nav_Button label="Redeem Tokens" to="/game/redeem-tokens" />
+      <Nav_Button label="Mastery Scrolls" to="/game/mastery-scrolls" />
+      <Nav_Button label="Auction House" to="/game/auction-house" />
       <Music_Player />
     </div>
   );

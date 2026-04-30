@@ -7,7 +7,7 @@ import { get } from './shared/api_client';
 import { supabase } from './supabase_client';
 import { api_me, Login_Screen, Sign_Up_Screen } from './auth';
 import { Main_Screen } from './game';
-import { Settings_Screen, Buy_Premium_Screen } from './settings';
+import { Settings_Screen, Buy_Premium_Screen, Login_Details_Screen } from './settings';
 import { Auction_House_Screen } from './auction_house';
 import { Mastery_Scrolls_Screen } from './mastery_scrolls';
 import { Redeem_Tokens_Screen } from './redeem';
@@ -57,6 +57,7 @@ export default function App() {
         <Route path="/signup" element={is_logged_in ? <Navigate to="/game" replace /> : <Sign_Up_Screen />} />
         <Route path="/game" element={<Protected><Main_Screen /></Protected>} />
         <Route path="/game/settings" element={<Protected><Settings_Screen /></Protected>} />
+        <Route path="/game/settings/login-details" element={<Protected><Login_Details_Screen /></Protected>} />
         <Route path="/game/buy-premium" element={<Protected><Buy_Premium_Screen /></Protected>} />
         <Route path="/game/auction-house" element={<Protected><Auction_House_Screen /></Protected>} />
         <Route path="/game/mastery-scrolls" element={<Protected><Mastery_Scrolls_Screen /></Protected>} />

@@ -47,6 +47,8 @@ function Music_Player_Panel({ on_song_click, current_url }) {
               padding: '6px 4px',
               cursor: 'pointer',
               fontSize: '13px',
+              fontWeight: 'bold',
+              color: '#111',
               borderBottom: '1px solid #ccc',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
@@ -68,12 +70,13 @@ function Music_Player_Button({ onClick }) {
       onClick={onClick}
       className="hover:outline hover:outline-1 hover:outline-yellow-400 hover:cursor-pointer"
       style={{
-        background: 'none',
-        border: 'none',
-        fontSize: '20px',
+        background: '#facc15',
+        border: '1px solid #facc15',
+        fontSize: '16px',
         lineHeight: 1,
-        padding: '4px',
-        borderRadius: '4px',
+        padding: '4px 10px',
+        borderRadius: '6px',
+        cursor: 'pointer',
       }}
     >
       🎵

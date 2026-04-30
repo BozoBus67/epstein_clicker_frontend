@@ -43,6 +43,9 @@ const sessionSlice = createSlice({
     set_scrolls(state, action) {
       state.scrolls = action.payload;
     },
+    patch_session_data(state, action) {
+      if (state.session_data) Object.assign(state.session_data, action.payload);
+    },
   },
 });
 
@@ -54,6 +57,7 @@ export const {
   set_account_tiers,
   set_buildings,
   set_scrolls,
+  patch_session_data,
 } = sessionSlice.actions;
 
 export default sessionSlice.reducer;

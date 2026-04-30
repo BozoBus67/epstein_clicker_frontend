@@ -57,6 +57,18 @@ function Reset_Save_Button({ on_click }) {
   );
 }
 
+function Change_Login_Details_Button() {
+  const navigate = useNavigate();
+  return (
+    <button
+      onClick={() => navigate('/game/settings/login-details')}
+      className="bg-gray-500 text-white py-2 px-6 rounded-lg hover:bg-gray-600 active:bg-gray-700 transition"
+    >
+      Change Login Details
+    </button>
+  );
+}
+
 function Log_Out_Button() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -89,9 +101,10 @@ export default function Settings_Screen() {
   useEscapeKey(() => navigate('/game'), !show_reset_confirmation);
 
   return (
-    <div style={{ display: 'flex', width: '100vw', height: '100vh', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: '12px' }}>
+    <div style={{ display: 'flex', width: '100vw', height: '100vh', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: '24px' }}>
       <Back_Arrow_Button to="/game" />
       <X_Button to="/game" />
+      <Change_Login_Details_Button />
       <Reset_Save_Button on_click={() => set_show_reset_confirmation(true)} />
       <Log_Out_Button />
       {show_reset_confirmation && (

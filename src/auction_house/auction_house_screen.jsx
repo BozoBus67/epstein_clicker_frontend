@@ -7,8 +7,6 @@ import { api_create_listing, api_get_listings, api_buy_listing } from './api';
 import { update_game_data, update_premium_game_data } from '../shared/store/sessionSlice';
 import { CURRENCIES, opposite_currency } from './auction_house_constants';
 
-const AUCTION_SLOT_COUNT = 8;
-
 function Auction_Slot({ index, listing, on_click }) {
   const [hovered, set_hovered] = useState(false);
 
@@ -214,12 +212,11 @@ function Create_Listing_Modal({ on_close }) {
 }
 
 function Auction_House_Screen_Body({ listings, on_select }) {
-  const slots = Array.from({ length: AUCTION_SLOT_COUNT }).map((_, i) => listings[i] ?? null);
   return (
     <div style={{ flex: 1, overflowY: 'auto', padding: '24px 40px' }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-        {slots.map((listing, i) => (
-          <Auction_Slot key={i} index={i} listing={listing} on_click={() => listing && on_select(listing)} />
+        {listings.map((listing, i) => (
+          <Auction_Slot key={listing.id ?? i} index={i} listing={listing} on_click={() => on_select(listing)} />
         ))}
       </div>
     </div>
