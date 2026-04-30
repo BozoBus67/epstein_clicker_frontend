@@ -12,7 +12,7 @@ import Main_Body from './main_screen_parts/main_body';
 import Gamble_Modal from './gamble_modal';
 import settingsIcon from '../assets/settings_gear_icon.jpg';
 
-function Daily_Reward_Popup({ data, on_close }) {
+function Reward_Popup({ title, streak_label, data, on_close }) {
   useEscapeKey(on_close);
   return (
     <div style={{
@@ -23,8 +23,8 @@ function Daily_Reward_Popup({ data, on_close }) {
         background: '#1e1e2e', border: '2px solid #facc15', borderRadius: '12px',
         padding: '32px', minWidth: '280px', textAlign: 'center', color: 'white',
       }}>
-        <h2 style={{ color: '#facc15', marginBottom: '8px' }}>Daily Reward!</h2>
-        <p>Streak: Day {data.streak}</p>
+        <h2 style={{ color: '#facc15', marginBottom: '8px' }}>{title}</h2>
+        <p>Streak: {streak_label} {data.streak}</p>
         <p>Tokens granted: {data.tokens_granted}</p>
         <button
           onClick={on_close}
@@ -76,6 +76,8 @@ export default function Main_Screen() {
   const game_data = useSelector(state => state.session.game_data);
   const game_data_ref = useRef(game_data);
   const [daily_reward_data, set_daily_reward_data] = useState(null);
+  const [hourly_reward_data, set_hourly_reward_data] = useState(null);
+  const [fivemin_reward_data, set_fivemin_reward_data] = useState(null);
   const [show_gamble, set_show_gamble] = useState(false);
 
   useEffect(() => {
@@ -118,24 +120,25 @@ export default function Main_Screen() {
   }, [jwt]);
 
   useEffect(() => {
-    const do_checkin = async (api_fn) => {
+    const do_checkin = async (api_fn, set_reward) => {
       if (document.hidden) return;
       try {
         const data = await api_fn();
+        if (!data.already_checked_in) set_reward(data);
         if (data.premium_game_data) dispatch(update_premium_game_data(data.premium_game_data));
       } catch (e) { console.error('Checkin error:', e); }
     };
 
-    do_checkin(api_fivemin_checkin);
-    do_checkin(api_hourly_checkin);
+    do_checkin(api_fivemin_checkin, set_fivemin_reward_data);
+    do_checkin(api_hourly_checkin, set_hourly_reward_data);
 
     const on_visibility = () => {
-      do_checkin(api_fivemin_checkin);
-      do_checkin(api_hourly_checkin);
+      do_checkin(api_fivemin_checkin, set_fivemin_reward_data);
+      do_checkin(api_hourly_checkin, set_hourly_reward_data);
     };
 
-    const fivemin_interval = setInterval(() => do_checkin(api_fivemin_checkin), 5 * 60 * 1000);
-    const hourly_interval = setInterval(() => do_checkin(api_hourly_checkin), 60 * 60 * 1000);
+    const fivemin_interval = setInterval(() => do_checkin(api_fivemin_checkin, set_fivemin_reward_data), 5 * 60 * 1000);
+    const hourly_interval = setInterval(() => do_checkin(api_hourly_checkin, set_hourly_reward_data), 60 * 60 * 1000);
     document.addEventListener('visibilitychange', on_visibility);
 
     return () => {
@@ -156,7 +159,9 @@ export default function Main_Screen() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh' }}>
-      {daily_reward_data && <Daily_Reward_Popup data={daily_reward_data} on_close={() => set_daily_reward_data(null)} />}
+      {daily_reward_data && <Reward_Popup title="Daily Reward!" streak_label="Day" data={daily_reward_data} on_close={() => set_daily_reward_data(null)} />}
+      {hourly_reward_data && <Reward_Popup title="Hourly Reward!" streak_label="Hour" data={hourly_reward_data} on_close={() => set_hourly_reward_data(null)} />}
+      {fivemin_reward_data && <Reward_Popup title="5 Minute Reward!" streak_label="x" data={fivemin_reward_data} on_close={() => set_fivemin_reward_data(null)} />}
       {show_gamble && <Gamble_Modal on_close={() => set_show_gamble(false)} />}
       <Top_Bar on_gamble_click={() => set_show_gamble(true)} />
       <Main_Body />
