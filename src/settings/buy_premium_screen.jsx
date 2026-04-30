@@ -17,12 +17,9 @@ const TIER_PERKS = {
   ],
   account_tier_3: [
     'Everything in Pro',
-    'Unlimited gamble slots',
-    '5× token rewards',
-    'Enterprise badge',
-    'Custom island name',
-    'Placeholder perk 6',
-    'Placeholder perk 7',
+    'Gain the ability to change your username',
+    'Gain the ability to change your password',
+    'Gain the ability to change your email',
   ],
   account_tier_4: [
     'Everything in Enterprise',

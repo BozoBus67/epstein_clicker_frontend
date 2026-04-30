@@ -8,6 +8,7 @@ import X_Button from '../shared/components/x_button';
 import { current_audio, set_current_audio } from '../misc_info';
 import { supabase } from '../supabase_client';
 import { api_reset_game } from '../game/api';
+import { tier_num } from '../shared/utils';
 
 function Reset_Save_Confirmation_Panel({ on_confirm, on_cancel }) {
   useEscapeKey(on_cancel);
@@ -59,6 +60,8 @@ function Reset_Save_Button({ on_click }) {
 
 function Change_Login_Details_Button() {
   const navigate = useNavigate();
+  const tier = tier_num(useSelector(state => state.session.premium_game_data?.account_tier));
+  if (tier < 3) return null;
   return (
     <button
       onClick={() => navigate('/game/settings/login-details')}
