@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Music_Player from './music_player';
+import Volume_Control from './volume_control';
 import { api_me } from '../../auth/api';
 import { update_game_data, update_premium_game_data } from '../../shared/store/sessionSlice';
 import { ACCOUNT_TIER_NAMES } from '../../shared/constants';
@@ -114,6 +115,7 @@ export default function Top_Bar({ on_gamble_click }) {
       <Nav_Button label="Mastery Scrolls" to="/game/mastery-scrolls" />
       {tier >= 4 && <Nav_Button label="Auction House" to="/game/auction-house" />}
       {tier >= 1 && <Music_Player />}
+      {tier >= 4 && <Volume_Control />}
     </div>
   );
 }

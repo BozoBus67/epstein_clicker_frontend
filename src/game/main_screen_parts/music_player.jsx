@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { current_audio, set_current_audio, current_song_url, set_current_song_url } from '../../misc_info';
+import { current_audio, set_current_audio, current_song_url, set_current_song_url, current_volume } from '../../misc_info';
 
 const songs = import.meta.glob(
   '/public/music/*.mp3',
@@ -112,6 +112,7 @@ export default function Music_Player() {
       current_audio.currentTime = 0;
     }
     const audio = new Audio(url);
+    audio.volume = current_volume;
     audio.play();
     audio.onended = () => play_next(url);
     set_current_audio(audio);
