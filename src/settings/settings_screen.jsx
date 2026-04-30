@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useEscapeKey } from '../shared/hooks/useEscapeKey';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout, update_game_data } from '../shared/store/sessionSlice';
 import Back_Arrow_Button from '../shared/components/back_arrow_button';
