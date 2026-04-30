@@ -30,11 +30,7 @@ const TIER_PERKS = {
   ],
   account_tier_5: [
     'Everything in Premium',
-    '25× token rewards',
-    'Luxurious badge',
-    'Gold card border',
-    'Placeholder perk 5',
-    'Placeholder perk 6',
+    'Get my Discord',
   ],
   account_tier_6: [
     'Everything in Luxurious',
