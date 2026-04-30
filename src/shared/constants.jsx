@@ -45,6 +45,41 @@ export const SCROLL_NAMES = {
   mastery_scroll_24: 'Walter White',
 };
 
+export const SCROLL_TIERS = [
+  { min: 100, tier: 5 },
+  { min: 25,  tier: 4 },
+  { min: 10,  tier: 3 },
+  { min: 4,   tier: 2 },
+  { min: 1,   tier: 1 },
+];
+
+export const SCROLL_DESCRIPTIONS = {
+  mastery_scroll_1:  'Not yet implemented',
+  mastery_scroll_2:  `${QUANTITY_NAME} per second multiplied by 1000`,
+  mastery_scroll_3:  'Not yet implemented',
+  mastery_scroll_4:  'Not yet implemented',
+  mastery_scroll_5:  'Not yet implemented',
+  mastery_scroll_6:  'Diddy Factory, Baby Oil Factory, and Mega Diddy Factory production ×2500',
+  mastery_scroll_7:  'Not yet implemented',
+  mastery_scroll_8:  'Not yet implemented',
+  mastery_scroll_9:  'Not yet implemented',
+  mastery_scroll_10: 'Not yet implemented',
+  mastery_scroll_11: 'Not yet implemented',
+  mastery_scroll_12: 'Not yet implemented',
+  mastery_scroll_13: 'Not yet implemented',
+  mastery_scroll_14: 'Not yet implemented',
+  mastery_scroll_15: 'Not yet implemented',
+  mastery_scroll_16: 'Not yet implemented',
+  mastery_scroll_17: 'Not yet implemented',
+  mastery_scroll_18: 'Not yet implemented',
+  mastery_scroll_19: 'Not yet implemented',
+  mastery_scroll_20: 'Not yet implemented',
+  mastery_scroll_21: 'Not yet implemented',
+  mastery_scroll_22: 'Not yet implemented',
+  mastery_scroll_23: 'Not yet implemented',
+  mastery_scroll_24: 'Not yet implemented',
+};
+
 export const AD_TEXT = 'HOT GIRLS IN YOUR AREA WANT TO S3X';
 export const BAKERY_SUBSTITUDE_NAME = 'Island';
 
@@ -56,4 +91,7 @@ export const ACCOUNT_TIER_NAMES = {
   account_tier_4: 'Premium',
   account_tier_5: 'Luxurious',
   account_tier_6: 'Jewish',
+  account_tier_7: 'Jewish+',
+  account_tier_8: 'Jewish++',
+  account_tier_9: 'Jewish+++',
 };

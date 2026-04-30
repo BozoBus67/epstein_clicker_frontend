@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ACCOUNT_TIER_NAMES } from '../shared/constants';
 
 const TIER_IMAGES = Object.fromEntries(
-  Array.from({ length: 6 }, (_, i) => [
+  Array.from({ length: 9 }, (_, i) => [
     `account_tier_${i + 1}`,
     new URL(`../assets/tier_images/tier_${i + 1}.svg`, import.meta.url).href,
   ])
@@ -69,7 +69,7 @@ export default function Buy_Premium_Screen() {
 
   useEffect(() => {
     const handle_key = (e) => {
-      if (e.key === 'Escape') navigate('/game/settings');
+      if (e.key === 'Escape') navigate('/game');
     };
     window.addEventListener('keydown', handle_key);
     return () => window.removeEventListener('keydown', handle_key);
@@ -77,7 +77,7 @@ export default function Buy_Premium_Screen() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh', overflow: 'hidden' }}>
-      <Back_Arrow_Button on_click={() => navigate('/game/settings')} />
+      <Back_Arrow_Button on_click={() => navigate('/game')} />
       <X_Button on_click={() => navigate('/game')} />
 
       <div style={{

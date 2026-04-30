@@ -91,6 +91,7 @@ export default function Top_Bar({ on_gamble_click }) {
       <Nav_Button label="Auction House" to="/game/auction-house" />
       <Nav_Button label="Redeem Tokens" to="/game/redeem-tokens" />
       <Nav_Button label="Buy Tokens" to="/game/buy-tokens" />
+      <Nav_Button label="Buy Premium" to="/game/buy-premium" />
       <Music_Player />
     </div>
   );

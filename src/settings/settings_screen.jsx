@@ -92,12 +92,6 @@ export default function Settings_Screen() {
     <div style={{ display: 'flex', width: '100vw', height: '100vh', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: '12px' }}>
       <Back_Arrow_Button to="/game" />
       <X_Button to="/game" />
-      <button
-        onClick={() => navigate('/game/buy-premium')}
-        className="bg-purple-500 text-white py-2 px-6 rounded-lg hover:bg-purple-600 active:bg-purple-700 transition"
-      >
-        Buy Premium
-      </button>
       <Reset_Save_Button on_click={() => set_show_reset_confirmation(true)} />
       <Log_Out_Button />
       {show_reset_confirmation && (

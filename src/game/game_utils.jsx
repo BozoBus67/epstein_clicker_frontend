@@ -1,11 +1,17 @@
 import { store } from '../shared/store';
 import { update_game_data } from '../shared/store/sessionSlice';
 import { api_save_game } from './api';
+import { SCROLL_EFFECTS } from './scroll_effects';
 
 export function recalculate_cps() {
-  const { game_data, buildings } = store.getState().session;
+  const { game_data, buildings, premium_game_data } = store.getState().session;
+  const pgd = premium_game_data ?? {};
   const cps = Object.entries(game_data.buildings).reduce((total, [key, count]) => {
-    return total + (buildings[key]?.cps ?? 0) * count;
+    let building_cps = (buildings[key]?.cps ?? 0) * count;
+    for (const effect of Object.values(SCROLL_EFFECTS)) {
+      building_cps = effect(key, building_cps, pgd);
+    }
+    return total + building_cps;
   }, 0);
   store.dispatch(update_game_data({ ...game_data, cps }));
 }
