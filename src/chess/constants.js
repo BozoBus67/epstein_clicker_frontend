@@ -1,12 +1,14 @@
 import { SCROLL_NAMES } from '../shared/constants';
+import epstein_face from '../assets/game_screen/epstein.png';
 
 const face_modules = import.meta.glob('../assets/master_scroll_faces/*', { eager: true });
 const FACES = Object.keys(face_modules).sort().map(k => face_modules[k].default);
 
+const EXCLUDED_SCROLL_IDS = new Set(['mastery_scroll_2']);
+
 // Rough thematic ELOs — easy to tweak per-character
 const BOT_ELOS = {
   mastery_scroll_1:  400,   // 6/7 Kid
-  mastery_scroll_2:  1500,  // Shadow Clone Jutsu
   mastery_scroll_3:  600,   // CaseOh
   mastery_scroll_4:  1200,  // Charlie Kirk
   mastery_scroll_5:  2000,  // Dexter
@@ -31,9 +33,24 @@ const BOT_ELOS = {
   mastery_scroll_24: 2800,  // Walter White
 };
 
-export const BOTS = Object.entries(SCROLL_NAMES).map(([id, name], i) => ({
-  scroll_id: id,
-  name,
-  face: FACES[i],
-  elo: BOT_ELOS[id],
-}));
+export const EPSTEIN_BOT_ID = 'epstein';
+
+const ALL_SCROLL_IDS = Object.keys(SCROLL_NAMES);
+const regular_bots = ALL_SCROLL_IDS
+  .filter(id => !EXCLUDED_SCROLL_IDS.has(id))
+  .map(id => ({
+    scroll_id: id,
+    name: SCROLL_NAMES[id],
+    face: FACES[ALL_SCROLL_IDS.indexOf(id)],
+    elo: BOT_ELOS[id],
+  }));
+
+export const EPSTEIN_BOT = {
+  scroll_id: EPSTEIN_BOT_ID,
+  name: 'Epstein',
+  face: epstein_face,
+  elo: 9999,
+};
+
+export const BOTS = [...regular_bots, EPSTEIN_BOT];
+export const REGULAR_BOT_IDS = regular_bots.map(b => b.scroll_id);
