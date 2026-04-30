@@ -114,8 +114,12 @@ export default function Top_Bar({ on_gamble_click }) {
       <Nav_Button label="Redeem Tokens" to="/game/redeem-tokens" />
       <Nav_Button label="Mastery Scrolls" to="/game/mastery-scrolls" />
       {tier >= 4 && <Nav_Button label="Auction House" to="/game/auction-house" />}
-      {tier >= 1 && <Music_Player />}
-      {tier >= 4 && <Volume_Control />}
+      {tier >= 1 && (
+        <div style={{ display: 'flex', gap: '5px' }}>
+          <Music_Player />
+          {tier >= 4 && <Volume_Control />}
+        </div>
+      )}
     </div>
   );
 }
