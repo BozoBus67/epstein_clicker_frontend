@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useEscapeKey, useTierGate } from '../shared/hooks';
+import { Error_Boundary } from '../shared/components';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -103,9 +104,15 @@ export default function Main_Screen() {
       {hourly_reward_data && <Reward_Popup title="Hourly Reward!" streak_label="Hour" data={hourly_reward_data} on_close={() => set_hourly_reward_data(null)} />}
       {fivemin_reward_data && <Reward_Popup title="5 Minute Reward!" streak_label="x" data={fivemin_reward_data} on_close={() => set_fivemin_reward_data(null)} />}
       {show_gamble && <Gamble_Modal on_close={() => set_show_gamble(false)} />}
-      <Main_Screen_Topbar on_gamble_click={() => set_show_gamble(true)} />
-      <Main_Body />
-      <Settings_Button />
+      <Error_Boundary fallback={msg => <Section_Fallback label="top bar" message={msg} />}>
+        <Main_Screen_Topbar on_gamble_click={() => set_show_gamble(true)} />
+      </Error_Boundary>
+      <Error_Boundary fallback={msg => <Section_Fallback label="main body" message={msg} fill />}>
+        <Main_Body />
+      </Error_Boundary>
+      <Error_Boundary fallback={null}>
+        <Settings_Button />
+      </Error_Boundary>
     </div>
   );
 }
@@ -146,6 +153,20 @@ function Settings_Button() {
       </button>
       {lock_modal}
     </>
+  );
+}
+
+function Section_Fallback({ label, message, fill }) {
+  return (
+    <div style={{
+      ...(fill ? { flex: 1 } : { padding: '12px 16px' }),
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: '#2a1414', borderBottom: '2px solid #ef4444',
+      color: '#ffcccc', fontSize: '13px', textAlign: 'center', gap: '8px',
+    }}>
+      <span style={{ fontWeight: 'bold' }}>⚠️ {label} crashed:</span>
+      <span style={{ color: '#aaa' }}>{message}</span>
+    </div>
   );
 }
 

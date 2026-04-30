@@ -14,6 +14,12 @@ export default class Error_Boundary extends Component {
   render() {
     if (!this.state.has_error) return this.props.children;
 
+    if (this.props.fallback) {
+      return typeof this.props.fallback === 'function'
+        ? this.props.fallback(this.state.message)
+        : this.props.fallback;
+    }
+
     return (
       <div style={{
         display: 'flex', flexDirection: 'column',
