@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { current_audio, set_current_audio, current_song_url, set_current_song_url, current_volume } from '../../misc_info';
+import {
+  current_audio, set_current_audio,
+  current_song_url, set_current_song_url,
+  current_volume,
+  playlist_entries, subscribe_playlist,
+} from '../../misc_info';
 
-const songs = import.meta.glob(
-  '/public/music/*.mp3',
-  { eager: true, query: '?url', import: 'default' }
-);
-const song_urls = Object.values(songs);
-
-function Music_Player_Panel({ on_song_click, current_url }) {
+function Music_Player_Panel({ entries, on_song_click, current_url }) {
   const selected_ref = useRef(null);
 
   useEffect(() => {
@@ -31,7 +30,7 @@ function Music_Player_Panel({ on_song_click, current_url }) {
       padding: '8px',
       zIndex: 100,
     }}>
-      {Object.entries(songs).map(([path, url]) => {
+      {entries.map(([path, url]) => {
         const filename = path.split('/').pop().replace('.mp3', '').replace(/\s*\[[^\]]+\]$/, '');
         return (
           <button
@@ -87,6 +86,9 @@ function Music_Player_Button({ onClick }) {
 export default function Music_Player() {
   const [open, setOpen] = useState(false);
   const [current_url, set_current_url] = useState(() => current_song_url);
+  const [, force_update] = useState(0);
+
+  useEffect(() => subscribe_playlist(() => force_update(n => n + 1)), []);
 
   useEffect(() => {
     if (!open) return;
@@ -121,9 +123,9 @@ export default function Music_Player() {
   };
 
   const play_next = (url) => {
-    const index = song_urls.indexOf(url);
-    const next_url = song_urls[(index + 1) % song_urls.length];
-    change_song(next_url);
+    const index = playlist_entries.findIndex(([, u]) => u === url);
+    const next_index = (index + 1) % playlist_entries.length;
+    change_song(playlist_entries[next_index][1]);
   };
 
   const on_song_click = (url) => {
@@ -141,7 +143,7 @@ export default function Music_Player() {
   return (
     <div className="music-player-container" style={{ position: 'relative' }}>
       <Music_Player_Button onClick={() => setOpen(!open)} />
-      {open && <Music_Player_Panel on_song_click={on_song_click} current_url={current_url} />}
+      {open && <Music_Player_Panel entries={playlist_entries} on_song_click={on_song_click} current_url={current_url} />}
     </div>
   );
 }

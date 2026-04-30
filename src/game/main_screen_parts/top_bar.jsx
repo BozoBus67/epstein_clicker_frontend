@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Music_Player from './music_player';
 import Volume_Control from './volume_control';
+import Shuffle_Button from './shuffle_button';
 import { api_me } from '../../auth/api';
 import { update_game_data, update_premium_game_data } from '../../shared/store/sessionSlice';
 import { ACCOUNT_TIER_NAMES } from '../../shared/constants';
@@ -99,6 +100,7 @@ function Audio_Controls({ tier }) {
     <Audio_Controls_Panel>
       <Music_Player />
       {tier >= 4 && <Volume_Control />}
+      {tier >= 4 && <Shuffle_Button />}
     </Audio_Controls_Panel>
   );
 }
