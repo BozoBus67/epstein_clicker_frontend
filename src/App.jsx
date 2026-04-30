@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { login, set_account_tiers, set_buildings, set_scrolls } from './shared/store/sessionSlice';
 import { get } from './shared/api_client';
 import { supabase } from './shared/supabase_client';
+import { Loading_Screen } from './shared/components';
 import { api_me, Login_Screen, Sign_Up_Screen } from './auth';
 import { Main_Screen } from './game';
 import { Settings_Screen, Buy_Premium_Screen, Login_Details_Screen } from './settings';
@@ -47,7 +48,7 @@ export default function App() {
     restore_session();
   }, []);
 
-  if (checking_session) return null;
+  if (checking_session) return <Loading_Screen />;
 
   return (
     <HashRouter>
