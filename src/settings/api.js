@@ -1,4 +1,4 @@
-import { auth_headers, post } from '../shared/api_client';
+import { auth_headers, post, get } from '../shared/api_client';
 
 export async function api_update_username(username) {
   const headers = await auth_headers();
@@ -15,4 +15,8 @@ export async function api_update_username(username) {
 
 export async function api_buy_account_tier(tier_id) {
   return post('/buy_account_tier', { tier_id }, await auth_headers());
+}
+
+export async function api_get_my_discord() {
+  return get('/my_discord', await auth_headers());
 }

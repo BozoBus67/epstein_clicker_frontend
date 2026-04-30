@@ -8,7 +8,9 @@ import X_Button from '../shared/components/x_button';
 import { current_audio, set_current_audio } from '../misc_info';
 import { supabase } from '../supabase_client';
 import { api_reset_game } from '../game/api';
+import { api_get_my_discord } from './api';
 import { useTierGate } from '../shared/hooks/useTierGate';
+import toast from 'react-hot-toast';
 
 function Reset_Save_Confirmation_Panel({ on_confirm, on_cancel }) {
   useEscapeKey(on_cancel);
@@ -74,6 +76,60 @@ function Change_Login_Details_Button() {
   );
 }
 
+function Discord_Reveal_Modal({ discord, on_close }) {
+  useEscapeKey(on_close);
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200,
+    }}>
+      <div style={{
+        background: '#1e1e2e', border: '2px solid #facc15', borderRadius: '12px',
+        padding: '32px', minWidth: '320px', textAlign: 'center', color: 'white',
+      }}>
+        <h2 style={{ color: '#facc15', marginBottom: '12px' }}>My Discord</h2>
+        <p style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>{discord}</p>
+        <button
+          onClick={on_close}
+          style={{
+            marginTop: '20px', padding: '8px 24px', background: '#facc15',
+            color: '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold',
+          }}
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Get_Discord_Button() {
+  const { gate, lock_modal } = useTierGate(5);
+  const [discord, set_discord] = useState(null);
+
+  const handle_click = async () => {
+    try {
+      const data = await api_get_my_discord();
+      set_discord(data.discord);
+    } catch (e) {
+      toast.error(e?.detail || e?.message || 'Failed to fetch Discord');
+    }
+  };
+
+  return (
+    <>
+      <button
+        onClick={() => gate(handle_click)}
+        className="bg-gray-500 text-white py-2 px-6 rounded-lg hover:bg-gray-600 active:bg-gray-700 transition"
+      >
+        Get My Discord
+      </button>
+      {lock_modal}
+      {discord && <Discord_Reveal_Modal discord={discord} on_close={() => set_discord(null)} />}
+    </>
+  );
+}
+
 function Log_Out_Button() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -110,6 +166,7 @@ export default function Settings_Screen() {
       <Back_Arrow_Button to="/game" />
       <X_Button to="/game" />
       <Change_Login_Details_Button />
+      <Get_Discord_Button />
       <Reset_Save_Button on_click={() => set_show_reset_confirmation(true)} />
       <Log_Out_Button />
       {show_reset_confirmation && (
