@@ -1,23 +1,19 @@
-import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { ACCOUNT_TIER_NAMES } from '../shared/constants';
+import { tier_num } from '../shared/utils';
+import { update_premium_game_data } from '../shared/store/sessionSlice';
+import { api_buy_account_tier } from './api';
 
 const TIER_PERKS = {
   account_tier_1: [
-    '5 extra gamble slots per day',
-    'Access to exclusive Plus badge',
-    'Priority support',
-    'Placeholder perk 4',
-    'Placeholder perk 5',
+    'Access to music player',
   ],
   account_tier_2: [
     'Everything in Plus',
-    '15 extra gamble slots per day',
-    '2× token rewards',
-    'Access to Pro badge',
-    'Placeholder perk 5',
-    'Placeholder perk 6',
+    'Close ads',
   ],
   account_tier_3: [
     'Everything in Pro',
@@ -88,39 +84,51 @@ const TIER_IMAGES = Object.fromEntries(
   ])
 );
 
-function Back_Arrow_Button({ on_click }) {
+function Confirm_Modal({ tier, on_confirm, on_cancel, loading }) {
   return (
-    <button
-      onClick={on_click}
-      style={{ position: 'fixed', top: '16px', left: '16px', border: '1px solid gray', borderRadius: '50%', width: '32px', height: '32px' }}
-      className="text-gray-700 hover:text-gray-900 transition font-bold"
-    >
-      ←
-    </button>
+    <div style={{
+      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
+    }}>
+      <div style={{
+        background: 'white', borderRadius: '12px', padding: '32px',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', minWidth: '300px',
+      }}>
+        <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>Buy {ACCOUNT_TIER_NAMES[tier.id]}?</p>
+        <p style={{ margin: 0, color: '#555' }}>This will cost {tier.token_price} tokens.</p>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            onClick={on_cancel}
+            disabled={loading}
+            className="bg-gray-300 text-black py-2 px-6 rounded-lg hover:bg-gray-400 transition"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={on_confirm}
+            disabled={loading}
+            className="bg-yellow-400 text-black font-bold py-2 px-6 rounded-lg hover:bg-yellow-500 transition"
+          >
+            {loading ? 'Buying...' : 'Confirm'}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
-function X_Button({ on_click }) {
-  return (
-    <button
-      onClick={on_click}
-      style={{ position: 'fixed', top: '16px', right: '16px', border: '1px solid gray', borderRadius: '50%', width: '32px', height: '32px' }}
-      className="text-gray-700 hover:text-gray-900 transition font-bold"
-    >
-      ✕
-    </button>
-  );
-}
-
-function Tier_Card({ tier }) {
+function Tier_Card({ tier, current_tier, on_click }) {
   const perks = TIER_PERKS[tier.id] ?? [];
+  const is_owned = tier_num(tier.id) <= current_tier;
+
   return (
     <button
-      onClick={() => {}}
+      onClick={is_owned ? undefined : on_click}
+      disabled={is_owned}
       style={{
         minWidth: '240px',
         height: '520px',
-        border: '1px solid #ccc',
+        border: `2px solid ${is_owned ? '#facc15' : '#ccc'}`,
         borderRadius: '12px',
         display: 'flex',
         flexDirection: 'column',
@@ -128,14 +136,18 @@ function Tier_Card({ tier }) {
         padding: '20px',
         gap: '12px',
         flexShrink: 0,
-        background: 'white',
-        cursor: 'pointer',
+        background: is_owned ? '#fffbe6' : 'white',
+        cursor: is_owned ? 'default' : 'pointer',
         transition: 'transform 0.15s, box-shadow 0.15s',
         textAlign: 'left',
+        opacity: is_owned ? 0.7 : 1,
       }}
-      className="hover:scale-105 hover:shadow-xl"
+      className={is_owned ? '' : 'hover:scale-105 hover:shadow-xl'}
     >
-      <div style={{ fontWeight: 'bold', fontSize: '18px', color: '#111', width: '100%', textAlign: 'center' }}>{ACCOUNT_TIER_NAMES[tier.id]}</div>
+      <div style={{ fontWeight: 'bold', fontSize: '18px', color: '#111', width: '100%', textAlign: 'center' }}>
+        {ACCOUNT_TIER_NAMES[tier.id]}
+        {is_owned && <span style={{ fontSize: '12px', color: '#888', marginLeft: '8px' }}>✓ Owned</span>}
+      </div>
       <div style={{ fontSize: '14px', color: '#333', width: '100%', textAlign: 'center' }}>{tier.token_price} tokens</div>
       <img src={TIER_IMAGES[tier.id]} style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />
       <div style={{ flex: 1, overflowY: 'auto', width: '100%' }}>
@@ -151,35 +163,75 @@ function Tier_Card({ tier }) {
 
 export default function Buy_Premium_Screen() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const account_tiers = useSelector(state => state.session.account_tiers);
+  const current_tier_str = useSelector(state => state.session.premium_game_data?.account_tier ?? 'account_tier_0');
+  const current_tier = tier_num(current_tier_str);
   const paid_tiers = account_tiers.filter(t => t.id !== 'account_tier_0');
+
+  const [selected, set_selected] = useState(null);
+  const [loading, set_loading] = useState(false);
 
   useEffect(() => {
     const handle_key = (e) => {
-      if (e.key === 'Escape') navigate('/game');
+      if (e.key === 'Escape') {
+        if (selected) set_selected(null);
+        else navigate('/game');
+      }
     };
     window.addEventListener('keydown', handle_key);
     return () => window.removeEventListener('keydown', handle_key);
-  }, [navigate]);
+  }, [navigate, selected]);
+
+  const handle_confirm = async () => {
+    set_loading(true);
+    try {
+      const data = await api_buy_account_tier(selected.id);
+      dispatch(update_premium_game_data(data.premium_game_data));
+      toast.success(`Upgraded to ${ACCOUNT_TIER_NAMES[selected.id]}!`);
+      set_selected(null);
+    } catch (e) {
+      toast.error(e?.message || 'Purchase failed.');
+    } finally {
+      set_loading(false);
+    }
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh', overflow: 'hidden' }}>
-      <Back_Arrow_Button on_click={() => navigate('/game')} />
-      <X_Button on_click={() => navigate('/game')} />
+      <button
+        onClick={() => navigate('/game')}
+        style={{ position: 'fixed', top: '16px', left: '16px', border: '1px solid gray', borderRadius: '50%', width: '32px', height: '32px' }}
+        className="text-gray-700 hover:text-gray-900 transition font-bold"
+      >←</button>
+      <button
+        onClick={() => navigate('/game')}
+        style={{ position: 'fixed', top: '16px', right: '16px', border: '1px solid gray', borderRadius: '50%', width: '32px', height: '32px' }}
+        className="text-gray-700 hover:text-gray-900 transition font-bold"
+      >✕</button>
 
       <div style={{
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: '24px',
-        padding: '80px 48px',
-        overflowX: 'auto',
-        height: '100%',
+        display: 'flex', flexDirection: 'row', alignItems: 'center',
+        gap: '24px', padding: '80px 48px', overflowX: 'auto', height: '100%',
       }}>
         {paid_tiers.map((tier) => (
-          <Tier_Card key={tier.id} tier={tier} />
+          <Tier_Card
+            key={tier.id}
+            tier={tier}
+            current_tier={current_tier}
+            on_click={() => set_selected(tier)}
+          />
         ))}
       </div>
+
+      {selected && (
+        <Confirm_Modal
+          tier={selected}
+          on_confirm={handle_confirm}
+          on_cancel={() => set_selected(null)}
+          loading={loading}
+        />
+      )}
     </div>
   );
 }

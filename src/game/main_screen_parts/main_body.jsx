@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { increase_cookies } from '../game_utils';
 import { Building_Row } from '../buildings/buildings_components';
 import * as Constants from '../../shared/constants';
+import { tier_num } from '../../shared/utils';
 
 const ad_modules = import.meta.glob('../../assets/faces/*.png', { eager: true });
 const ADS = Object.values(ad_modules).map(m => m.default);
@@ -80,17 +81,35 @@ function Left_Part_Of_Screen() {
   );
 }
 
+const CORNERS = [
+  { top: '8px', left: '8px' },
+  { top: '8px', right: '8px' },
+  { bottom: '8px', left: '8px' },
+  { bottom: '8px', right: '8px' },
+];
+
+function random_next_index(current) {
+  let next;
+  do { next = Math.floor(Math.random() * ADS.length); } while (next === current);
+  return next;
+}
+
 function Middle_Part_Of_Screen() {
+  const tier = tier_num(useSelector(state => state.session.premium_game_data?.account_tier));
+  const can_close_ads = tier >= 2;
+
   const [index, set_index] = useState(() => Math.floor(Math.random() * ADS.length));
+  const [corner, set_corner] = useState(() => Math.floor(Math.random() * 4));
+  const [dismissed, set_dismissed] = useState(false);
+
+  const advance = () => {
+    set_index(i => random_next_index(i));
+    set_corner(Math.floor(Math.random() * 4));
+    set_dismissed(false);
+  };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      set_index(i => {
-        let next;
-        do { next = Math.floor(Math.random() * ADS.length); } while (next === i);
-        return next;
-      });
-    }, 5000);
+    const interval = setInterval(advance, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -100,19 +119,36 @@ function Middle_Part_Of_Screen() {
       backgroundImage: `url(${cc_bg})`, backgroundSize: 'cover', backgroundPosition: 'center',
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px',
     }}>
-      <img
-        key={index}
-        src={ADS[index]}
-        draggable={false}
-        style={{ maxWidth: '80%', maxHeight: '65%', objectFit: 'contain', animation: 'ad-pulse 5s ease-in-out infinite' }}
-      />
-      <span style={{
-        fontWeight: 'bold', fontSize: '15px', color: '#fff',
-        background: 'rgba(0,0,0,0.65)', borderRadius: '6px', padding: '4px 12px',
-        textAlign: 'center',
-      }}>
-        {Constants.AD_TEXT}
-      </span>
+      {!dismissed && (
+        <>
+          <img
+            key={index}
+            src={ADS[index]}
+            draggable={false}
+            style={{ maxWidth: '80%', maxHeight: '65%', objectFit: 'contain', animation: 'ad-pulse 5s ease-in-out infinite' }}
+          />
+          <span style={{
+            fontWeight: 'bold', fontSize: '15px', color: '#fff',
+            background: 'rgba(0,0,0,0.65)', borderRadius: '6px', padding: '4px 12px',
+            textAlign: 'center',
+          }}>
+            {Constants.AD_TEXT}
+          </span>
+        </>
+      )}
+      {can_close_ads && !dismissed && (
+        <button
+          onClick={() => set_dismissed(true)}
+          style={{
+            position: 'absolute', ...CORNERS[corner],
+            background: 'rgba(0,0,0,0.6)', border: '1px solid #fff',
+            color: '#fff', borderRadius: '4px', width: '24px', height: '24px',
+            cursor: 'pointer', fontSize: '14px', lineHeight: 1, padding: 0,
+          }}
+        >
+          ✕
+        </button>
+      )}
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { update_game_data, update_premium_game_data } from '../shared/store/sessionSlice';
 import { save_game_data } from './game_utils';
-import { api_daily_checkin } from './api';
+import { api_daily_checkin, api_hourly_checkin, api_fivemin_checkin } from './api';
 import Top_Bar from './main_screen_parts/top_bar';
 import Main_Body from './main_screen_parts/main_body';
 import Gamble_Modal from './gamble_modal';
@@ -112,6 +112,34 @@ export default function Main_Screen() {
     do_checkin();
     document.addEventListener('visibilitychange', do_checkin);
     return () => document.removeEventListener('visibilitychange', do_checkin);
+  }, [jwt]);
+
+  useEffect(() => {
+    const do_checkin = async (api_fn) => {
+      if (document.hidden) return;
+      try {
+        const data = await api_fn();
+        if (data.premium_game_data) dispatch(update_premium_game_data(data.premium_game_data));
+      } catch (e) { console.error('Checkin error:', e); }
+    };
+
+    do_checkin(api_fivemin_checkin);
+    do_checkin(api_hourly_checkin);
+
+    const on_visibility = () => {
+      do_checkin(api_fivemin_checkin);
+      do_checkin(api_hourly_checkin);
+    };
+
+    const fivemin_interval = setInterval(() => do_checkin(api_fivemin_checkin), 5 * 60 * 1000);
+    const hourly_interval = setInterval(() => do_checkin(api_hourly_checkin), 60 * 60 * 1000);
+    document.addEventListener('visibilitychange', on_visibility);
+
+    return () => {
+      clearInterval(fivemin_interval);
+      clearInterval(hourly_interval);
+      document.removeEventListener('visibilitychange', on_visibility);
+    };
   }, [jwt]);
 
   useEffect(() => {

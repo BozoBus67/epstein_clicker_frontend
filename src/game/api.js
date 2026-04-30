@@ -9,5 +9,11 @@ export const api_reset_game = async () =>
 export const api_daily_checkin = async () =>
   post('/daily_checkin', null, await auth_headers());
 
+export const api_hourly_checkin = async () =>
+  post('/hourly_checkin', null, await auth_headers());
+
+export const api_fivemin_checkin = async () =>
+  post('/fivemin_checkin', null, await auth_headers());
+
 export const api_spin = async () =>
   post('/spin', null, await auth_headers());

@@ -5,10 +5,8 @@ import { update_premium_game_data } from '../shared/store/sessionSlice';
 import { api_spin } from './api';
 import { useEscapeKey } from '../shared/hooks/useEscapeKey';
 
-const SLOT_IMAGE_COUNT = 10;
-const SLOT_IMAGES = Object.fromEntries(
-  Array.from({ length: SLOT_IMAGE_COUNT }, (_, i) => [i, new URL(`../assets/slot_images/slot_${i}.png`, import.meta.url).href])
-);
+const face_modules = import.meta.glob('../assets/master_scroll_faces/*', { eager: true });
+const SCROLL_FACES = Object.values(face_modules).map(m => m.default);
 
 function Lever({ on_pull }) {
   const [down, set_down] = useState(false);
@@ -44,7 +42,7 @@ function Slot_Card({ digit }) {
       border: '2px solid #444', background: '#0f0f1a',
     }}>
       {digit !== null && (
-        <img src={SLOT_IMAGES[digit]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <img src={SCROLL_FACES[digit]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       )}
     </div>
   );

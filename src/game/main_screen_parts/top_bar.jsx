@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import Music_Player from './music_player';
 import { api_me } from '../../auth/api';
 import { update_game_data, update_premium_game_data } from '../../shared/store/sessionSlice';
 import { ACCOUNT_TIER_NAMES } from '../../shared/constants';
+import { tier_num } from '../../shared/utils';
 
 export async function refresh_user_data(jwt, dispatch) {
   const data = await api_me(jwt);
@@ -19,8 +21,12 @@ function Refresh_Button() {
 
   const handle = async () => {
     set_loading(true);
-    try { await refresh_user_data(jwt, dispatch); }
-    finally { set_loading(false); }
+    try {
+      await refresh_user_data(jwt, dispatch);
+      toast.success('Account tier and tokens data reloaded');
+    } catch (e) {
+      toast.error('Failed to reload data');
+    } finally { set_loading(false); }
   };
 
   return (
@@ -83,6 +89,8 @@ function Nav_Button({ label, to, on_click }) {
 }
 
 export default function Top_Bar({ on_gamble_click }) {
+  const tier = tier_num(useSelector(state => state.session.premium_game_data?.account_tier));
+
   return (
     <div style={{
       width: '100%',
@@ -105,7 +113,7 @@ export default function Top_Bar({ on_gamble_click }) {
       <Nav_Button label="Redeem Tokens" to="/game/redeem-tokens" />
       <Nav_Button label="Mastery Scrolls" to="/game/mastery-scrolls" />
       <Nav_Button label="Auction House" to="/game/auction-house" />
-      <Music_Player />
+      {tier >= 1 && <Music_Player />}
     </div>
   );
 }
