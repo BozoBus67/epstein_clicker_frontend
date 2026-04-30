@@ -119,14 +119,12 @@ function Confirm_Modal({ tier, on_confirm, on_cancel, loading }) {
 
 function Tier_Card({ tier, current_tier, on_click }) {
   const perks = TIER_PERKS[tier.id] ?? [];
-  const this_tier = tier_num(tier.id);
-  const is_owned = this_tier <= current_tier;
-  const is_locked = this_tier > current_tier + 1;
+  const is_owned = tier_num(tier.id) <= current_tier;
 
   return (
     <button
-      onClick={is_owned || is_locked ? undefined : on_click}
-      disabled={is_owned || is_locked}
+      onClick={is_owned ? undefined : on_click}
+      disabled={is_owned}
       style={{
         minWidth: '240px',
         height: '520px',
@@ -139,17 +137,16 @@ function Tier_Card({ tier, current_tier, on_click }) {
         gap: '12px',
         flexShrink: 0,
         background: is_owned ? '#fffbe6' : 'white',
-        cursor: is_owned || is_locked ? 'default' : 'pointer',
+        cursor: is_owned ? 'default' : 'pointer',
         transition: 'transform 0.15s, box-shadow 0.15s',
         textAlign: 'left',
-        opacity: is_owned || is_locked ? 0.4 : 1,
+        opacity: is_owned ? 0.7 : 1,
       }}
-      className={is_owned || is_locked ? '' : 'hover:scale-105 hover:shadow-xl'}
+      className={is_owned ? '' : 'hover:scale-105 hover:shadow-xl'}
     >
       <div style={{ fontWeight: 'bold', fontSize: '18px', color: '#111', width: '100%', textAlign: 'center' }}>
         {ACCOUNT_TIER_NAMES[tier.id]}
         {is_owned && <span style={{ fontSize: '12px', color: '#888', marginLeft: '8px' }}>✓ Owned</span>}
-        {is_locked && <span style={{ fontSize: '12px', color: '#888', marginLeft: '8px' }}>🔒 Locked</span>}
       </div>
       <div style={{ fontSize: '14px', color: '#333', width: '100%', textAlign: 'center' }}>{tier.token_price} tokens</div>
       <img src={TIER_IMAGES[tier.id]} style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />
