@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { increase_cookies } from '../game_utils';
 import { Building_Row } from '../buildings/buildings_components';
 import * as Constants from '../../shared/constants';
-import { tier_num } from '../../shared/utils';
+import { useTierGate } from '../../shared/hooks/useTierGate';
 
 const ad_modules = import.meta.glob('../../assets/faces/*.png', { eager: true });
 const ADS = Object.values(ad_modules).map(m => m.default);
@@ -95,8 +95,7 @@ function random_next_index(current) {
 }
 
 function Middle_Part_Of_Screen() {
-  const tier = tier_num(useSelector(state => state.session.premium_game_data?.account_tier));
-  const can_close_ads = tier >= 2;
+  const { gate, lock_modal } = useTierGate(2);
 
   const [index, set_index] = useState(() => Math.floor(Math.random() * ADS.length));
   const [corner, set_corner] = useState(() => Math.floor(Math.random() * 4));
@@ -136,9 +135,9 @@ function Middle_Part_Of_Screen() {
           </span>
         </>
       )}
-      {can_close_ads && !dismissed && (
+      {!dismissed && (
         <button
-          onClick={() => set_dismissed(true)}
+          onClick={() => gate(() => set_dismissed(true))}
           style={{
             position: 'absolute', ...CORNERS[corner],
             background: 'rgba(0,0,0,0.6)', border: '1px solid #fff',
@@ -149,6 +148,7 @@ function Middle_Part_Of_Screen() {
           ✕
         </button>
       )}
+      {lock_modal}
     </div>
   );
 }

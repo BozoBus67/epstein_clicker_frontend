@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { update_game_data, update_premium_game_data } from '../shared/store/sessionSlice';
-import { tier_num } from '../shared/utils';
+import { useTierGate } from '../shared/hooks/useTierGate';
 import { save_game_data } from './game_utils';
 import { api_daily_checkin, api_hourly_checkin, api_fivemin_checkin } from './api';
 import Top_Bar from './main_screen_parts/top_bar';
@@ -42,31 +42,33 @@ function Reward_Popup({ title, streak_label, data, on_close }) {
 
 function Settings_Button() {
   const navigate = useNavigate();
-  const tier = tier_num(useSelector(state => state.session.premium_game_data?.account_tier));
-  if (tier < 1) return null;
+  const { gate, lock_modal } = useTierGate(1);
   const [hovered, set_hovered] = useState(false);
 
   return (
-    <button
-      onClick={() => navigate('/game/settings')}
-      onMouseEnter={() => set_hovered(true)}
-      onMouseLeave={() => set_hovered(false)}
-      style={{
-        position: 'fixed',
-        bottom: '16px',
-        left: '16px',
-        border: '3px solid black',
-        borderRadius: '8px',
-        padding: '0',
-        cursor: 'pointer',
-        overflow: 'hidden',
-        background: 'transparent',
-        transform: hovered ? 'scale(1.08)' : 'scale(1)',
-        transition: 'all 0.1s ease',
-      }}
-    >
-      <img src={settingsIcon} draggable={false} style={{ width: '44px', height: '44px', display: 'block', borderRadius: '8px' }} />
-    </button>
+    <>
+      <button
+        onClick={() => gate(() => navigate('/game/settings'))}
+        onMouseEnter={() => set_hovered(true)}
+        onMouseLeave={() => set_hovered(false)}
+        style={{
+          position: 'fixed',
+          bottom: '16px',
+          left: '16px',
+          border: '3px solid black',
+          borderRadius: '8px',
+          padding: '0',
+          cursor: 'pointer',
+          overflow: 'hidden',
+          background: 'transparent',
+          transform: hovered ? 'scale(1.08)' : 'scale(1)',
+          transition: 'all 0.1s ease',
+        }}
+      >
+        <img src={settingsIcon} draggable={false} style={{ width: '44px', height: '44px', display: 'block', borderRadius: '8px' }} />
+      </button>
+      {lock_modal}
+    </>
   );
 }
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { current_volume, set_current_volume } from '../../misc_info';
+import { useTierGate } from '../../shared/hooks/useTierGate';
 
 function Volume_Panel({ value, on_change }) {
   return (
@@ -56,6 +57,7 @@ function Volume_Button({ on_click, value }) {
 export default function Volume_Control() {
   const [open, set_open] = useState(false);
   const [value, set_value] = useState(() => current_volume);
+  const { gate, lock_modal } = useTierGate(4);
 
   useEffect(() => {
     if (!open) return;
@@ -80,8 +82,9 @@ export default function Volume_Control() {
 
   return (
     <div className="volume-control-container" style={{ position: 'relative' }}>
-      <Volume_Button on_click={() => set_open(!open)} value={value} />
+      <Volume_Button on_click={() => gate(() => set_open(!open))} value={value} />
       {open && <Volume_Panel value={value} on_change={handle_change} />}
+      {lock_modal}
     </div>
   );
 }

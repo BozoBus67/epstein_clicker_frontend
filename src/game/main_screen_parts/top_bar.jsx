@@ -8,7 +8,7 @@ import Shuffle_Button from './shuffle_button';
 import { api_me } from '../../auth/api';
 import { update_game_data, update_premium_game_data } from '../../shared/store/sessionSlice';
 import { ACCOUNT_TIER_NAMES } from '../../shared/constants';
-import { tier_num } from '../../shared/utils';
+import { useTierGate } from '../../shared/hooks/useTierGate';
 
 export async function refresh_user_data(jwt, dispatch) {
   const data = await api_me(jwt);
@@ -94,20 +94,28 @@ function Audio_Controls_Panel({ children }) {
   return <div style={{ display: 'flex', gap: '5px' }}>{children}</div>;
 }
 
-function Audio_Controls({ tier }) {
-  if (tier < 1) return null;
+function Audio_Controls() {
   return (
     <Audio_Controls_Panel>
       <Music_Player />
-      {tier >= 4 && <Volume_Control />}
-      {tier >= 4 && <Shuffle_Button />}
+      <Volume_Control />
+      <Shuffle_Button />
     </Audio_Controls_Panel>
   );
 }
 
-export default function Top_Bar({ on_gamble_click }) {
-  const tier = tier_num(useSelector(state => state.session.premium_game_data?.account_tier));
+function Auction_House_Nav_Button() {
+  const navigate = useNavigate();
+  const { gate, lock_modal } = useTierGate(2);
+  return (
+    <>
+      <Nav_Button label="Auction House" on_click={() => gate(() => navigate('/game/auction-house'))} />
+      {lock_modal}
+    </>
+  );
+}
 
+export default function Top_Bar({ on_gamble_click }) {
   return (
     <div style={{
       width: '100%',
@@ -129,8 +137,8 @@ export default function Top_Bar({ on_gamble_click }) {
       <Nav_Button label="Gamble Tokens" on_click={on_gamble_click} />
       <Nav_Button label="Redeem Tokens" to="/game/redeem-tokens" />
       <Nav_Button label="Mastery Scrolls" to="/game/mastery-scrolls" />
-      {tier >= 2 && <Nav_Button label="Auction House" to="/game/auction-house" />}
-      <Audio_Controls tier={tier} />
+      <Auction_House_Nav_Button />
+      <Audio_Controls />
     </div>
   );
 }

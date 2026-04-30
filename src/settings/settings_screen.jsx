@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useEscapeKey } from '../shared/hooks/useEscapeKey';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout, update_game_data } from '../shared/store/sessionSlice';
 import Back_Arrow_Button from '../shared/components/back_arrow_button';
@@ -8,7 +8,7 @@ import X_Button from '../shared/components/x_button';
 import { current_audio, set_current_audio } from '../misc_info';
 import { supabase } from '../supabase_client';
 import { api_reset_game } from '../game/api';
-import { tier_num } from '../shared/utils';
+import { useTierGate } from '../shared/hooks/useTierGate';
 
 function Reset_Save_Confirmation_Panel({ on_confirm, on_cancel }) {
   useEscapeKey(on_cancel);
@@ -60,15 +60,17 @@ function Reset_Save_Button({ on_click }) {
 
 function Change_Login_Details_Button() {
   const navigate = useNavigate();
-  const tier = tier_num(useSelector(state => state.session.premium_game_data?.account_tier));
-  if (tier < 3) return null;
+  const { gate, lock_modal } = useTierGate(3);
   return (
-    <button
-      onClick={() => navigate('/game/settings/login-details')}
-      className="bg-gray-500 text-white py-2 px-6 rounded-lg hover:bg-gray-600 active:bg-gray-700 transition"
-    >
-      Change Login Details
-    </button>
+    <>
+      <button
+        onClick={() => gate(() => navigate('/game/settings/login-details'))}
+        className="bg-gray-500 text-white py-2 px-6 rounded-lg hover:bg-gray-600 active:bg-gray-700 transition"
+      >
+        Change Login Details
+      </button>
+      {lock_modal}
+    </>
   );
 }
 

@@ -5,6 +5,7 @@ import {
   current_volume,
   playlist_entries, subscribe_playlist,
 } from '../../misc_info';
+import { useTierGate } from '../../shared/hooks/useTierGate';
 
 function Music_Player_Panel({ entries, on_song_click, current_url }) {
   const selected_ref = useRef(null);
@@ -87,6 +88,7 @@ export default function Music_Player() {
   const [open, setOpen] = useState(false);
   const [current_url, set_current_url] = useState(() => current_song_url);
   const [, force_update] = useState(0);
+  const { gate, lock_modal } = useTierGate(1);
 
   useEffect(() => subscribe_playlist(() => force_update(n => n + 1)), []);
 
@@ -142,8 +144,9 @@ export default function Music_Player() {
 
   return (
     <div className="music-player-container" style={{ position: 'relative' }}>
-      <Music_Player_Button onClick={() => setOpen(!open)} />
+      <Music_Player_Button onClick={() => gate(() => setOpen(!open))} />
       {open && <Music_Player_Panel entries={playlist_entries} on_song_click={on_song_click} current_url={current_url} />}
+      {lock_modal}
     </div>
   );
 }
