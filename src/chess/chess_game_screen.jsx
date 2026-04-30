@@ -85,11 +85,17 @@ export default function Chess_Game_Screen() {
     return true;
   };
 
-  const on_drop = (sourceSquare, targetSquare) => apply_user_move(sourceSquare, targetSquare, 'q');
+  const on_drop = (sourceSquare, targetSquare) => {
+    console.log('[chess] on_drop', { sourceSquare, targetSquare });
+    return apply_user_move(sourceSquare, targetSquare, 'q');
+  };
 
   const on_promotion_piece_select = (piece, from, to) => {
+    console.log('[chess] on_promotion_piece_select', { piece, from, to });
     if (!piece) return false;
-    return apply_user_move(from, to, piece[1].toLowerCase());
+    const ok = apply_user_move(from, to, piece[1].toLowerCase());
+    console.log('[chess] apply result', ok);
+    return ok;
   };
 
   const reset = () => {
