@@ -136,7 +136,7 @@ function Tier_Card({ tier, current_tier, on_click }) {
         padding: '20px',
         gap: '12px',
         flexShrink: 0,
-        background: is_owned ? '#fffbe6' : 'white',
+        background: 'white',
         cursor: is_owned ? 'default' : 'pointer',
         transition: 'transform 0.15s, box-shadow 0.15s',
         textAlign: 'left',
