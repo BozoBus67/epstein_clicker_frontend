@@ -10,7 +10,6 @@ import { api_daily_checkin, api_hourly_checkin, api_fivemin_checkin } from './ap
 import Top_Bar from './main_screen_parts/top_bar';
 import Main_Body from './main_screen_parts/main_body';
 import Gamble_Modal from './gamble_modal';
-import settingsIcon from '../assets/settings_gear_icon.jpg';
 
 function Reward_Popup({ title, streak_label, data, on_close }) {
   useEscapeKey(on_close);
@@ -55,17 +54,20 @@ function Settings_Button() {
           position: 'fixed',
           bottom: '16px',
           left: '16px',
-          border: '3px solid black',
+          width: '44px',
+          height: '44px',
+          border: '2px solid #facc15',
           borderRadius: '8px',
-          padding: '0',
+          background: '#1e1e2e',
+          color: '#facc15',
+          fontSize: '24px',
+          lineHeight: 1,
           cursor: 'pointer',
-          overflow: 'hidden',
-          background: 'transparent',
           transform: hovered ? 'scale(1.08)' : 'scale(1)',
           transition: 'all 0.1s ease',
         }}
       >
-        <img src={settingsIcon} draggable={false} style={{ width: '44px', height: '44px', display: 'block', borderRadius: '8px' }} />
+        ⚙️
       </button>
       {lock_modal}
     </>
