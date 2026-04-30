@@ -13,7 +13,7 @@ const TIER_PERKS = {
   ],
   account_tier_2: [
     'Everything in Plus',
-    'Close ads',
+    'Gain the ability to close ads',
   ],
   account_tier_3: [
     'Everything in Pro',
