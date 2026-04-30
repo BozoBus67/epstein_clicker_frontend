@@ -112,7 +112,7 @@ function Bot_Header({ bot, engine_ready, thinking, outcome }) {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
-      <img src={bot.face} style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', border: '2px solid #facc15' }} />
+      <img src={bot.face} style={{ width: '96px', height: '96px', borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', border: '3px solid #facc15' }} />
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <span style={{ color: '#facc15', fontWeight: 'bold' }}>{bot.name} <span style={{ color: '#aaa', fontWeight: 'normal' }}>(ELO {bot.elo})</span></span>
         <span style={{ fontSize: '13px', color: '#aaa' }}>{status}</span>
