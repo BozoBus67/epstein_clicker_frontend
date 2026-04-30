@@ -71,18 +71,25 @@ export default function Chess_Game_Screen() {
     }
   };
 
-  const on_drop = (sourceSquare, targetSquare) => {
+  const apply_user_move = (from, to, promotion) => {
     const chess = chess_ref.current;
     if (outcome || thinking_ref.current) return false;
     let move;
     try {
-      move = chess.move({ from: sourceSquare, to: targetSquare, promotion: 'q' });
+      move = chess.move({ from, to, promotion });
     } catch { return false; }
     if (!move) return false;
     set_position(chess.fen());
     check_outcome();
     if (!chess.isGameOver()) make_engine_move();
     return true;
+  };
+
+  const on_drop = (sourceSquare, targetSquare) => apply_user_move(sourceSquare, targetSquare, 'q');
+
+  const on_promotion_piece_select = (piece, from, to) => {
+    if (!piece) return false;
+    return apply_user_move(from, to, piece[1].toLowerCase());
   };
 
   const reset = () => {
@@ -102,6 +109,7 @@ export default function Chess_Game_Screen() {
         <Chessboard
           position={position}
           onPieceDrop={on_drop}
+          onPromotionPieceSelect={on_promotion_piece_select}
           boardOrientation="white"
           arePiecesDraggable={!outcome}
         />
