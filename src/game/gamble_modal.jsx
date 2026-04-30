@@ -14,6 +14,7 @@ export default function Gamble_Modal({ on_close }) {
   const pgd_ref = useRef(premium_game_data);
   const pending_win_ref = useRef(null);
   const [sequences, set_sequences] = useState(null);
+  const [subset_indices, set_subset_indices] = useState(null);
   const [frame, set_frame] = useState(null);
   const is_spinning = frame !== null && sequences !== null;
 
@@ -27,6 +28,7 @@ export default function Gamble_Modal({ on_close }) {
       dispatch(update_premium_game_data({ ...pgd_ref.current, tokens: data.tokens_remaining }));
       pending_win_ref.current = data.win ?? null;
       set_sequences(data.sequences);
+      set_subset_indices(data.subset_indices);
       set_frame(0);
     } catch (err) {
       toast.error(err?.detail || 'Spin failed.');
@@ -72,7 +74,9 @@ export default function Gamble_Modal({ on_close }) {
             Tokens: {premium_game_data?.tokens ?? 0}
           </span>
           <div style={{ display: 'flex', gap: '16px' }}>
-            {current_digits.map((d, i) => <Slot_Card key={i} digit={d} />)}
+            {current_digits.map((d, i) => (
+              <Slot_Card key={i} face_index={d === null || subset_indices === null ? null : subset_indices[d]} />
+            ))}
           </div>
           <button
             onClick={on_close}
@@ -90,14 +94,14 @@ export default function Gamble_Modal({ on_close }) {
   );
 }
 
-function Slot_Card({ digit }) {
+function Slot_Card({ face_index }) {
   return (
     <div style={{
       width: '90px', height: '90px', borderRadius: '8px', overflow: 'hidden',
       border: '2px solid #444', background: '#0f0f1a',
     }}>
-      {digit !== null && (
-        <img src={SCROLL_FACES[digit]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      {face_index !== null && (
+        <img src={SCROLL_FACES[face_index]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       )}
     </div>
   );
