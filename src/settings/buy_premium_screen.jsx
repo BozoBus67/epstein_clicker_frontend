@@ -9,6 +9,7 @@ import { api_buy_account_tier } from './api';
 
 const TIER_PERKS = {
   account_tier_1: [
+    'Access to settings screen',
     'Access to music player',
   ],
   account_tier_2: [
