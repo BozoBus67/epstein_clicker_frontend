@@ -7,6 +7,61 @@ import { api_create_listing, api_get_listings, api_buy_listing, api_cancel_listi
 import { update_game_data, update_premium_game_data } from '../shared/store/sessionSlice';
 import { CURRENCIES, opposite_currency } from './auction_house_constants';
 
+export default function Auction_House_Screen() {
+  const username = useSelector(state => state.session.session_data?.username ?? '');
+  const [show_create_modal, set_show_create_modal] = useState(false);
+  const [selected_listing, set_selected_listing] = useState(null);
+  const [listings, set_listings] = useState([]);
+
+  useEffect(() => {
+    api_get_listings().then(set_listings).catch(console.error);
+  }, []);
+
+  const refresh = () => api_get_listings().then(set_listings).catch(console.error);
+  const is_own_listing = selected_listing?.seller_username === username;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh' }}>
+      <Page_Header title="Auction House" />
+      <Auction_House_Screen_Body listings={listings} on_select={set_selected_listing} />
+      <button
+        onClick={refresh}
+        style={{ position: 'fixed', bottom: '24px', left: '24px', border: '1px solid gray', borderRadius: '50%', width: '32px', height: '32px', background: 'transparent', color: 'white', cursor: 'pointer', fontSize: '16px' }}
+      >
+        ↻
+      </button>
+      <Add_Auction_Button on_click={() => set_show_create_modal(true)} />
+      {show_create_modal && <Create_Listing_Modal on_close={() => set_show_create_modal(false)} />}
+      {selected_listing && is_own_listing && (
+        <Cancel_Listing_Modal
+          listing={selected_listing}
+          on_close={() => set_selected_listing(null)}
+          on_cancelled={() => { set_selected_listing(null); refresh(); }}
+        />
+      )}
+      {selected_listing && !is_own_listing && (
+        <Buy_Listing_Modal
+          listing={selected_listing}
+          on_close={() => set_selected_listing(null)}
+          on_bought={() => { set_selected_listing(null); refresh(); }}
+        />
+      )}
+    </div>
+  );
+}
+
+function Auction_House_Screen_Body({ listings, on_select }) {
+  return (
+    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 40px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+        {listings.map((listing, i) => (
+          <Auction_Slot key={listing.id ?? i} index={i} listing={listing} on_click={() => on_select(listing)} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Auction_Slot({ index, listing, on_click }) {
   const [hovered, set_hovered] = useState(false);
 
@@ -141,34 +196,6 @@ function Cancel_Listing_Modal({ listing, on_close, on_cancelled }) {
   );
 }
 
-function Add_Auction_Button({ on_click }) {
-  const [hovered, set_hovered] = useState(false);
-  return (
-    <button
-      onClick={on_click}
-      onMouseEnter={() => set_hovered(true)}
-      onMouseLeave={() => set_hovered(false)}
-      style={{
-        position: 'fixed',
-        bottom: '24px',
-        right: '24px',
-        padding: '10px 20px',
-        background: hovered ? '#facc15' : 'transparent',
-        color: hovered ? '#000' : '#facc15',
-        border: '2px solid #facc15',
-        borderRadius: '8px',
-        fontWeight: 'bold',
-        fontSize: '14px',
-        cursor: 'pointer',
-        transform: hovered ? 'scale(1.05)' : 'scale(1)',
-        transition: 'all 0.1s ease',
-      }}
-    >
-      + Add Auction
-    </button>
-  );
-}
-
 function Create_Listing_Modal({ on_close }) {
   const dispatch = useDispatch();
   const game_data = useSelector(state => state.session.game_data);
@@ -258,57 +285,30 @@ function Create_Listing_Modal({ on_close }) {
   );
 }
 
-function Auction_House_Screen_Body({ listings, on_select }) {
+function Add_Auction_Button({ on_click }) {
+  const [hovered, set_hovered] = useState(false);
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 40px' }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-        {listings.map((listing, i) => (
-          <Auction_Slot key={listing.id ?? i} index={i} listing={listing} on_click={() => on_select(listing)} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export default function Auction_House_Screen() {
-  const username = useSelector(state => state.session.session_data?.username ?? '');
-  const [show_create_modal, set_show_create_modal] = useState(false);
-  const [selected_listing, set_selected_listing] = useState(null);
-  const [listings, set_listings] = useState([]);
-
-  useEffect(() => {
-    api_get_listings().then(set_listings).catch(console.error);
-  }, []);
-
-  const refresh = () => api_get_listings().then(set_listings).catch(console.error);
-  const is_own_listing = selected_listing?.seller_username === username;
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh' }}>
-      <Page_Header title="Auction House" />
-      <Auction_House_Screen_Body listings={listings} on_select={set_selected_listing} />
-      <button
-        onClick={refresh}
-        style={{ position: 'fixed', bottom: '24px', left: '24px', border: '1px solid gray', borderRadius: '50%', width: '32px', height: '32px', background: 'transparent', color: 'white', cursor: 'pointer', fontSize: '16px' }}
-      >
-        ↻
-      </button>
-      <Add_Auction_Button on_click={() => set_show_create_modal(true)} />
-      {show_create_modal && <Create_Listing_Modal on_close={() => set_show_create_modal(false)} />}
-      {selected_listing && is_own_listing && (
-        <Cancel_Listing_Modal
-          listing={selected_listing}
-          on_close={() => set_selected_listing(null)}
-          on_cancelled={() => { set_selected_listing(null); refresh(); }}
-        />
-      )}
-      {selected_listing && !is_own_listing && (
-        <Buy_Listing_Modal
-          listing={selected_listing}
-          on_close={() => set_selected_listing(null)}
-          on_bought={() => { set_selected_listing(null); refresh(); }}
-        />
-      )}
-    </div>
+    <button
+      onClick={on_click}
+      onMouseEnter={() => set_hovered(true)}
+      onMouseLeave={() => set_hovered(false)}
+      style={{
+        position: 'fixed',
+        bottom: '24px',
+        right: '24px',
+        padding: '10px 20px',
+        background: hovered ? '#facc15' : 'transparent',
+        color: hovered ? '#000' : '#facc15',
+        border: '2px solid #facc15',
+        borderRadius: '8px',
+        fontWeight: 'bold',
+        fontSize: '14px',
+        cursor: 'pointer',
+        transform: hovered ? 'scale(1.05)' : 'scale(1)',
+        transition: 'all 0.1s ease',
+      }}
+    >
+      + Add Auction
+    </button>
   );
 }
