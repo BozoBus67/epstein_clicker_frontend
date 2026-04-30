@@ -37,26 +37,50 @@ export async function auth_headers() {
 }
 
 export function make_error(res, data) {
-  const err = new Error(data?.detail || 'Something went wrong.');
-  err.detail = data?.detail;
+  let detail = data?.detail;
+  if (!detail) {
+    if (res.status === 502 || res.status === 503 || res.status === 504) {
+      detail = 'Server is waking up — try again in a moment.';
+    } else {
+      detail = `Request failed (${res.status})`;
+    }
+  }
+  const err = new Error(detail);
+  err.detail = detail;
   err.status = res.status;
   return err;
 }
 
+function network_error() {
+  const err = new Error('Cannot reach server. Check your connection or try again.');
+  err.detail = err.message;
+  return err;
+}
+
+async function safe_json(res) {
+  try { return await res.json(); }
+  catch { return null; }
+}
+
 export async function get(path, headers = {}) {
-  const res = await tracked_fetch(`${base()}${path}`, { headers });
-  const data = await res.json();
+  let res;
+  try { res = await tracked_fetch(`${base()}${path}`, { headers }); }
+  catch { throw network_error(); }
+  const data = await safe_json(res);
   if (!res.ok) throw make_error(res, data);
   return data;
 }
 
 export async function post(path, body, headers = {}) {
-  const res = await tracked_fetch(`${base()}${path}`, {
-    method: 'POST',
-    headers: { ...headers, ...(body ? { 'Content-Type': 'application/json' } : {}) },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const data = await res.json();
+  let res;
+  try {
+    res = await tracked_fetch(`${base()}${path}`, {
+      method: 'POST',
+      headers: { ...headers, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch { throw network_error(); }
+  const data = await safe_json(res);
   if (!res.ok) throw make_error(res, data);
   return data;
 }
