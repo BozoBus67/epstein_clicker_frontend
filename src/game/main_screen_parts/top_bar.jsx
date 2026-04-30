@@ -33,6 +33,7 @@ export default function Top_Bar({ on_gamble_click }) {
       <Nav_Button label="Redeem Tokens" to="/game/redeem-tokens" />
       <Nav_Button label="Mastery Scrolls" to="/game/mastery-scrolls" />
       <Auction_House_Nav_Button />
+      <Nav_Button label="Play Chess" to="/game/play-chess" />
       <Audio_Controls />
     </div>
   );

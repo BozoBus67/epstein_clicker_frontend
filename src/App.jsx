@@ -13,6 +13,7 @@ import { Auction_House_Screen } from './auction_house';
 import { Mastery_Scrolls_Screen } from './mastery_scrolls';
 import { Redeem_Tokens_Screen } from './redeem';
 import { Buy_Tokens_Screen } from './buy_tokens';
+import { Chess_Screen } from './chess';
 
 function Protected({ children }) {
   const is_logged_in = useSelector(state => state.session.is_logged_in);
@@ -65,6 +66,7 @@ export default function App() {
         <Route path="/game/mastery-scrolls" element={<Protected><Mastery_Scrolls_Screen /></Protected>} />
         <Route path="/game/redeem-tokens" element={<Protected><Redeem_Tokens_Screen /></Protected>} />
         <Route path="/game/buy-tokens" element={<Protected><Buy_Tokens_Screen /></Protected>} />
+        <Route path="/game/play-chess" element={<Protected><Chess_Screen /></Protected>} />
         <Route path="*" element={<Navigate to={is_logged_in ? '/game' : '/login'} replace />} />
       </Routes>
       </Error_Boundary>
