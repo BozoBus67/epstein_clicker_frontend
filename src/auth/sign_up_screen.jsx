@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { api_signup } from './api';
 import { login } from '../shared/store/sessionSlice';
-import { supabase } from '../supabase_client';
+import { supabase } from '../shared/supabase_client';
 
 export default function Sign_Up_Screen() {
   const navigate = useNavigate();

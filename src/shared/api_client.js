@@ -1,4 +1,4 @@
-import { supabase } from '../supabase_client';
+import { supabase } from './supabase_client';
 
 const base = () => import.meta.env.VITE_BACKEND_URL;
 

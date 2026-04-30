@@ -1,4 +1,4 @@
-import { shuffle_playlist } from '../../misc_info';
+import { shuffle_playlist } from '../../shared/misc_info';
 import { useTierGate } from '../../shared/hooks';
 
 export default function Shuffle_Button() {

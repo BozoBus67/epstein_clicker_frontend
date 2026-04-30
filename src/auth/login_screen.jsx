@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../shared/store/sessionSlice';
 import { api_login } from './api';
-import { supabase } from '../supabase_client';
+import { supabase } from '../shared/supabase_client';
 
 export default function Login_Screen() {
   const dispatch = useDispatch();

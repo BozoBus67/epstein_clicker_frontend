@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
 import { Back_Arrow_Button, X_Button } from '../shared/components';
 import { useEscapeKey } from '../shared/hooks';
-import { supabase } from '../supabase_client';
+import { supabase } from '../shared/supabase_client';
 import { patch_session_data } from '../shared/store/sessionSlice';
 import { api_update_username } from './api';
 
