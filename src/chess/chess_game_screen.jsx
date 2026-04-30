@@ -74,10 +74,14 @@ export default function Chess_Game_Screen() {
   const apply_user_move = (from, to, promotion) => {
     const chess = chess_ref.current;
     if (outcome || thinking_ref.current) return false;
+    console.log('[chess] applying', { from, to, promotion, fen: chess.fen(), turn: chess.turn() });
     let move;
     try {
       move = chess.move({ from, to, promotion });
-    } catch { return false; }
+    } catch (e) {
+      console.error('[chess] move failed:', e.message);
+      return false;
+    }
     if (!move) return false;
     set_position(chess.fen());
     check_outcome();
