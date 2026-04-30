@@ -6,8 +6,8 @@ function Volume_Panel({ value, on_change }) {
     <div style={{
       position: 'absolute',
       top: '100%',
-      right: '8px',
-      width: '180px',
+      right: '24px',
+      width: '240px',
       background: 'white',
       border: '1px solid #ddd',
       borderRadius: '8px',
