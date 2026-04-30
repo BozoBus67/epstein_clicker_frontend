@@ -5,7 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { login, set_account_tiers, set_buildings, set_scrolls } from './shared/store/sessionSlice';
 import { get } from './shared/api_client';
 import { supabase } from './shared/supabase_client';
-import { Loading_Screen } from './shared/components';
+import { Loading_Screen, Error_Boundary } from './shared/components';
 import { api_me, Login_Screen, Sign_Up_Screen } from './auth';
 import { Main_Screen } from './game';
 import { Settings_Screen, Buy_Premium_Screen, Login_Details_Screen } from './settings';
@@ -53,6 +53,7 @@ export default function App() {
   return (
     <HashRouter>
       <Toaster position="bottom-center" toastOptions={{ style: { background: '#1e1e2e', color: 'white', border: '1px solid #444' } }} />
+      <Error_Boundary>
       <Routes>
         <Route path="/login" element={is_logged_in ? <Navigate to="/game" replace /> : <Login_Screen />} />
         <Route path="/signup" element={is_logged_in ? <Navigate to="/game" replace /> : <Sign_Up_Screen />} />
@@ -66,6 +67,7 @@ export default function App() {
         <Route path="/game/buy-tokens" element={<Protected><Buy_Tokens_Screen /></Protected>} />
         <Route path="*" element={<Navigate to={is_logged_in ? '/game' : '/login'} replace />} />
       </Routes>
+      </Error_Boundary>
     </HashRouter>
   );
 }
