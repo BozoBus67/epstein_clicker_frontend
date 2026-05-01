@@ -5,6 +5,7 @@ import { HashRouter } from 'react-router-dom';
 import Auth_Shell from './app_structure/auth_shell';
 import Game_Shell from './app_structure/game_shell';
 import { api_me } from './auth';
+import { load_playlist } from './music/audio_state';
 import { get } from './shared/api_client';
 import { Error_Boundary, Loading_Screen } from './shared/components';
 import { login, set_account_tiers, set_buildings, set_scrolls } from './shared/store/sessionSlice';
@@ -62,6 +63,7 @@ async function restore_session(dispatch) {
     get('/account_tiers'),
     get('/get_building_metadata'),
     get('/get_scroll_metadata'),
+    load_playlist(),
   ]);
   dispatch(set_account_tiers(account_tiers));
   dispatch(set_buildings(buildings));
