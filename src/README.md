@@ -2,6 +2,12 @@
 
 Codebase-wide rules for the Vite/React frontend. Per-feature READMEs in each folder document architecture; this file documents conventions that apply everywhere.
 
+## Fail loud and early
+
+Don't silently swallow problems. Don't paper over unexpected state with overly-permissive defaults, empty `catch` blocks, optional chaining used as a "just hope it's there" shortcut, or fallback values that mask the real shape mismatch. 
+
+Failing loud doesn't always mean throwing — a toast popup, a `console.error`, or an explicit `throw` are all valid depending on context. The point is that the failure is *visible* the moment it happens, to whoever can act on it (user, developer, or oncall). When in doubt, surface it; we'd rather see a noisy bug we can fix than a quiet bug we can't find.
+
 ## Code
 
 - **Component file structure** — for each feature folder containing a screen, define the screen's components in *one file* per top-level screen, top-down by JSX hierarchy (screen first, sub-components in render order, modals last). Co-locate state with the thing that triggers it.

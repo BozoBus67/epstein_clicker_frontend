@@ -2,6 +2,43 @@
 
 The main clicker screen and everything that runs on it: the cookie click loop, the rotating ad panel, building purchases, the slot machine and roulette modals, and the assorted background timers (auto-save, daily/hourly/5-minute check-ins, CPS tick).
 
+## `game_data` vs `premium_game_data`
+
+Each user row has two JSONB columns. The split isn't cosmetic — it's a deliberate ownership boundary that determines who is allowed to write what.
+
+**`game_data`** — the grindable state. Everything the player accumulates through normal play sits here:
+
+- `quantity` (current cookies)
+- `cps` (cookies per second, derived from buildings)
+- `cookies_per_click`
+- `buildings` (a dict of how many of each building they own)
+
+This changes constantly (every second from the CPS tick, every cookie click, every building purchase). The frontend is allowed to own the working copy in Redux and persist the whole object to `/save_game_data` periodically. **"Reset Game"** wipes only this column.
+
+**`premium_game_data`** — everything tied to real money, external systems, or anti-cheat-sensitive counters:
+
+- `tokens` (bought with real money via Stripe, or won from `/spin`)
+- `account_tier` (bought with tokens)
+- `mastery_scroll_1`..`mastery_scroll_24` (won from gambling)
+- `chess_beaten_bots`
+- `login_streak` / `last_login_date` / `hourly_streak` / `last_hourly_claim` / `fivemin_streak` / `last_5min_claim`
+- `redeemed` (one-time-redeem flags)
+- `theme` (gated behind owning the George Floyd scroll)
+
+The frontend is **not** allowed to own this. Every field above is written exclusively by the specific backend endpoint that owns it: `/spin` increments scrolls, `/buy_account_tier` deducts tokens and bumps the tier, `/daily_checkin` updates the streak fields, the Stripe webhook adds tokens, etc. The client just reflects what the server says.
+
+## Save scope: only `game_data`
+
+The auto-save loop in `main_screen.jsx` (and the `Cmd/Ctrl+S` shortcut) calls `save_game_data()`, which posts **only `game_data`** to `/save_game_data`. `premium_game_data` is deliberately never sent.
+
+Why: if the client were allowed to PUT the whole `premium_game_data` object every minute, a request that's in flight on the server (e.g. `/spin` is mid-way through awarding a mastery scroll) would race against the next auto-save (the client's `pgd` snapshot doesn't know about the new scroll yet). The auto-save would land last and silently revert the win. Real money is involved (tokens come from Stripe), so this would be much worse than a normal save bug.
+
+The fix is structural: the client never persists `premium_game_data` at all. Mutations to it always go through a *specific* endpoint that reads + writes the field server-side, then returns the updated `premium_game_data` in its response, which the frontend mirrors into Redux. This keeps all `pgd` writes serialized through the backend.
+
+**Practical implication for this folder:** if you find yourself wanting to write a `pgd` field from a click handler in here, don't add it to `save_game_data` — instead, add (or call) a backend endpoint that owns that field, and dispatch the returned `premium_game_data` into Redux from the response.
+
+> **Caveat.** "All `pgd` writes go through the backend" is the *frontend* ownership boundary — and that one is rock-solid (no client code persists `pgd`). It does **not** mean the backend itself is race-free. The backend currently does naive read-modify-write on the JSONB columns, so two workers handling concurrent requests (e.g. a Stripe webhook crediting tokens while `/spin` is spending tokens) can still clobber each other. See `backend/README.md` for the open work on this.
+
 ## Folder layout
 
 - `main_screen.jsx` — the page entry point. Owns the daily/hourly/5-minute check-in effects, the auto-save loop, the CPS tick, the keyboard `Cmd/Ctrl+S` shortcut, and the modal-trigger state for slot machine + roulette.

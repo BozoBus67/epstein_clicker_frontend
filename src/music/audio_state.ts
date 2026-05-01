@@ -16,10 +16,10 @@ export function set_current_volume(v: number): void {
   if (current_audio) current_audio.volume = v;
 }
 
-const songs = import.meta.glob(
-  '/public/music/*.mp3',
-  { eager: true, query: '?url', import: 'default' }
-) as Record<string, string>;
+// `songs` comes from music_glob.ts (full mp3 glob) on Electron builds, or
+// music_glob.empty.ts (empty stub) on web builds. The swap is driven by
+// VITE_INCLUDE_MUSIC in vite.renderer.config.mjs's resolve.alias.
+import { songs } from './music_glob';
 
 export let playlist_entries: [string, string][] = Object.entries(songs);
 

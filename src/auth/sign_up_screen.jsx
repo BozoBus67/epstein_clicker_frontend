@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import jeffery_epstein_blurry from '../assets/game_screen/jeffery_epstein_blurry.png';
 import { login } from '../shared/store/sessionSlice';
 import { supabase } from '../shared/supabase_client';
 import { api_signup } from './api';
@@ -45,7 +46,7 @@ export default function Sign_Up_Screen() {
       height: '100vh',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundImage: 'url(/images/jeffery_epstein_blurry.png)',
+      backgroundImage: `url(${jeffery_epstein_blurry})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
     }}>
@@ -78,7 +79,7 @@ function Sign_Up_Panel({ on_submit, error, loading, go_to_login }) {
       backdropFilter: 'blur(12px)',
       color: '#e0e0f0',
     }}>
-      <h2 style={{ margin: '0 0 20px', color: '#facc15' }}>Sign Up</h2>
+      <h2 style={{ margin: '0 0 20px', color: '#facc15', fontSize: '32px', fontWeight: 'bold', textAlign: 'center' }}>Sign Up</h2>
 
       <input
         type="text"

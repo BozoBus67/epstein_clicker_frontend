@@ -6,6 +6,10 @@
 // intentional; see ./constants.js for the displayed-to-actual ELO map and
 // the rationale.
 
+// Stockfish lives in /public/ (not /src/assets/) because the worker self-
+// locates its companion .wasm relative to its own URL. Vite's content-
+// hashing assigns different hashes to .js and .wasm, breaking that lookup.
+// Files in /public/ are copied to dist/ with their names intact.
 const STOCKFISH_URL = `${import.meta.env.BASE_URL}stockfish/stockfish-18-lite-single.js`;
 const ELO_MIN = 1320;
 const ELO_MAX = 3190;
