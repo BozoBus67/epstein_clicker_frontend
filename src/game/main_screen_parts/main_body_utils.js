@@ -1,9 +1,10 @@
 // Clickbait-ad rotation data + helpers used by the middle pane of Main_Body.
 // The ad image set comes from the alphabetical filenames in
-// assets/clickbait_faces/ — drop a new PNG in that folder and it joins the
-// rotation automatically.
+// assets/clickbait_faces/ — drop a new image in that folder and it joins the
+// rotation automatically. JPG is preferred for photographic ads (much smaller
+// than PNG); PNG is fine for the few that need transparency.
 
-const ad_modules = import.meta.glob('../../assets/clickbait_faces/*.png', { eager: true });
+const ad_modules = import.meta.glob('../../assets/clickbait_faces/*.{png,jpg}', { eager: true });
 
 export const ADS = Object.values(ad_modules).map(m => m.default);
 
