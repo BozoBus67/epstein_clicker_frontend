@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { logout, update_game_data, update_premium_game_data_field } from '../shared/store/sessionSlice';
 import { Back_Arrow_Button, Confirm_Modal, Modal_Overlay, X_Button } from '../shared/components';
-import { current_player, set_current_video_id } from '../music/audio_state';
+import { stop_player } from '../music/audio_state';
 import { supabase } from '../shared/supabase_client';
 import { useTheme } from '../shared/theme';
 import { api_reset_game } from '../game';
@@ -159,10 +159,7 @@ function Log_Out_Button() {
   const navigate = useNavigate();
 
   const handle_logout = async () => {
-    if (current_player) {
-      current_player.stopVideo();
-      set_current_video_id(null);
-    }
+    stop_player();
     await supabase.auth.signOut();
     dispatch(logout());
     navigate('/login');

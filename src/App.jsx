@@ -5,7 +5,7 @@ import { HashRouter } from 'react-router-dom';
 import Auth_Shell from './app_structure/auth_shell';
 import Game_Shell from './app_structure/game_shell';
 import { api_me } from './auth';
-import { load_playlist } from './music/audio_state';
+import { init_yt_player, load_playlist } from './music/audio_state';
 import { get } from './shared/api_client';
 import { Error_Boundary, Loading_Screen } from './shared/components';
 import { login, set_account_tiers, set_buildings, set_scrolls } from './shared/store/sessionSlice';
@@ -20,6 +20,9 @@ export default function App() {
 
   useEffect(() => {
     restore_session(dispatch).finally(() => set_checking_session(false));
+    // Fire-and-forget: builds the persistent YT.Player iframe under <body>.
+    // Lives independently of any screen so audio survives navigation.
+    init_yt_player();
   }, []);
 
   if (checking_session) return <Loading_Screen />;
