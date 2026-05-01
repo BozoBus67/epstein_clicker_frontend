@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import { useEscapeKey, useTierGate } from '../shared/hooks';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { logout, update_game_data } from '../shared/store/sessionSlice';
-import { Back_Arrow_Button, X_Button } from '../shared/components';
-import { current_audio, set_current_audio } from '../shared/audio_state';
+import { logout, update_game_data, update_premium_game_data_field } from '../shared/store/sessionSlice';
+import { Back_Arrow_Button, Confirm_Modal, Modal_Overlay, X_Button } from '../shared/components';
+import { current_audio, set_current_audio } from '../music/audio_state';
 import { supabase } from '../shared/supabase_client';
+import { useTheme } from '../shared/theme';
 import { api_reset_game } from '../game';
-import { api_get_my_discord } from './api';
+import { api_get_my_discord, api_set_theme } from './api';
 
 export default function Settings_Screen() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const theme = useTheme();
   const [show_reset_confirmation, set_show_reset_confirmation] = useState(false);
 
   useEscapeKey(() => navigate('/game'), !show_reset_confirmation);
@@ -21,14 +23,20 @@ export default function Settings_Screen() {
     try {
       const data = await api_reset_game();
       dispatch(update_game_data(data.game_data));
-    } catch {
-      console.error('Reset failed');
+      toast.success('Game reset.');
+    } catch (e) {
+      toast.error(e?.detail || 'Reset failed.');
     }
     set_show_reset_confirmation(false);
   };
 
   return (
-    <div style={{ display: 'flex', width: '100vw', height: '100vh', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: '24px' }}>
+    <div style={{
+      display: 'flex', width: '100vw', height: '100vh', justifyContent: 'center', alignItems: 'center',
+      flexDirection: 'column', gap: '24px',
+      background: theme.bg, backgroundSize: theme.bg_size, backgroundPosition: theme.bg_position,
+      color: theme.text,
+    }}>
       <Settings_Screen_Topbar />
       <Settings_Screen_Body on_reset_click={() => set_show_reset_confirmation(true)} />
       {show_reset_confirmation && (
@@ -55,9 +63,40 @@ function Settings_Screen_Body({ on_reset_click }) {
     <>
       <Change_Login_Details_Button />
       <Get_Discord_Button />
+      <Theme_Toggle_Button />
       <Reset_Save_Button on_click={on_reset_click} />
       <Log_Out_Button />
     </>
+  );
+}
+
+function Theme_Toggle_Button() {
+  const dispatch = useDispatch();
+  const pgd = useSelector(state => state.session.premium_game_data);
+  const theme = useTheme();
+  const current = pgd?.theme ?? 'light';
+  const next = current === 'light' ? 'dark' : 'light';
+
+  const handle = async () => {
+    try {
+      await api_set_theme(next);
+      dispatch(update_premium_game_data_field({ key: 'theme', value: next }));
+    } catch (err) {
+      toast.error(err?.detail || err?.message || 'Failed to set theme');
+    }
+  };
+
+  return (
+    <button
+      onClick={handle}
+      style={{
+        padding: '8px 24px', borderRadius: '8px',
+        background: theme.accent, color: theme.accent_text,
+        border: `2px solid ${theme.panel_border}`, fontWeight: 'bold', cursor: 'pointer',
+      }}
+    >
+      Theme: {current === 'light' ? 'Light ☀' : 'Dark ☾'} (click to toggle)
+    </button>
   );
 }
 
@@ -140,65 +179,26 @@ function Log_Out_Button() {
 }
 
 function Discord_Reveal_Modal({ discord, on_close }) {
+  const theme = useTheme();
   useEscapeKey(on_close);
   return (
-    <div style={{
-      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200,
-    }}>
-      <div style={{
-        background: '#1e1e2e', border: '2px solid #facc15', borderRadius: '12px',
-        padding: '32px', minWidth: '320px', textAlign: 'center', color: 'white',
-      }}>
-        <h2 style={{ color: '#facc15', marginBottom: '12px' }}>My Discord</h2>
-        <p style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>{discord}</p>
-        <button
-          onClick={on_close}
-          style={{
-            marginTop: '20px', padding: '8px 24px', background: '#facc15',
-            color: '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold',
-          }}
-        >
-          OK
-        </button>
-      </div>
-    </div>
+    <Modal_Overlay panel_style={{ alignItems: 'center', textAlign: 'center' }}>
+      <h2 style={{ color: theme.accent, margin: 0 }}>My Discord</h2>
+      <p style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>{discord}</p>
+      <button
+        type="button"
+        onClick={on_close}
+        style={{
+          marginTop: '8px', padding: '8px 24px', background: theme.accent,
+          color: theme.accent_text, border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold',
+        }}
+      >
+        OK
+      </button>
+    </Modal_Overlay>
   );
 }
 
 function Reset_Save_Confirmation_Panel({ on_confirm, on_cancel }) {
-  useEscapeKey(on_cancel);
-  return (
-    <div style={{
-      position: 'fixed',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      background: 'white',
-      border: '1px solid gray',
-      borderRadius: '12px',
-      padding: '24px',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '16px',
-      zIndex: 100,
-    }}>
-      <p style={{ fontSize: '18px', fontWeight: 'bold' }}>Are you sure?</p>
-      <div style={{ display: 'flex', gap: '12px' }}>
-        <button
-          onClick={on_confirm}
-          className="bg-red-500 text-white py-2 px-6 rounded-lg hover:bg-red-600 active:bg-red-700 transition"
-        >
-          Yes
-        </button>
-        <button
-          onClick={on_cancel}
-          className="bg-gray-300 text-black py-2 px-6 rounded-lg hover:bg-gray-400 active:bg-gray-500 transition"
-        >
-          No
-        </button>
-      </div>
-    </div>
-  );
+  return <Confirm_Modal on_confirm={on_confirm} on_cancel={on_cancel} danger />;
 }

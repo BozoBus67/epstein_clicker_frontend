@@ -1,23 +1,32 @@
+// Chess game screen. Architecture overview, ELO mechanics, and engine
+// lifecycle live in ./README.md — read that first if you're new to this file.
 import { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
-import { Back_Arrow_Button, Audio_Controls } from '../shared/components';
+import toast from 'react-hot-toast';
+import { Back_Arrow_Button } from '../shared/components';
+import Audio_Controls from '../music';
+import { update_premium_game_data_field } from '../shared/store/sessionSlice';
+import { useTheme } from '../shared/theme';
+import { api_mark_chess_bot_beaten } from './api';
 import { BOTS } from './constants';
-import { mark_bot_beaten } from './storage';
 import { Engine } from './engine';
 
 export default function Chess_Game_Screen() {
   const { bot_id } = useParams();
   const navigate = useNavigate();
-  const bot = BOTS.find(b => b.scroll_id === bot_id);
+  const dispatch = useDispatch();
+  const theme = useTheme();
+  const bot = BOTS.find(b => b.id === bot_id);
 
   const chess_ref = useRef(new Chess());
   const engine_ref = useRef(null);
   const init_promise_ref = useRef(null);
-  const thinking_ref = useRef(false);
   const [position, set_position] = useState(chess_ref.current.fen());
-  const [outcome, set_outcome] = useState(null); // null | 'win' | 'loss' | 'draw'
+  const [outcome, set_outcome] = useState(null);  // null | 'win' | 'loss' | 'draw'
+  const [is_thinking, set_is_thinking] = useState(false);
   const [engine_ready, set_engine_ready] = useState(false);
   const [engine_error, set_engine_error] = useState(null);
 
@@ -33,8 +42,11 @@ export default function Chess_Game_Screen() {
 
   if (!bot) {
     return (
-      <div style={{ display: 'flex', width: '100vw', height: '100vh', justifyContent: 'center', alignItems: 'center', color: 'white' }}>
-        Unknown bot. <button onClick={() => navigate('/game/play-chess')}>Back</button>
+      <div style={{
+        display: 'flex', width: '100vw', height: '100vh', justifyContent: 'center', alignItems: 'center',
+        background: theme.bg, backgroundSize: theme.bg_size, color: theme.text,
+      }}>
+        Unknown bot. <button type="button" onClick={() => navigate('/game/play-chess')}>Back</button>
       </div>
     );
   }
@@ -44,17 +56,24 @@ export default function Chess_Game_Screen() {
     if (chess.isCheckmate()) {
       const won = chess.turn() === 'b';
       set_outcome(won ? 'win' : 'loss');
-      if (won) mark_bot_beaten(bot.scroll_id);
+      if (won) {
+        api_mark_chess_bot_beaten(bot.id)
+          .then(data => dispatch(update_premium_game_data_field({
+            key: 'chess_beaten_bots',
+            value: data.chess_beaten_bots,
+          })))
+          .catch(e => toast.error(e?.detail || 'Failed to save chess progress.'));
+      }
     } else if (chess.isDraw() || chess.isStalemate() || chess.isThreefoldRepetition()) {
       set_outcome('draw');
     }
   };
 
   const make_engine_move = async () => {
-    if (thinking_ref.current || engine_error) return;
+    if (is_thinking || engine_error) return;
     const chess = chess_ref.current;
     if (chess.isGameOver()) return;
-    thinking_ref.current = true;
+    set_is_thinking(true);
     try {
       await init_promise_ref.current;
       const move = await engine_ref.current.best_move(chess.fen());
@@ -65,23 +84,19 @@ export default function Chess_Game_Screen() {
       set_position(chess.fen());
       check_outcome();
     } catch (e) {
-      console.error('engine move failed', e);
+      toast.error(e?.message || 'Chess engine failed to move.', { id: 'engine-move-error' });
     } finally {
-      thinking_ref.current = false;
+      set_is_thinking(false);
     }
   };
 
   const apply_user_move = (from, to, promotion) => {
     const chess = chess_ref.current;
-    if (outcome || thinking_ref.current) return false;
-    console.log('[chess] applying', { from, to, promotion, fen: chess.fen(), turn: chess.turn() });
+    if (outcome || is_thinking) return false;
     let move;
     try {
       move = chess.move({ from, to, promotion });
-    } catch (e) {
-      console.error('[chess] move failed:', e.message);
-      return false;
-    }
+    } catch { return false; }
     if (!move) return false;
     set_position(chess.fen());
     check_outcome();
@@ -89,17 +104,12 @@ export default function Chess_Game_Screen() {
     return true;
   };
 
-  const on_drop = (sourceSquare, targetSquare) => {
-    console.log('[chess] on_drop', { sourceSquare, targetSquare });
-    return apply_user_move(sourceSquare, targetSquare, 'q');
-  };
+  const on_drop = (sourceSquare, targetSquare) =>
+    apply_user_move(sourceSquare, targetSquare, 'q');
 
   const on_promotion_piece_select = (piece, from, to) => {
-    console.log('[chess] on_promotion_piece_select', { piece, from, to });
     if (!piece) return false;
-    const ok = apply_user_move(from, to, piece[1].toLowerCase());
-    console.log('[chess] apply result', ok);
-    return ok;
+    return apply_user_move(from, to, piece[1].toLowerCase());
   };
 
   const reset = () => {
@@ -109,12 +119,15 @@ export default function Chess_Game_Screen() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh', alignItems: 'center', padding: '12px 16px 16px', gap: '12px' }}>
+    <div style={{
+      display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh', alignItems: 'center', padding: '12px 16px 16px', gap: '12px',
+      background: theme.bg, backgroundSize: theme.bg_size, backgroundPosition: theme.bg_position, color: theme.text,
+    }}>
       <Back_Arrow_Button to="/game/play-chess" />
       <div style={{ position: 'fixed', top: '16px', right: '16px' }}>
         <Audio_Controls />
       </div>
-      <Bot_Header bot={bot} engine_ready={engine_ready} engine_error={engine_error} thinking={thinking_ref.current} outcome={outcome} />
+      <Bot_Header bot={bot} engine_ready={engine_ready} engine_error={engine_error} thinking={is_thinking} outcome={outcome} />
       <div style={{ width: 'min(60vh, 85vw)', maxWidth: '480px' }}>
         <Chessboard
           position={position}
@@ -130,6 +143,7 @@ export default function Chess_Game_Screen() {
 }
 
 function Bot_Header({ bot, engine_ready, engine_error, thinking, outcome }) {
+  const theme = useTheme();
   const status =
     outcome === 'win'  ? 'You won!' :
     outcome === 'loss' ? 'You lost.' :
@@ -140,24 +154,31 @@ function Bot_Header({ bot, engine_ready, engine_error, thinking, outcome }) {
                          'Your move (white).';
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'white' }}>
-      <img src={bot.face} style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', border: '3px solid #facc15' }} />
+    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: theme.text }}>
+      <img
+        src={bot.face}
+        style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', border: `3px solid ${theme.accent}` }}
+      />
       <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <span style={{ color: '#facc15', fontWeight: 'bold' }}>{bot.name} <span style={{ color: '#aaa', fontWeight: 'normal' }}>(ELO {bot.elo})</span></span>
-        <span style={{ fontSize: '13px', color: '#aaa' }}>{status}</span>
+        <span style={{ color: theme.accent, fontWeight: 'bold' }}>
+          {bot.name} <span style={{ color: theme.text_muted, fontWeight: 'normal' }}>(ELO {bot.elo})</span>
+        </span>
+        <span style={{ fontSize: '13px', color: theme.text_muted }}>{status}</span>
       </div>
     </div>
   );
 }
 
 function Outcome_Banner({ outcome, on_reset }) {
+  const theme = useTheme();
   const text = outcome === 'win' ? '🏆 Victory' : outcome === 'loss' ? '💀 Defeat' : '🤝 Draw';
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: 'white' }}>
-      <div style={{ fontWeight: 'bold', fontSize: '18px', color: '#facc15' }}>{text}</div>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: theme.text }}>
+      <div style={{ fontWeight: 'bold', fontSize: '18px', color: theme.accent }}>{text}</div>
       <button
+        type="button"
         onClick={on_reset}
-        style={{ padding: '8px 24px', background: '#facc15', color: '#000', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
+        style={{ padding: '8px 24px', background: theme.accent, color: theme.accent_text, border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
       >
         Play again
       </button>

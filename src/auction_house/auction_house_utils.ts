@@ -1,3 +1,6 @@
+// Shared types and helpers for the auction house. CURRENCIES is the source of
+// truth for what can be listed or priced (cookies, tokens) — add an entry here
+// to introduce a new currency to the marketplace.
 export const CURRENCIES = [
   { id: 'cookies', label: 'Cookies' },
   { id: 'tokens',  label: 'Tokens'  },

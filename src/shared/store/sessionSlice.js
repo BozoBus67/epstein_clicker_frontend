@@ -4,7 +4,6 @@ const sessionSlice = createSlice({
   name: 'session',
   initialState: {
     is_logged_in: false,
-    jwt: null,
     session_data: null,
     game_data: null,
     premium_game_data: null,
@@ -14,16 +13,14 @@ const sessionSlice = createSlice({
   },
   reducers: {
     login(state, action) {
-      const { user, token } = action.payload;
+      const { user } = action.payload;
       state.is_logged_in = true;
-      state.jwt = token;
       state.session_data = user;
       state.game_data = user.game_data;
       state.premium_game_data = user.premium_game_data ?? null;
     },
     logout(state) {
       state.is_logged_in = false;
-      state.jwt = null;
       state.session_data = null;
       state.game_data = null;
       state.premium_game_data = null;
@@ -33,6 +30,30 @@ const sessionSlice = createSlice({
     },
     update_premium_game_data(state, action) {
       state.premium_game_data = action.payload;
+    },
+
+    // Field-granular updates. Prefer these over whole-object replacement when
+    // updating one top-level field — see ./README.md for the lost-update
+    // race they prevent.
+    update_game_data_field(state, action) {
+      const { key, value } = action.payload;
+      if (state.game_data) state.game_data[key] = value;
+    },
+    increment_game_data_field(state, action) {
+      const { key, amount } = action.payload;
+      if (state.game_data) {
+        state.game_data[key] = (state.game_data[key] ?? 0) + amount;
+      }
+    },
+    update_premium_game_data_field(state, action) {
+      const { key, value } = action.payload;
+      if (state.premium_game_data) state.premium_game_data[key] = value;
+    },
+    increment_premium_game_data_field(state, action) {
+      const { key, amount } = action.payload;
+      if (state.premium_game_data) {
+        state.premium_game_data[key] = (state.premium_game_data[key] ?? 0) + amount;
+      }
     },
     set_account_tiers(state, action) {
       state.account_tiers = action.payload;
@@ -54,6 +75,10 @@ export const {
   logout,
   update_game_data,
   update_premium_game_data,
+  update_game_data_field,
+  increment_game_data_field,
+  update_premium_game_data_field,
+  increment_premium_game_data_field,
   set_account_tiers,
   set_buildings,
   set_scrolls,

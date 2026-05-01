@@ -1,15 +1,21 @@
-import { useSelector } from 'react-redux';
 import { useState, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import { Page_Header } from '../shared/components';
 import { SCROLL_NAMES, SCROLL_DESCRIPTIONS } from '../shared/constants';
-import { FACES, TOOLTIP_W, get_tier, get_next_tier, get_tooltip_style } from './utils';
+import { SCROLL_FACES } from '../shared/scroll_faces';
+import { useTheme } from '../shared/theme';
+import { TOOLTIP_W, get_tier, get_next_tier, get_tooltip_style } from './utils';
 
 export default function Mastery_Scrolls_Screen() {
   const premium_game_data = useSelector(state => state.session.premium_game_data);
   const scrolls = useSelector(state => state.session.scrolls);
+  const theme = useTheme();
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh' }}>
+    <div style={{
+      display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh',
+      background: theme.bg, backgroundSize: theme.bg_size, backgroundPosition: theme.bg_position, color: theme.text,
+    }}>
       <Mastery_Scrolls_Screen_Topbar />
       <Mastery_Scrolls_Screen_Body premium_game_data={premium_game_data} scrolls={scrolls} />
     </div>
@@ -25,7 +31,7 @@ function Mastery_Scrolls_Screen_Body({ premium_game_data, scrolls }) {
     <div style={{ flex: 1, overflowY: 'auto', padding: '24px 40px' }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
         {Object.entries(scrolls).map(([id], i) => (
-          <Scroll_Panel key={id} scroll_id={id} count={premium_game_data?.[id] ?? 0} image={FACES[i]} />
+          <Scroll_Panel key={id} scroll_id={id} count={premium_game_data?.[id] ?? 0} image={SCROLL_FACES[i]} />
         ))}
       </div>
     </div>
@@ -37,7 +43,8 @@ function Scroll_Panel({ scroll_id, count, image }) {
   const description = SCROLL_DESCRIPTIONS[scroll_id];
   const tier = get_tier(count);
   const next = get_next_tier(count);
-  const tier_color = tier > 0 ? '#facc15' : '#555';
+  const theme = useTheme();
+  const tier_color = tier > 0 ? theme.accent : theme.text_muted;
   const [tooltip_pos, set_tooltip_pos] = useState(null);
   const card_ref = useRef(null);
 
@@ -48,7 +55,7 @@ function Scroll_Panel({ scroll_id, count, image }) {
       onMouseLeave={() => set_tooltip_pos(null)}
       style={{
         width: '180px', borderRadius: '10px', overflow: 'visible',
-        background: '#1e1e2e', border: '2px solid #444',
+        background: theme.panel, border: `2px solid ${theme.panel_border}`,
         display: 'flex', flexDirection: 'column', flexShrink: 0,
         position: 'relative',
       }}
@@ -58,22 +65,22 @@ function Scroll_Panel({ scroll_id, count, image }) {
       </div>
       <div style={{
         padding: '10px 12px', display: 'flex', flexDirection: 'column',
-        alignItems: 'center', gap: '4px', textAlign: 'center', color: 'white',
+        alignItems: 'center', gap: '4px', textAlign: 'center', color: theme.text,
       }}>
-        <span style={{ color: '#facc15', fontWeight: 'bold', fontSize: '13px', lineHeight: 1.2 }}>{display_name}</span>
+        <span style={{ color: theme.accent, fontWeight: 'bold', fontSize: '13px', lineHeight: 1.2 }}>{display_name}</span>
         <span style={{ fontSize: '12px' }}>Owned: <b>{count}</b></span>
         <span style={{ fontSize: '12px', color: tier_color }}>{tier > 0 ? `Tier ${tier}` : 'No tier'}</span>
         {next
-          ? <span style={{ fontSize: '11px', color: '#888' }}>{count}/{next.needed} → Tier {next.tier}</span>
-          : <span style={{ fontSize: '11px', color: '#facc15' }}>Max Tier</span>
+          ? <span style={{ fontSize: '11px', color: theme.text_muted }}>{count}/{next.needed} → Tier {next.tier}</span>
+          : <span style={{ fontSize: '11px', color: theme.accent }}>Max Tier</span>
         }
       </div>
       {tooltip_pos && (
         <div style={{
           position: 'fixed', top: tooltip_pos.top, left: tooltip_pos.left,
-          background: 'rgba(0,0,0,0.9)', border: '1px solid #facc15', borderRadius: '6px',
+          background: theme.panel, border: `1px solid ${theme.panel_border}`, borderRadius: '6px',
           padding: '8px 12px', width: `${TOOLTIP_W}px`, textAlign: 'center',
-          color: 'white', fontSize: '12px', pointerEvents: 'none', zIndex: 9999,
+          color: theme.text, fontSize: '12px', pointerEvents: 'none', zIndex: 9999,
         }}>
           {description}
         </div>

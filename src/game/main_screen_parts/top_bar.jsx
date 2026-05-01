@@ -1,20 +1,22 @@
-import { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import { Audio_Controls } from '../../shared/components';
-import { api_me } from '../../auth/api';
-import { update_game_data, update_premium_game_data } from '../../shared/store/sessionSlice';
+import { Async_Refresh_Button, Nav_Button } from '../../shared/components';
 import { ACCOUNT_TIER_NAMES } from '../../shared/constants';
 import { useTierGate } from '../../shared/hooks';
+import { useTheme } from '../../shared/theme';
+import { refresh_user_data } from '../../shared/utils';
+import Audio_Controls from '../../music';
 
-export default function Top_Bar({ on_gamble_click }) {
+export default function Top_Bar({ on_gamble_click, on_roulette_click }) {
+  const theme = useTheme();
   return (
     <div style={{
       width: '100%',
       height: '60px',
-      background: 'linear-gradient(to bottom, #1c1c30, #141422)',
-      borderBottom: '2px solid #facc15',
+      background: theme.name === 'light'
+        ? 'linear-gradient(to bottom, rgba(255,236,179,0.95), rgba(245,210,140,0.95))'
+        : 'linear-gradient(to bottom, #1c1c30, #141422)',
+      borderBottom: `2px solid ${theme.panel_border}`,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-evenly',
@@ -22,12 +24,13 @@ export default function Top_Bar({ on_gamble_click }) {
       boxSizing: 'border-box',
       flexShrink: 0,
     }}>
-      <Refresh_Button />
+      <Account_Refresh_Button />
       <Account_Tier_Display />
       <Token_Display />
-      <Nav_Button label="Buy Tokens" to="/game/buy-tokens" />
+      <Buy_Tokens_Button />
       <Nav_Button label="Buy Premium" to="/game/buy-premium" />
       <Nav_Button label="Gamble Tokens" on_click={on_gamble_click} />
+      <Nav_Button label="Roulette" on_click={on_roulette_click} />
       <Nav_Button label="Redeem Tokens" to="/game/redeem-tokens" />
       <Nav_Button label="Mastery Scrolls" to="/game/mastery-scrolls" />
       <Auction_House_Nav_Button />
@@ -37,44 +40,29 @@ export default function Top_Bar({ on_gamble_click }) {
   );
 }
 
-export async function refresh_user_data(jwt, dispatch) {
-  const data = await api_me(jwt);
-  dispatch(update_game_data(data.user.game_data));
-  dispatch(update_premium_game_data(data.user.premium_game_data));
-}
-
-function Refresh_Button() {
+function Account_Refresh_Button() {
   const dispatch = useDispatch();
-  const jwt = useSelector(state => state.session.jwt);
-  const [loading, set_loading] = useState(false);
-
-  const handle = async () => {
-    set_loading(true);
-    try {
-      await refresh_user_data(jwt, dispatch);
-      toast.success('Account tier and tokens data reloaded');
-    } catch (e) {
-      toast.error('Failed to reload data');
-    } finally { set_loading(false); }
-  };
+  const theme = useTheme();
 
   return (
-    <button
-      onClick={handle}
-      disabled={loading}
-      style={{ border: '1px solid #facc15', borderRadius: '50%', width: '28px', height: '28px', background: 'transparent', color: '#facc15', cursor: 'pointer', fontSize: '15px' }}
-    >
-      ↻
-    </button>
+    <Async_Refresh_Button
+      on_click={() => refresh_user_data(dispatch)}
+      success_message="Reloaded account data and attempted account migration."
+      error_message="Failed to reload account data."
+      size={28}
+      title="Reload account data"
+      style={{ border: `1px solid ${theme.accent}`, color: theme.accent }}
+    />
   );
 }
 
 function Account_Tier_Display() {
   const tier = useSelector(state => state.session.premium_game_data?.account_tier ?? null);
+  const theme = useTheme();
   if (tier === null) return null;
   const name = ACCOUNT_TIER_NAMES[tier] ?? 'Free';
   return (
-    <span style={{ fontWeight: 'bold', color: '#facc15', fontSize: '14px' }}>
+    <span style={{ fontWeight: 'bold', color: theme.accent, fontSize: '14px' }}>
       Account: {name}
     </span>
   );
@@ -82,39 +70,24 @@ function Account_Tier_Display() {
 
 function Token_Display() {
   const tokens = useSelector(state => state.session.premium_game_data?.tokens ?? null);
+  const theme = useTheme();
   if (tokens === null) return null;
   return (
-    <span style={{ fontWeight: 'bold', color: '#facc15', fontSize: '14px' }}>
-      Tokens: {tokens}
+    <span style={{ fontWeight: 'bold', color: theme.accent, fontSize: '14px' }}>
+      Tokens: {tokens.toLocaleString()}
     </span>
   );
 }
 
-function Nav_Button({ label, to, on_click }) {
-  const navigate = useNavigate();
-  const [hovered, set_hovered] = useState(false);
-
-  return (
-    <button
-      onClick={on_click ?? (() => navigate(to))}
-      onMouseEnter={() => set_hovered(true)}
-      onMouseLeave={() => set_hovered(false)}
-      style={{
-        padding: '4px 12px',
-        border: '1px solid #facc15',
-        borderRadius: '6px',
-        background: '#facc15',
-        color: '#000',
-        fontWeight: 'bold',
-        fontSize: '13px',
-        cursor: 'pointer',
-        transform: hovered ? 'scale(1.05)' : 'scale(1)',
-        transition: 'all 0.1s ease',
-      }}
-    >
-      {label}
-    </button>
-  );
+function Buy_Tokens_Button() {
+  const user_id = useSelector(state => state.session.session_data?.id);
+  const handle_click = () => {
+    const stripe_link = import.meta.env.VITE_STRIPE_PAYMENT_LINK;
+    const url = `${stripe_link}?client_reference_id=${user_id}`;
+    if (window.api?.openExternal) window.api.openExternal(url);
+    else window.open(url, '_blank', 'noopener,noreferrer');
+  };
+  return <Nav_Button label="Buy Tokens" on_click={handle_click} />;
 }
 
 function Auction_House_Nav_Button() {

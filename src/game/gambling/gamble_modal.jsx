@@ -1,19 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import { update_premium_game_data } from '../shared/store/sessionSlice';
-import { api_spin } from './api';
-import { useEscapeKey } from '../shared/hooks';
+import { SCROLL_NAMES } from '../../shared/constants';
+import { useEscapeKey } from '../../shared/hooks';
+import { increment_premium_game_data_field, update_premium_game_data_field } from '../../shared/store/sessionSlice';
+import { useTheme } from '../../shared/theme';
+import { api_spin } from '../api';
+import { SCROLL_FACES } from '../../shared/scroll_faces';
 import { SLOT_FRAME_MS, LEVER_RESET_MS } from './constants';
-
-const face_modules = import.meta.glob('../assets/master_scroll_faces/*', { eager: true });
-const SCROLL_FACES = Object.values(face_modules).map(m => m.default);
 
 export default function Gamble_Modal({ on_close }) {
   const dispatch = useDispatch();
   const premium_game_data = useSelector(state => state.session.premium_game_data);
-  const pgd_ref = useRef(premium_game_data);
-  const pending_win_ref = useRef(null);
+  const pending_wins_ref = useRef([]);
+  const theme = useTheme();
   const [sequences, set_sequences] = useState(null);
   const [subset_indices, set_subset_indices] = useState(null);
   const [frame, set_frame] = useState(null);
@@ -21,13 +21,11 @@ export default function Gamble_Modal({ on_close }) {
 
   useEscapeKey(on_close, !is_spinning);
 
-  useEffect(() => { pgd_ref.current = premium_game_data; }, [premium_game_data]);
-
   const handle_pull = async () => {
     try {
       const data = await api_spin();
-      dispatch(update_premium_game_data({ ...pgd_ref.current, tokens: data.tokens_remaining }));
-      pending_win_ref.current = data.win ?? null;
+      dispatch(update_premium_game_data_field({ key: 'tokens', value: data.tokens_remaining }));
+      pending_wins_ref.current = data.wins ?? [];
       set_sequences(data.sequences);
       set_subset_indices(data.subset_indices);
       set_frame(0);
@@ -36,20 +34,21 @@ export default function Gamble_Modal({ on_close }) {
     }
   };
 
-  const apply_pending_win = () => {
-    const win = pending_win_ref.current;
-    if (!win) return;
-    pending_win_ref.current = null;
-    const pgd = pgd_ref.current;
-    dispatch(update_premium_game_data({ ...pgd, [win.scroll_id]: (pgd[win.scroll_id] ?? 0) + win.amount }));
-    toast.success(`Won ${win.amount}x ${win.scroll_id.replace(/_/g, ' ')}!`);
+  const apply_pending_wins = () => {
+    const wins = pending_wins_ref.current;
+    if (!wins.length) return;
+    pending_wins_ref.current = [];
+    for (const win of wins) {
+      dispatch(increment_premium_game_data_field({ key: win.scroll_id, amount: win.amount }));
+      toast.success(`Won ${win.amount}× ${SCROLL_NAMES[win.scroll_id] ?? win.scroll_id}!`);
+    }
   };
 
   useEffect(() => {
     if (frame === null || !sequences) return;
     if (frame >= sequences[0].length) {
       set_frame(null);
-      apply_pending_win();
+      apply_pending_wins();
       return;
     }
     const t = setTimeout(() => set_frame(f => f + 1), SLOT_FRAME_MS);
@@ -67,12 +66,12 @@ export default function Gamble_Modal({ on_close }) {
     }}>
       <div style={{ position: 'relative' }}>
         <div style={{
-          background: '#1e1e2e', border: '2px solid #facc15', borderRadius: '12px',
+          background: theme.panel, border: `2px solid ${theme.panel_border}`, borderRadius: '12px',
           width: '580px', height: '280px', display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center', gap: '20px',
+          alignItems: 'center', justifyContent: 'center', gap: '20px', color: theme.text,
         }}>
-          <span style={{ color: '#facc15', fontWeight: 'bold', fontSize: '15px' }}>
-            Tokens: {premium_game_data?.tokens ?? 0}
+          <span style={{ color: theme.accent, fontWeight: 'bold', fontSize: '15px' }}>
+            Tokens: {(premium_game_data?.tokens ?? 0).toLocaleString()}
           </span>
           <div style={{ display: 'flex', gap: '16px' }}>
             {current_digits.map((d, i) => (
@@ -82,7 +81,7 @@ export default function Gamble_Modal({ on_close }) {
           <button
             onClick={on_close}
             disabled={is_spinning}
-            style={{ background: '#333', color: 'white', border: 'none', borderRadius: '6px', padding: '8px 20px', cursor: is_spinning ? 'default' : 'pointer' }}
+            style={{ background: theme.button_neutral_bg, color: theme.button_neutral_text, border: 'none', borderRadius: '6px', padding: '8px 20px', cursor: is_spinning ? 'default' : 'pointer' }}
           >
             Close
           </button>
@@ -96,10 +95,11 @@ export default function Gamble_Modal({ on_close }) {
 }
 
 function Slot_Card({ face_index }) {
+  const theme = useTheme();
   return (
     <div style={{
       width: '90px', height: '90px', borderRadius: '8px', overflow: 'hidden',
-      border: '2px solid #444', background: '#0f0f1a',
+      border: `2px solid ${theme.panel_border}`, background: theme.panel_secondary,
     }}>
       {face_index !== null && (
         <img src={SCROLL_FACES[face_index]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { current_volume, set_current_volume } from '../../shared/audio_state';
-import { useTierGate } from '../../shared/hooks';
+import { current_volume, set_current_volume } from './audio_state';
+import { useTierGate } from '../shared/hooks';
+import { useTheme } from '../shared/theme';
 
 export default function Volume_Control() {
   const [open, set_open] = useState(false);
@@ -39,13 +40,15 @@ export default function Volume_Control() {
 
 function Volume_Button({ on_click, value }) {
   const icon = value === 0 ? '🔇' : value < 0.5 ? '🔉' : '🔊';
+  const theme = useTheme();
   return (
     <button
+      type="button"
       onClick={on_click}
-      className="hover:outline hover:outline-1 hover:outline-yellow-400 hover:cursor-pointer"
+      className="hover:outline hover:outline-1 hover:cursor-pointer"
       style={{
-        background: '#facc15',
-        border: '1px solid #facc15',
+        background: theme.accent,
+        border: `1px solid ${theme.accent}`,
         fontSize: '16px',
         lineHeight: 1,
         padding: '4px 10px',

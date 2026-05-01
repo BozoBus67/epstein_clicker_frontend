@@ -6,6 +6,7 @@ import { Back_Arrow_Button, X_Button } from '../shared/components';
 import { useEscapeKey } from '../shared/hooks';
 import { supabase } from '../shared/supabase_client';
 import { patch_session_data } from '../shared/store/sessionSlice';
+import { useTheme } from '../shared/theme';
 import { api_update_username } from './api';
 
 export default function Login_Details_Screen() {
@@ -70,8 +71,12 @@ export default function Login_Details_Screen() {
     }
   };
 
+  const theme = useTheme();
   return (
-    <div style={{ display: 'flex', width: '100vw', height: '100vh', justifyContent: 'center', alignItems: 'center' }}>
+    <div style={{
+      display: 'flex', width: '100vw', height: '100vh', justifyContent: 'center', alignItems: 'center',
+      background: theme.bg, backgroundSize: theme.bg_size, backgroundPosition: theme.bg_position, color: theme.text,
+    }}>
       <Login_Details_Screen_Topbar />
       <Login_Details_Screen_Body
         username={username} set_username={set_username}
@@ -102,9 +107,10 @@ function Login_Details_Screen_Body({
   confirm_password, set_confirm_password,
   loading, on_submit, on_cancel,
 }) {
+  const theme = useTheme();
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '340px' }}>
-      <h2 style={{ color: 'white', margin: 0, textAlign: 'center' }}>Change Login Details</h2>
+      <h2 style={{ color: theme.text, margin: 0, textAlign: 'center' }}>Change Login Details</h2>
       <Field label="Username" type="text" value={username} on_change={set_username} placeholder="Username" />
       <Field label="Email" type="email" value={email} on_change={set_email} placeholder="Email" />
       <Field label="Current password" type="password" value={old_password} on_change={set_old_password} placeholder="Required to set a new password" />
@@ -114,14 +120,14 @@ function Login_Details_Screen_Body({
         <button
           onClick={on_cancel}
           disabled={loading}
-          style={{ flex: 1, padding: '10px', borderRadius: '8px', background: '#333', color: 'white', fontWeight: 'bold', fontSize: '14px', border: '1px solid #555', cursor: 'pointer' }}
+          style={{ flex: 1, padding: '10px', borderRadius: '8px', background: theme.button_neutral_bg, color: theme.button_neutral_text, fontWeight: 'bold', fontSize: '14px', border: `1px solid ${theme.panel_border}`, cursor: 'pointer' }}
         >
           Cancel
         </button>
         <button
           onClick={on_submit}
           disabled={loading}
-          style={{ flex: 1, padding: '10px', borderRadius: '8px', background: '#facc15', color: '#000', fontWeight: 'bold', fontSize: '14px', border: 'none', cursor: 'pointer' }}
+          style={{ flex: 1, padding: '10px', borderRadius: '8px', background: theme.accent, color: theme.accent_text, fontWeight: 'bold', fontSize: '14px', border: 'none', cursor: 'pointer' }}
         >
           {loading ? 'Saving...' : 'Save Changes'}
         </button>
@@ -131,15 +137,16 @@ function Login_Details_Screen_Body({
 }
 
 function Field({ label, type, value, on_change, placeholder }) {
+  const theme = useTheme();
   return (
-    <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '14px', color: 'white', width: '100%' }}>
+    <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '14px', color: theme.text, width: '100%' }}>
       {label}
       <input
         type={type}
         value={value}
         onChange={e => on_change(e.target.value)}
         placeholder={placeholder}
-        style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #444', background: '#1e1e2e', color: 'white', fontSize: '14px', outline: 'none' }}
+        style={{ padding: '10px 12px', borderRadius: '8px', border: `1px solid ${theme.panel_border}`, background: theme.panel_secondary, color: theme.text, fontSize: '14px', outline: 'none' }}
       />
     </label>
   );

@@ -4,8 +4,9 @@ import {
   current_song_url, set_current_song_url,
   current_volume,
   playlist_entries, subscribe_playlist,
-} from '../../shared/audio_state';
-import { useTierGate } from '../../shared/hooks';
+} from './audio_state';
+import { useTierGate } from '../shared/hooks';
+import { useTheme } from '../shared/theme';
 
 export default function Music_Player() {
   const [open, setOpen] = useState(false);
@@ -75,13 +76,15 @@ export default function Music_Player() {
 }
 
 function Music_Player_Button({ onClick }) {
+  const theme = useTheme();
   return (
     <button
+      type="button"
       onClick={onClick}
-      className="hover:outline hover:outline-1 hover:outline-yellow-400 hover:cursor-pointer"
+      className="hover:outline hover:outline-1 hover:cursor-pointer"
       style={{
-        background: '#facc15',
-        border: '1px solid #facc15',
+        background: theme.accent,
+        border: `1px solid ${theme.accent}`,
         fontSize: '16px',
         lineHeight: 1,
         padding: '4px 10px',
@@ -122,6 +125,7 @@ function Music_Player_Panel({ entries, on_song_click, current_url }) {
         const filename = path.split('/').pop().replace('.mp3', '').replace(/\s*\[[^\]]+\]$/, '');
         return (
           <button
+            type="button"
             key={path}
             ref={current_url === url ? selected_ref : null}
             onClick={() => on_song_click(url)}

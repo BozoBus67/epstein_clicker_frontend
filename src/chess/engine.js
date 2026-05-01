@@ -1,5 +1,10 @@
 // Stockfish 18 lite-single — single-threaded WASM build, UCI protocol over a Web Worker.
-// ELO range supported by Stockfish: 1320–3190. Values outside get clamped.
+//
+// Stockfish's UCI_LimitStrength supports ELOs from 1320 to 3190. Anything
+// outside that range is silently clamped — so a "400 ELO" bot is actually a
+// 1320 ELO Stockfish instance with the displayed number being a lie. This is
+// intentional; see ./constants.js for the displayed-to-actual ELO map and
+// the rationale.
 
 const STOCKFISH_URL = `${import.meta.env.BASE_URL}stockfish/stockfish-18-lite-single.js`;
 const ELO_MIN = 1320;
@@ -15,6 +20,12 @@ export class Engine {
       this.handlers.forEach(h => h(line));
     };
     this.worker.onerror = (e) => {
+      // Worker-level errors (e.g. WASM load failure) are logged to console for
+      // debugging. They don't currently propagate to the consuming component —
+      // chess_game_screen uses init failures + best_move rejections to drive
+      // its engine_error state, which covers the practical failure modes. If
+      // we ever see worker.onerror firing in the wild without a matching
+      // best_move rejection, expose it via a callback in this constructor.
       console.error('[sf] worker error', e.message ?? e);
     };
   }

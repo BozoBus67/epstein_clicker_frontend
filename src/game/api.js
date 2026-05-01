@@ -1,19 +1,22 @@
-import { post, auth_headers } from '../shared/api_client';
+import { post_auth } from '../shared/api_client';
 
-export const api_save_game = async (game_data) =>
-  post('/save_game_data', { game_data }, await auth_headers());
+export const api_save_game = (game_data) =>
+  post_auth('/save_game_data', { game_data });
 
-export const api_reset_game = async () =>
-  post('/reset_game_data', null, await auth_headers());
+export const api_reset_game = () =>
+  post_auth('/reset_game_data', null);
 
-export const api_daily_checkin = async () =>
-  post('/daily_checkin', null, await auth_headers());
+export const api_daily_checkin = () =>
+  post_auth('/daily_checkin', null);
 
-export const api_hourly_checkin = async () =>
-  post('/hourly_checkin', null, await auth_headers());
+export const api_hourly_checkin = () =>
+  post_auth('/hourly_checkin', null);
 
-export const api_fivemin_checkin = async () =>
-  post('/fivemin_checkin', null, await auth_headers());
+export const api_fivemin_checkin = () =>
+  post_auth('/fivemin_checkin', null);
 
-export const api_spin = async () =>
-  post('/spin', null, await auth_headers());
+export const api_spin = () =>
+  post_auth('/spin', null);
+
+export const api_roulette_spin = () =>
+  post_auth('/roulette_spin', null);

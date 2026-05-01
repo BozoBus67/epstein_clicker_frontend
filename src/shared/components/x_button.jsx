@@ -5,8 +5,12 @@ export default function X_Button({ to }) {
   return (
     <button
       onClick={() => navigate(to)}
-      style={{ position: 'fixed', top: '16px', right: '16px', border: '1px solid gray', borderRadius: '50%', width: '32px', height: '32px' }}
-      className="text-gray-700 hover:text-gray-900 transition font-bold"
+      style={{
+        position: 'fixed', top: '16px', right: '16px',
+        border: '2px solid #000', borderRadius: '50%', width: '32px', height: '32px',
+        background: '#fff', color: '#000', fontWeight: 'bold',
+        boxShadow: '0 0 0 2px rgba(255,255,255,0.6)', cursor: 'pointer',
+      }}
     >
       ✕
     </button>

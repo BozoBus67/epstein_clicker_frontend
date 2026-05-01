@@ -1,21 +1,18 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../shared/store/sessionSlice';
-import { api_login } from './api';
 import { supabase } from '../shared/supabase_client';
+import { api_login } from './api';
 
 export default function Login_Screen() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [username_or_email, set_username_or_email] = useState('');
-  const [password, set_password] = useState('');
   const [error, set_error] = useState('');
   const [loading, set_loading] = useState(false);
-  const submit_ref = useRef(null);
 
-  const try_login = async () => {
+  const try_login = async ({ username_or_email, password }) => {
     set_error('');
 
     if (!username_or_email || !password) {
@@ -28,25 +25,14 @@ export default function Login_Screen() {
     try {
       const data = await api_login(username_or_email, password);
       await supabase.auth.setSession({ access_token: data.jwt, refresh_token: data.refresh_token });
-      dispatch(login({ user: data.user, token: data.jwt }));
+      dispatch(login({ user: data.user }));
       navigate('/game');
     } catch (err) {
-      if (err?.status === 429) set_error('Too many login attempts — try again later.');
-      else set_error(err?.detail || 'An unknown error occurred — please try again.');
+      set_error(err?.detail || 'An unknown error occurred — please try again.');
     } finally {
       set_loading(false);
     }
   };
-
-  submit_ref.current = try_login;
-
-  useEffect(() => {
-    const handle_enter = (e) => {
-      if (e.key === 'Enter') submit_ref.current();
-    };
-    document.addEventListener('keydown', handle_enter);
-    return () => document.removeEventListener('keydown', handle_enter);
-  }, []);
 
   return (
     <div style={{
@@ -61,10 +47,6 @@ export default function Login_Screen() {
     }}>
       <Login_Panel
         on_submit={try_login}
-        username_or_email={username_or_email}
-        set_username_or_email={set_username_or_email}
-        password={password}
-        set_password={set_password}
         error={error}
         loading={loading}
         go_to_signup={() => navigate('/signup')}
@@ -73,7 +55,15 @@ export default function Login_Screen() {
   );
 }
 
-function Login_Panel({ on_submit, username_or_email, set_username_or_email, password, set_password, error, loading, go_to_signup }) {
+function Login_Panel({ on_submit, error, loading, go_to_signup }) {
+  const [username_or_email, set_username_or_email] = useState('');
+  const [password, set_password] = useState('');
+
+  const submit = () => on_submit({ username_or_email, password });
+
+  const input_style = { display: 'block', padding: '8px 10px', background: 'rgba(255,255,255,0.1)', color: '#e0e0f0', border: '1px solid rgba(255,255,255,0.25)' };
+  const on_enter = (e) => { if (e.key === 'Enter') submit(); };
+
   return (
     <div style={{
       width: '384px', padding: '32px', borderRadius: '12px',
@@ -88,18 +78,20 @@ function Login_Panel({ on_submit, username_or_email, set_username_or_email, pass
         type="text"
         placeholder="Username or Email"
         className="w-full mb-2 rounded-lg"
-        style={{ display: 'block', padding: '8px 10px', background: 'rgba(255,255,255,0.1)', color: '#e0e0f0', border: '1px solid rgba(255,255,255,0.25)' }}
+        style={input_style}
         value={username_or_email}
         onChange={(e) => set_username_or_email(e.target.value)}
+        onKeyDown={on_enter}
       />
 
       <input
         type="password"
         placeholder="Password"
         className="w-full mb-4 rounded-lg"
-        style={{ display: 'block', padding: '8px 10px', background: 'rgba(255,255,255,0.1)', color: '#e0e0f0', border: '1px solid rgba(255,255,255,0.25)' }}
+        style={input_style}
         value={password}
         onChange={(e) => set_password(e.target.value)}
+        onKeyDown={on_enter}
       />
 
       {error && (
@@ -107,15 +99,17 @@ function Login_Panel({ on_submit, username_or_email, set_username_or_email, pass
       )}
 
       <button
+        type="button"
         className="w-full rounded-lg transition"
         style={{ padding: '8px', background: '#facc15', color: '#000', fontWeight: 'bold', cursor: 'pointer', border: 'none' }}
-        onClick={on_submit}
+        onClick={submit}
         disabled={loading}
       >
         {loading ? 'Logging in...' : 'Login'}
       </button>
 
       <button
+        type="button"
         className="w-full rounded-lg transition hover:underline"
         style={{ padding: '8px', background: 'transparent', color: '#facc15', border: 'none', cursor: 'pointer', marginTop: '4px' }}
         onClick={go_to_signup}

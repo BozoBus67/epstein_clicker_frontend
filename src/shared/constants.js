@@ -1,4 +1,15 @@
-// ── Swap this file to change all display names (e.g. SFW vs Epstein edition) ──
+// ─────────────────────────────────────────────────────────────────────────────
+// User-facing text content for the entire game.
+//
+// This is THE swappable layer: every name, label, ad string, and tier title
+// the user sees is exported from here. Swap (or fork) this file to retheme
+// the game wholesale — e.g. an SFW edition would change QUANTITY_NAME from
+// "children trafficked" to "cookies", BUILDING_NAMES from "Diddy Factory" to
+// "Mine", ACCOUNT_TIER_NAMES from "Jewish+++" to "Premium+++", etc.
+//
+// Underlying mechanics (building costs, scroll effects, ELO bands, etc.)
+// live elsewhere and don't reference any of this. Strings only.
+// ─────────────────────────────────────────────────────────────────────────────
 
 export const QUANTITY_NAME = 'children trafficked';
 
@@ -65,7 +76,7 @@ export const SCROLL_DESCRIPTIONS = {
   mastery_scroll_9:  'Not yet implemented',
   mastery_scroll_10: 'Not yet implemented',
   mastery_scroll_11: 'Not yet implemented',
-  mastery_scroll_12: 'Not yet implemented',
+  mastery_scroll_12: 'Unlocks dark mode',
   mastery_scroll_13: 'Not yet implemented',
   mastery_scroll_14: 'Not yet implemented',
   mastery_scroll_15: 'Not yet implemented',

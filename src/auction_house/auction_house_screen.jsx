@@ -1,51 +1,39 @@
+// Auction House screen. Architecture overview, modal ownership, component
+// list, and conventions live in ./README.md — read that first if you're new
+// to this file.
 import { useState, useEffect } from 'react';
 import { useEscapeKey } from '../shared/hooks';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import { Page_Header } from '../shared/components';
+import { Async_Refresh_Button, Confirm_Modal, Modal_Overlay, Page_Header } from '../shared/components';
+import { useTheme } from '../shared/theme';
 import { api_create_listing, api_get_listings, api_buy_listing, api_cancel_listing } from './api';
-import { update_game_data, update_premium_game_data } from '../shared/store/sessionSlice';
-import { CURRENCIES, opposite_currency } from './auction_house_constants';
+import { increment_game_data_field, update_game_data, update_premium_game_data } from '../shared/store/sessionSlice';
+import { CURRENCIES, opposite_currency } from './auction_house_utils';
 
 export default function Auction_House_Screen() {
-  const username = useSelector(state => state.session.session_data?.username ?? '');
-  const [show_create_modal, set_show_create_modal] = useState(false);
-  const [selected_listing, set_selected_listing] = useState(null);
+  const theme = useTheme();
   const [listings, set_listings] = useState([]);
 
+  // Returns the underlying promise so each caller can choose its own error UX:
+  //  • The Async_Refresh_Button wraps it in its own try/catch + toast.
+  //  • The mount-time call below catches and toasts directly.
+  //  • on_action_done callbacks fire after backend mutations and chain off this.
+  const refresh = () => api_get_listings().then(set_listings);
+
   useEffect(() => {
-    api_get_listings().then(set_listings).catch(console.error);
+    refresh().catch(e => toast.error(e?.detail || 'Failed to load listings.', { id: 'load-listings-error' }));
   }, []);
 
-  const refresh = () => api_get_listings().then(set_listings).catch(console.error);
-  const is_own_listing = selected_listing?.seller_username === username;
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh' }}>
+    <div style={{
+      display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh',
+      background: theme.bg, backgroundSize: theme.bg_size, backgroundPosition: theme.bg_position, color: theme.text,
+    }}>
       <Auction_House_Screen_Topbar />
-      <Auction_House_Screen_Body listings={listings} on_select={set_selected_listing} />
-      <button
-        onClick={refresh}
-        style={{ position: 'fixed', bottom: '24px', left: '24px', border: '1px solid gray', borderRadius: '50%', width: '32px', height: '32px', background: 'transparent', color: 'white', cursor: 'pointer', fontSize: '16px' }}
-      >
-        ↻
-      </button>
-      <Add_Auction_Button on_click={() => set_show_create_modal(true)} />
-      {show_create_modal && <Create_Listing_Modal on_close={() => set_show_create_modal(false)} />}
-      {selected_listing && is_own_listing && (
-        <Cancel_Listing_Modal
-          listing={selected_listing}
-          on_close={() => set_selected_listing(null)}
-          on_cancelled={() => { set_selected_listing(null); refresh(); }}
-        />
-      )}
-      {selected_listing && !is_own_listing && (
-        <Buy_Listing_Modal
-          listing={selected_listing}
-          on_close={() => set_selected_listing(null)}
-          on_bought={() => { set_selected_listing(null); refresh(); }}
-        />
-      )}
+      <Auction_House_Screen_Body listings={listings} on_action_done={refresh} />
+      <Refresh_Listings_Button on_click={refresh} />
+      <Create_Listing_Manager on_action_done={refresh} />
     </div>
   );
 }
@@ -54,45 +42,48 @@ function Auction_House_Screen_Topbar() {
   return <Page_Header title="Auction House" />;
 }
 
-function Auction_House_Screen_Body({ listings, on_select }) {
+// Renders the listings grid AND owns the "which listing is selected" state plus the
+// resulting cancel/buy modal. The screen passes in the listings + a refresh callback;
+// nothing about selection leaks back up.
+function Auction_House_Screen_Body({ listings, on_action_done }) {
+  const username = useSelector(state => state.session.session_data?.username ?? '');
+  const [selected, set_selected] = useState(null);
+
+  const is_own = selected?.seller_username === username;
+  const close = () => set_selected(null);
+  const finish = () => { close(); on_action_done(); };
+
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 40px' }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-        {listings.map((listing, i) => (
-          <Auction_Slot key={listing.id ?? i} index={i} listing={listing} on_click={() => on_select(listing)} />
-        ))}
+    <>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '24px 40px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+          {listings.map((listing, i) => (
+            <Auction_Slot key={listing.id ?? i} listing={listing} on_click={() => set_selected(listing)} />
+          ))}
+        </div>
       </div>
-    </div>
+      <Manage_Listing_Modal listing={selected} is_own={is_own} on_close={close} on_done={finish} />
+    </>
   );
 }
 
-function Auction_Slot({ index, listing, on_click }) {
+function Auction_Slot({ listing, on_click }) {
   const [hovered, set_hovered] = useState(false);
-
-  const slot_style = {
-    width: '200px', height: '160px', borderRadius: '10px', padding: '20px',
-    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-    boxSizing: 'border-box', flexShrink: 0,
-  };
-
-  if (!listing) {
-    return (
-      <div style={{ ...slot_style, background: '#1e1e2e', border: '2px solid #333', color: '#555', fontSize: '14px' }}>
-        Auction slot {index + 1}
-      </div>
-    );
-  }
+  const theme = useTheme();
 
   return (
     <button
+      type="button"
       onClick={on_click}
       onMouseEnter={() => set_hovered(true)}
       onMouseLeave={() => set_hovered(false)}
       style={{
-        ...slot_style,
-        background: hovered ? '#252538' : '#1e1e2e',
-        border: `2px solid ${hovered ? '#facc15' : '#444'}`,
-        color: 'white',
+        width: '200px', height: '160px', borderRadius: '10px', padding: '20px',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        boxSizing: 'border-box', flexShrink: 0,
+        background: theme.panel,
+        border: `2px solid ${hovered ? theme.accent : theme.panel_border}`,
+        color: theme.text,
         fontSize: '13px',
         cursor: 'pointer',
         gap: '8px',
@@ -100,7 +91,7 @@ function Auction_Slot({ index, listing, on_click }) {
         textAlign: 'center',
       }}
     >
-      <span style={{ color: '#facc15', fontWeight: 'bold', fontSize: '14px' }}>
+      <span style={{ color: theme.accent, fontWeight: 'bold', fontSize: '14px' }}>
         {listing.seller_username}
       </span>
       <span>Selling: <b>{listing.amount} {listing.selling_item_type}</b></span>
@@ -109,98 +100,64 @@ function Auction_Slot({ index, listing, on_click }) {
   );
 }
 
-function Buy_Listing_Modal({ listing, on_close, on_bought }) {
-  const dispatch = useDispatch();
-  const [loading, set_loading] = useState(false);
-  useEscapeKey(on_close, !loading);
-
-  const handle_buy = async () => {
-    set_loading(true);
-    try {
-      const data = await api_buy_listing(listing.id);
-      dispatch(update_game_data(data.game_data));
-      dispatch(update_premium_game_data(data.premium_game_data));
-      toast.success('Purchase complete!');
-      on_bought();
-    } catch (e) {
-      toast.error(e?.detail || 'Something went wrong.');
-      set_loading(false);
-    }
-  };
-
+function Refresh_Listings_Button({ on_click }) {
   return (
-    <div style={{
-      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
-    }}>
-      <div style={{
-        background: '#1e1e2e', border: '2px solid #facc15', borderRadius: '12px',
-        padding: '32px', minWidth: '320px', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px',
-      }}>
-        <h2 style={{ color: '#facc15', margin: 0, textAlign: 'center' }}>Buy Listing</h2>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={on_close} disabled={loading}
-            style={{ padding: '8px 28px', borderRadius: '6px', background: '#333', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
-            No
-          </button>
-          <button onClick={handle_buy} disabled={loading}
-            style={{ padding: '8px 28px', borderRadius: '6px', background: '#facc15', color: '#000', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
-            {loading ? '...' : 'Yes'}
-          </button>
-        </div>
-      </div>
-    </div>
+    <Async_Refresh_Button
+      on_click={on_click}
+      success_message="Listings refreshed."
+      error_message="Failed to refresh listings."
+      title="Refresh listings"
+      style={{ position: 'fixed', bottom: '24px', left: '24px' }}
+    />
   );
 }
 
-function Cancel_Listing_Modal({ listing, on_close, on_cancelled }) {
-  const dispatch = useDispatch();
-  const [loading, set_loading] = useState(false);
-  useEscapeKey(on_close, !loading);
-
-  const handle_cancel = async () => {
-    set_loading(true);
-    try {
-      const data = await api_cancel_listing(listing.id);
-      dispatch(update_game_data(data.game_data));
-      dispatch(update_premium_game_data(data.premium_game_data));
-      toast.success('Listing cancelled, items refunded');
-      on_cancelled();
-    } catch (e) {
-      toast.error(e?.detail || 'Something went wrong.');
-      set_loading(false);
-    }
-  };
-
+function Add_Auction_Button({ on_click }) {
+  const [hovered, set_hovered] = useState(false);
+  const theme = useTheme();
   return (
-    <div style={{
-      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
-    }}>
-      <div style={{
-        background: '#1e1e2e', border: '2px solid #facc15', borderRadius: '12px',
-        padding: '32px', minWidth: '320px', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px',
-      }}>
-        <h2 style={{ color: '#facc15', margin: 0, textAlign: 'center' }}>Cancel Listing?</h2>
-        <p style={{ margin: 0, textAlign: 'center', color: '#ccc' }}>
-          You'll get back {listing.amount} {listing.selling_item_type}.
-        </p>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={on_close} disabled={loading}
-            style={{ padding: '8px 28px', borderRadius: '6px', background: '#333', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
-            No
-          </button>
-          <button onClick={handle_cancel} disabled={loading}
-            style={{ padding: '8px 28px', borderRadius: '6px', background: '#ef4444', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
-            {loading ? '...' : 'Yes'}
-          </button>
-        </div>
-      </div>
-    </div>
+    <button
+      type="button"
+      onClick={on_click}
+      onMouseEnter={() => set_hovered(true)}
+      onMouseLeave={() => set_hovered(false)}
+      style={{
+        position: 'fixed',
+        bottom: '24px',
+        right: '24px',
+        padding: '10px 20px',
+        background: hovered ? theme.accent : 'transparent',
+        color: hovered ? theme.accent_text : theme.accent,
+        border: `2px solid ${theme.accent}`,
+        borderRadius: '8px',
+        fontWeight: 'bold',
+        fontSize: '14px',
+        cursor: 'pointer',
+        transform: hovered ? 'scale(1.05)' : 'scale(1)',
+        transition: 'all 0.1s ease',
+      }}
+    >
+      + Add Auction
+    </button>
   );
 }
 
-function Create_Listing_Modal({ on_close }) {
+// Owns the Add Auction trigger button + the create-listing modal + the open/close state.
+// The screen mounts <Create_Listing_Manager /> once and forgets about it. After a
+// successful create, on_action_done fires so the caller can refresh the listings grid.
+function Create_Listing_Manager({ on_action_done }) {
+  const [show, set_show] = useState(false);
+  const close = () => set_show(false);
+  const finish = () => { close(); on_action_done(); };
+  return (
+    <>
+      <Add_Auction_Button on_click={() => set_show(true)} />
+      {show && <Create_Listing_Modal on_close={close} on_created={finish} />}
+    </>
+  );
+}
+
+function Create_Listing_Modal({ on_close, on_created }) {
   const dispatch = useDispatch();
   const game_data = useSelector(state => state.session.game_data);
   const premium_game_data = useSelector(state => state.session.premium_game_data);
@@ -209,6 +166,7 @@ function Create_Listing_Modal({ on_close }) {
   const [price_type, set_price_type] = useState('tokens');
   const [price, set_price] = useState('');
   const [loading, set_loading] = useState(false);
+  const theme = useTheme();
   useEscapeKey(on_close, !loading);
 
   const handle_listing_type_change = (val) => {
@@ -222,12 +180,12 @@ function Create_Listing_Modal({ on_close }) {
     try {
       const data = await api_create_listing({ listing_type, amount: Number(amount), price_type, price: Number(price) });
       if (listing_type === 'cookies') {
-        dispatch(update_game_data({ ...game_data, quantity: game_data.quantity - Number(amount) }));
+        dispatch(increment_game_data_field({ key: 'quantity', amount: -Number(amount) }));
       } else {
         dispatch(update_premium_game_data(data.premium_game_data));
       }
       toast.success('Listing created!');
-      on_close();
+      on_created();
     } catch (e) {
       toast.error(e?.detail || 'Something went wrong.');
     } finally {
@@ -236,83 +194,117 @@ function Create_Listing_Modal({ on_close }) {
   };
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
-    }}>
-      <div style={{
-        background: '#1e1e2e', border: '2px solid #facc15', borderRadius: '12px',
-        padding: '32px', minWidth: '320px', color: 'white', display: 'flex', flexDirection: 'column', gap: '16px',
-      }}>
-        <h2 style={{ color: '#facc15', margin: 0 }}>New Listing</h2>
+    <Modal_Overlay>
+      <h2 style={{ color: theme.accent, margin: 0 }}>New Listing</h2>
 
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
-          Selling
-          <select value={listing_type} onChange={(e) => handle_listing_type_change(e.target.value)}
-            style={{ padding: '8px', borderRadius: '6px', background: '#0f0f1a', color: 'white', border: '1px solid #444' }}>
-            {CURRENCIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
-          </select>
-        </label>
+      <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
+        Selling
+        <select value={listing_type} onChange={(e) => handle_listing_type_change(e.target.value)}
+          style={{ padding: '8px', borderRadius: '6px', background: theme.panel_secondary, color: theme.text, border: `1px solid ${theme.panel_border}` }}>
+          {CURRENCIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+        </select>
+      </label>
 
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
-          Amount
-          <input type="number" value={amount} onChange={(e) => set_amount(e.target.value)} placeholder="0"
-            style={{ padding: '8px', borderRadius: '6px', background: '#0f0f1a', color: 'white', border: '1px solid #444' }} />
-        </label>
+      <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
+        Amount
+        <input type="number" value={amount} onChange={(e) => set_amount(e.target.value)} placeholder="0"
+          style={{ padding: '8px', borderRadius: '6px', background: theme.panel_secondary, color: theme.text, border: `1px solid ${theme.panel_border}` }} />
+      </label>
 
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
-          Asking for
-          <select value={price_type} onChange={(e) => set_price_type(e.target.value)}
-            style={{ padding: '8px', borderRadius: '6px', background: '#0f0f1a', color: 'white', border: '1px solid #444' }}>
-            {CURRENCIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
-          </select>
-        </label>
+      <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
+        Asking for
+        <select value={price_type} onChange={(e) => set_price_type(e.target.value)}
+          style={{ padding: '8px', borderRadius: '6px', background: theme.panel_secondary, color: theme.text, border: `1px solid ${theme.panel_border}` }}>
+          {CURRENCIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+        </select>
+      </label>
 
-        <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
-          Price
-          <input type="number" value={price} onChange={(e) => set_price(e.target.value)} placeholder="0"
-            style={{ padding: '8px', borderRadius: '6px', background: '#0f0f1a', color: 'white', border: '1px solid #444' }} />
-        </label>
+      <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
+        Price
+        <input type="number" value={price} onChange={(e) => set_price(e.target.value)} placeholder="0"
+          style={{ padding: '8px', borderRadius: '6px', background: theme.panel_secondary, color: theme.text, border: `1px solid ${theme.panel_border}` }} />
+      </label>
 
-        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-          <button onClick={on_close}
-            style={{ padding: '8px 20px', borderRadius: '6px', background: '#333', color: 'white', border: 'none', cursor: 'pointer' }}>
-            Cancel
-          </button>
-          <button onClick={handle_submit} disabled={loading}
-            style={{ padding: '8px 20px', borderRadius: '6px', background: '#facc15', color: '#000', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>
-            {loading ? 'Listing...' : 'List Auction'}
-          </button>
-        </div>
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+        <button type="button" onClick={on_close}
+          style={{ padding: '8px 20px', borderRadius: '6px', background: theme.button_neutral_bg, color: theme.button_neutral_text, border: 'none', cursor: 'pointer' }}>
+          Cancel
+        </button>
+        <button type="button" onClick={handle_submit} disabled={loading}
+          style={{ padding: '8px 20px', borderRadius: '6px', background: theme.accent, color: theme.accent_text, border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>
+          {loading ? 'Listing...' : 'List Auction'}
+        </button>
       </div>
-    </div>
+    </Modal_Overlay>
   );
 }
 
-function Add_Auction_Button({ on_click }) {
-  const [hovered, set_hovered] = useState(false);
+// Routes between the buy and cancel modals depending on whether the selected
+// listing belongs to the current user. Returns null when no listing is selected.
+function Manage_Listing_Modal({ listing, is_own, on_close, on_done }) {
+  if (!listing) return null;
+  return is_own
+    ? <Cancel_Listing_Modal listing={listing} on_close={on_close} on_cancelled={on_done} />
+    : <Buy_Listing_Modal    listing={listing} on_close={on_close} on_bought={on_done} />;
+}
+
+function Buy_Listing_Modal({ listing, on_close, on_bought }) {
+  const dispatch = useDispatch();
+  const [loading, set_loading] = useState(false);
+
+  const handle_buy = async () => {
+    set_loading(true);
+    try {
+      const data = await api_buy_listing(listing.id);
+      dispatch(update_game_data(data.game_data));
+      dispatch(update_premium_game_data(data.premium_game_data));
+      toast.success('Purchase complete!');
+      on_bought();
+    } catch (e) {
+      toast.error(e?.detail || 'Something went wrong.');
+    } finally {
+      set_loading(false);
+    }
+  };
+
   return (
-    <button
-      onClick={on_click}
-      onMouseEnter={() => set_hovered(true)}
-      onMouseLeave={() => set_hovered(false)}
-      style={{
-        position: 'fixed',
-        bottom: '24px',
-        right: '24px',
-        padding: '10px 20px',
-        background: hovered ? '#facc15' : 'transparent',
-        color: hovered ? '#000' : '#facc15',
-        border: '2px solid #facc15',
-        borderRadius: '8px',
-        fontWeight: 'bold',
-        fontSize: '14px',
-        cursor: 'pointer',
-        transform: hovered ? 'scale(1.05)' : 'scale(1)',
-        transition: 'all 0.1s ease',
-      }}
-    >
-      + Add Auction
-    </button>
+    <Confirm_Modal
+      title="Buy Listing?"
+      info={`You'll get ${listing.amount} ${listing.selling_item_type} for ${listing.price_item_amount} ${listing.price_item_type}.`}
+      on_confirm={handle_buy}
+      on_cancel={on_close}
+      loading={loading}
+    />
+  );
+}
+
+function Cancel_Listing_Modal({ listing, on_close, on_cancelled }) {
+  const dispatch = useDispatch();
+  const [loading, set_loading] = useState(false);
+
+  const handle_cancel = async () => {
+    set_loading(true);
+    try {
+      const data = await api_cancel_listing(listing.id);
+      dispatch(update_game_data(data.game_data));
+      dispatch(update_premium_game_data(data.premium_game_data));
+      toast.success('Listing cancelled, items refunded');
+      on_cancelled();
+    } catch (e) {
+      toast.error(e?.detail || 'Something went wrong.');
+    } finally {
+      set_loading(false);
+    }
+  };
+
+  return (
+    <Confirm_Modal
+      title="Cancel Listing?"
+      info={`You'll get back ${listing.amount} ${listing.selling_item_type}.`}
+      on_confirm={handle_cancel}
+      on_cancel={on_close}
+      loading={loading}
+      danger
+    />
   );
 }

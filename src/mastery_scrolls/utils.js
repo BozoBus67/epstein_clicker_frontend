@@ -1,8 +1,5 @@
 import { SCROLL_TIERS } from '../shared/constants';
 
-const face_modules = import.meta.glob('../assets/master_scroll_faces/*', { eager: true });
-export const FACES = Object.keys(face_modules).sort().map(k => face_modules[k].default);
-
 export const TOOLTIP_W = 200;
 const TOOLTIP_H = 50;
 const GAP = 8;

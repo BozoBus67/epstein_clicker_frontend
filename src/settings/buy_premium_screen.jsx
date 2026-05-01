@@ -6,6 +6,8 @@ import { ACCOUNT_TIER_NAMES } from '../shared/constants';
 import { tier_num } from '../shared/utils';
 import { update_premium_game_data } from '../shared/store/sessionSlice';
 import { api_buy_account_tier } from './api';
+import { Back_Arrow_Button, Confirm_Modal, X_Button } from '../shared/components';
+import { useTheme } from '../shared/theme';
 
 const TIER_PERKS = {
   account_tier_1: [
@@ -15,7 +17,7 @@ const TIER_PERKS = {
   account_tier_2: [
     'Everything in Plus',
     'Gain the ability to close ads',
-    'Access to the trade market',
+    'Access to the auction house',
   ],
   account_tier_3: [
     'Everything in Pro',
@@ -90,16 +92,21 @@ export default function Buy_Premium_Screen() {
     }
   };
 
+  const theme = useTheme();
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh', overflow: 'hidden' }}>
-      <Buy_Premium_Screen_Topbar on_back={() => navigate('/game')} />
+    <div style={{
+      display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh', overflow: 'hidden',
+      background: theme.bg, backgroundSize: theme.bg_size, backgroundPosition: theme.bg_position,
+      color: theme.text,
+    }}>
+      <Buy_Premium_Screen_Topbar />
       <Buy_Premium_Screen_Body
         tiers={paid_tiers}
         current_tier={current_tier}
         on_select={set_selected}
       />
       {selected && (
-        <Confirm_Modal
+        <Tier_Confirm_Modal
           tier={selected}
           on_confirm={handle_confirm}
           on_cancel={() => set_selected(null)}
@@ -110,19 +117,11 @@ export default function Buy_Premium_Screen() {
   );
 }
 
-function Buy_Premium_Screen_Topbar({ on_back }) {
+function Buy_Premium_Screen_Topbar() {
   return (
     <>
-      <button
-        onClick={on_back}
-        style={{ position: 'fixed', top: '16px', left: '16px', border: '1px solid gray', borderRadius: '50%', width: '32px', height: '32px' }}
-        className="text-gray-700 hover:text-gray-900 transition font-bold"
-      >←</button>
-      <button
-        onClick={on_back}
-        style={{ position: 'fixed', top: '16px', right: '16px', border: '1px solid gray', borderRadius: '50%', width: '32px', height: '32px' }}
-        className="text-gray-700 hover:text-gray-900 transition font-bold"
-      >✕</button>
+      <Back_Arrow_Button to="/game" />
+      <X_Button to="/game" />
     </>
   );
 }
@@ -189,35 +188,16 @@ function Tier_Card({ tier, current_tier, on_click }) {
   );
 }
 
-function Confirm_Modal({ tier, on_confirm, on_cancel, loading }) {
+function Tier_Confirm_Modal({ tier, on_confirm, on_cancel, loading }) {
   return (
-    <div style={{
-      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
-    }}>
-      <div style={{
-        background: 'white', borderRadius: '12px', padding: '32px',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', minWidth: '300px',
-      }}>
-        <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>Buy {ACCOUNT_TIER_NAMES[tier.id]}?</p>
-        <p style={{ margin: 0, color: '#555' }}>This will cost {tier.token_price} tokens.</p>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button
-            onClick={on_cancel}
-            disabled={loading}
-            className="bg-gray-300 text-black py-2 px-6 rounded-lg hover:bg-gray-400 transition"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={on_confirm}
-            disabled={loading}
-            className="bg-yellow-400 text-black font-bold py-2 px-6 rounded-lg hover:bg-yellow-500 transition"
-          >
-            {loading ? 'Buying...' : 'Confirm'}
-          </button>
-        </div>
-      </div>
-    </div>
+    <Confirm_Modal
+      title={`Buy ${ACCOUNT_TIER_NAMES[tier.id]}?`}
+      info={`This will cost ${tier.token_price} tokens.`}
+      yes_label="Confirm"
+      no_label="Cancel"
+      on_confirm={on_confirm}
+      on_cancel={on_cancel}
+      loading={loading}
+    />
   );
 }
