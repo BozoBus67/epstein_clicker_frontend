@@ -4,6 +4,7 @@ export default function Back_Arrow_Button({ to }) {
   const navigate = useNavigate();
   return (
     <button
+      type="button"
       onClick={() => navigate(to)}
       style={{
         position: 'fixed', top: '16px', left: '16px',

@@ -118,6 +118,7 @@ function Login_Details_Screen_Body({
       <Field label="Confirm new password" type="password" value={confirm_password} on_change={set_confirm_password} placeholder="" />
       <div style={{ display: 'flex', gap: '12px' }}>
         <button
+          type="button"
           onClick={on_cancel}
           disabled={loading}
           style={{ flex: 1, padding: '10px', borderRadius: '8px', background: theme.button_neutral_bg, color: theme.button_neutral_text, fontWeight: 'bold', fontSize: '14px', border: `1px solid ${theme.panel_border}`, cursor: 'pointer' }}
@@ -125,6 +126,7 @@ function Login_Details_Screen_Body({
           Cancel
         </button>
         <button
+          type="button"
           onClick={on_submit}
           disabled={loading}
           style={{ flex: 1, padding: '10px', borderRadius: '8px', background: theme.accent, color: theme.accent_text, fontWeight: 'bold', fontSize: '14px', border: 'none', cursor: 'pointer' }}

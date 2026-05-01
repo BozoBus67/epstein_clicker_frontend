@@ -16,6 +16,7 @@ export default function Tier_Locked_Modal({ required_tier, on_close }) {
         <h2 style={{ color: '#facc15', marginBottom: '12px' }}>🔒 Locked</h2>
         <p style={{ margin: 0 }}>You must be {tier_name} tier or higher for this.</p>
         <button
+          type="button"
           onClick={on_close}
           style={{
             marginTop: '20px', padding: '8px 24px', background: '#facc15',

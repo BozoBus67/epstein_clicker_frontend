@@ -1,28 +1,16 @@
-import { useState, useEffect } from 'react';
-import { current_volume, set_current_volume } from './audio_state';
-import { useTierGate } from '../shared/hooks';
+import { useState } from 'react';
+import { useEscapeKey, useOutsideClick, useTierGate } from '../shared/hooks';
 import { useTheme } from '../shared/theme';
+import { current_volume, set_current_volume } from './audio_state';
 
 export default function Volume_Control() {
+  const { gate, lock_modal } = useTierGate(4);
   const [open, set_open] = useState(false);
   const [value, set_value] = useState(() => current_volume);
-  const { gate, lock_modal } = useTierGate(4);
 
-  useEffect(() => {
-    if (!open) return;
-    const handle_click_outside = (e) => {
-      if (!e.target.closest('.volume-control-container')) set_open(false);
-    };
-    const handle_esc = (e) => {
-      if (e.key === 'Escape') set_open(false);
-    };
-    document.addEventListener('mousedown', handle_click_outside);
-    document.addEventListener('keydown', handle_esc);
-    return () => {
-      document.removeEventListener('mousedown', handle_click_outside);
-      document.removeEventListener('keydown', handle_esc);
-    };
-  }, [open]);
+  const close = () => set_open(false);
+  useOutsideClick('.volume-control-container', close, open);
+  useEscapeKey(close, open);
 
   const handle_change = (v) => {
     set_value(v);

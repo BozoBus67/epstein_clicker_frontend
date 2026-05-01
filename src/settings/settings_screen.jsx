@@ -88,6 +88,7 @@ function Theme_Toggle_Button() {
 
   return (
     <button
+      type="button"
       onClick={handle}
       style={{
         padding: '8px 24px', borderRadius: '8px',
@@ -106,6 +107,7 @@ function Change_Login_Details_Button() {
   return (
     <>
       <button
+        type="button"
         onClick={() => gate(() => navigate('/game/settings/login-details'))}
         className="bg-gray-500 text-white py-2 px-6 rounded-lg hover:bg-gray-600 active:bg-gray-700 transition"
       >
@@ -132,6 +134,7 @@ function Get_Discord_Button() {
   return (
     <>
       <button
+        type="button"
         onClick={() => gate(handle_click)}
         className="bg-gray-500 text-white py-2 px-6 rounded-lg hover:bg-gray-600 active:bg-gray-700 transition"
       >
@@ -146,6 +149,7 @@ function Get_Discord_Button() {
 function Reset_Save_Button({ on_click }) {
   return (
     <button
+      type="button"
       onClick={on_click}
       className="bg-gray-500 text-white py-2 px-6 rounded-lg hover:bg-gray-600 active:bg-gray-700 transition"
     >
@@ -167,6 +171,7 @@ function Log_Out_Button() {
 
   return (
     <button
+      type="button"
       onClick={handle_logout}
       className="bg-red-500 text-white py-2 px-6 rounded-lg hover:bg-red-600 active:bg-red-700 transition"
     >

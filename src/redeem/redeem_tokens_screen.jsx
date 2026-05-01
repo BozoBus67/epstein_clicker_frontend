@@ -48,6 +48,7 @@ function Redeem_Tokens_Screen_Body({ on_open_modal }) {
       <h1 style={{ color: theme.accent, marginBottom: '8px' }}>Redeem Tokens</h1>
       <p style={{ color: theme.text_muted, marginBottom: '24px' }}>Placeholder description text.</p>
       <button
+        type="button"
         onClick={on_open_modal}
         style={{
           padding: '10px 28px', background: theme.accent, color: theme.accent_text,

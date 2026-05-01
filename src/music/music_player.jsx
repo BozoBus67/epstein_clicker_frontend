@@ -1,40 +1,27 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useEscapeKey, useOutsideClick, useTierGate } from '../shared/hooks';
+import { useTheme } from '../shared/theme';
 import {
   current_video_id,
   play_video, toggle_play_pause,
   playlist_entries, playlist_load_error, yt_api_error,
   subscribe,
 } from './audio_state';
-import { useTierGate } from '../shared/hooks';
-import { useTheme } from '../shared/theme';
 
 export default function Music_Player() {
-  const [open, setOpen] = useState(false);
-  const [, force_update] = useState(0);
   const { gate, lock_modal } = useTierGate(1);
+  const [open, set_open] = useState(false);
+  const [, force_update] = useState(0);
+
+  const close = () => set_open(false);
+  useOutsideClick('.music-player-container', close, open);
+  useEscapeKey(close, open);
 
   // Re-render whenever the player state, playlist, or error fields mutate.
   // The actual YT.Player and playlist live as module state in audio_state,
   // so this component is pure UI — Music_Player can mount/unmount as the
   // user navigates and the player keeps playing.
   useEffect(() => subscribe(() => force_update(n => n + 1)), []);
-
-  // Close on outside click / Escape — only attached while open.
-  useEffect(() => {
-    if (!open) return;
-    const handle_click_outside = (e) => {
-      if (!e.target.closest('.music-player-container')) setOpen(false);
-    };
-    const handle_esc = (e) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
-    document.addEventListener('mousedown', handle_click_outside);
-    document.addEventListener('keydown', handle_esc);
-    return () => {
-      document.removeEventListener('mousedown', handle_click_outside);
-      document.removeEventListener('keydown', handle_esc);
-    };
-  }, [open]);
 
   const on_song_click = (video_id) => {
     if (current_video_id === video_id) toggle_play_pause();
@@ -43,7 +30,7 @@ export default function Music_Player() {
 
   return (
     <div className="music-player-container" style={{ position: 'relative' }}>
-      <Music_Player_Button onClick={() => gate(() => setOpen(!open))} />
+      <Music_Player_Button on_click={() => gate(() => set_open(!open))} />
       {open && <Music_Player_Panel
         entries={playlist_entries}
         on_song_click={on_song_click}
@@ -56,12 +43,12 @@ export default function Music_Player() {
   );
 }
 
-function Music_Player_Button({ onClick }) {
+function Music_Player_Button({ on_click }) {
   const theme = useTheme();
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={on_click}
       className="hover:outline hover:outline-1 hover:cursor-pointer"
       style={{
         background: theme.accent,

@@ -34,10 +34,13 @@ function notify(): void {
 
 // Fetches once at app boot from App.jsx. Errors set playlist_load_error
 // so the panel can surface a real message instead of silently empty.
+// Shuffled on load so each session starts on a different track; the
+// tier-gated Shuffle_Button only gates *manual re-shuffles*, not this.
 export async function load_playlist(): Promise<void> {
   try {
     const data: { video_id: string; title: string }[] = await api_get_playlist();
     playlist_entries = data.map(({ title, video_id }) => [title, video_id]);
+    shuffle_in_place(playlist_entries);
     playlist_load_error = null;
   } catch (e: any) {
     playlist_load_error = e?.detail || 'Failed to load playlist.';
@@ -46,11 +49,15 @@ export async function load_playlist(): Promise<void> {
   notify();
 }
 
-export function shuffle_playlist(): void {
-  for (let i = playlist_entries.length - 1; i > 0; i--) {
+function shuffle_in_place<T>(arr: T[]): void {
+  for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [playlist_entries[i], playlist_entries[j]] = [playlist_entries[j], playlist_entries[i]];
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
+}
+
+export function shuffle_playlist(): void {
+  shuffle_in_place(playlist_entries);
   notify();
 }
 
@@ -158,6 +165,3 @@ export function set_current_volume(v: number): void {
   current_volume = v;
   if (current_player) current_player.setVolume(v * 100);
 }
-
-// --- Backwards-compat: shuffle button still uses subscribe_playlist
-export const subscribe_playlist = subscribe;

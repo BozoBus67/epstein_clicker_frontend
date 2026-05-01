@@ -29,7 +29,7 @@ export default function Cookie_Click_Panel() {
     set_particles(p => [...p, ...new_particles]);
   };
 
-  const remove_particle = (id) => set_particles(p => p.filter(p => p.id !== id));
+  const remove_particle = (id) => set_particles(prev => prev.filter(p => p.id !== id));
 
   return (
     <div ref={panel_ref} style={{ flex: '1 1 0', height: '100%', position: 'relative', background: '#fff', borderRight: '2px solid #facc15' }}>
@@ -39,7 +39,7 @@ export default function Cookie_Click_Panel() {
           <Epstein_Head on_click={handle_click} />
         </div>
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <p style={{ margin: '0 0 8px', fontWeight: 'bold', fontSize: '26px', background: 'rgba(0,0,0,0.6)', borderRadius: '6px', padding: '4px 10px', display: 'inline-block' }}>{username}'s {Constants.BAKERY_SUBSTITUDE_NAME}</p>
+          <p style={{ margin: '0 0 8px', fontWeight: 'bold', fontSize: '26px', background: 'rgba(0,0,0,0.6)', borderRadius: '6px', padding: '4px 10px', display: 'inline-block' }}>{username}'s {Constants.BAKERY_SUBSTITUTE_NAME}</p>
           <div style={{ background: 'rgba(0,0,0,0.6)', padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <p style={{ margin: 0, fontWeight: 'bold' }}>{Constants.QUANTITY_NAME}: {displayed_quantity.toLocaleString()}</p>
             <p style={{ margin: 0 }}>{Constants.QUANTITY_NAME} per second: {cps.toLocaleString()}</p>

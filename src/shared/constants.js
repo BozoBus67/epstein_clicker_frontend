@@ -92,7 +92,7 @@ export const SCROLL_DESCRIPTIONS = {
 };
 
 export const AD_TEXT = 'HOT GIRLS IN YOUR AREA WANT TO S3X';
-export const BAKERY_SUBSTITUDE_NAME = 'Island';
+export const BAKERY_SUBSTITUTE_NAME = 'Island';
 
 export const ACCOUNT_TIER_NAMES = {
   account_tier_0: 'Free',

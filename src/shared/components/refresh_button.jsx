@@ -13,6 +13,7 @@ export default function Refresh_Button({
   const theme = useTheme();
   return (
     <button
+      type="button"
       onClick={on_click}
       disabled={disabled}
       title={title}

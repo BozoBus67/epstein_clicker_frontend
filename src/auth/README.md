@@ -12,6 +12,20 @@ Each screen file holds its top-level component plus a `*_Panel` sub-component th
 
 `api.js` exposes `api_login`, `api_signup`, and `api_me`. Of these, only `api_me` is publicly re-exported via `index.js` (used by `App.jsx` for session restore and by the top bar's refresh button).
 
+## Session restore on app boot
+
+`App.jsx::restore_session` runs once at mount. If `supabase.auth.getSession()` returns a cached session, it tries `api_me()` to validate that the JWT still works against our backend. Two outcomes:
+
+- **`/me` succeeds** — dispatch `login`, render `Game_Shell`.
+- **`/me` fails (typically 401: stale JWT)** — sign out and render `Auth_Shell`.
+
+The sign-out branch uses `supabase.auth.signOut({ scope: 'local' })` rather than the default network sign-out. That's a deliberate choice:
+
+- The default `signOut()` posts to Supabase's `/logout` endpoint with the current access token. If we got here, that token was *just rejected by `/me`* — Supabase will reject it too and return **403**, producing a confusing-looking error in the console for what is actually expected behavior.
+- `scope: 'local'` clears the cached session client-side without making the network call. Same end state, no doomed request.
+
+This is **not** an instance of silencing a real failure — the `/me` 401 itself stays visible in the network panel, which is correct fail-loud signal that the session expired. We're only skipping the redundant `/logout` round-trip that we already know will fail.
+
 ## Theming
 
 The auth screens deliberately do **not** use `useTheme`. They render before the user is logged in, so there's no `premium_game_data.theme` to read. Hardcoded dark styling is intentional. If you need to tweak the look, edit each screen file directly.

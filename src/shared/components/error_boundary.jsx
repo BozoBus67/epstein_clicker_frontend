@@ -32,6 +32,7 @@ export default class Error_Boundary extends Component {
           {this.state.message}
         </p>
         <button
+          type="button"
           onClick={() => location.reload()}
           style={{
             padding: '8px 24px', background: '#facc15', color: '#000',
