@@ -18,8 +18,8 @@ export function apply_building_buffs(entries, pgd) {
   return entries.map(entry => {
     let cps = entry.cps;
 
-    // mastery_scroll_6 — Diddy: ×2500 on Diddy-themed buildings (2, 3, 4)
-    if ((pgd.mastery_scroll_6 ?? 0) > 0 && DIDDY_BUILDINGS.includes(entry.key)) {
+    // mastery_scroll_7 — Diddy: ×2500 on Diddy-themed buildings (2, 3, 4)
+    if ((pgd.mastery_scroll_7 ?? 0) > 0 && DIDDY_BUILDINGS.includes(entry.key)) {
       cps *= 2500;
     }
 
@@ -32,8 +32,8 @@ export function apply_building_buffs(entries, pgd) {
 export function apply_global_modifiers(total_cps, pgd) {
   let cps = total_cps;
 
-  // mastery_scroll_2 — Shadow Clone Jutsu: ×1000 over total cps
-  if ((pgd.mastery_scroll_2 ?? 0) > 0) {
+  // mastery_scroll_3 — Shadow Clone Jutsu: ×1000 over total cps
+  if ((pgd.mastery_scroll_3 ?? 0) > 0) {
     cps *= 1000;
   }
 

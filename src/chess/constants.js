@@ -23,33 +23,34 @@ const face_modules = import.meta.glob('../assets/master_scroll_faces/*', { eager
 const FACES = Object.keys(face_modules).sort().map(k => face_modules[k].default);
 
 // Scrolls that don't get a corresponding chess bot.
-const EXCLUDED_SCROLL_IDS = new Set(['mastery_scroll_2']);
+const EXCLUDED_SCROLL_IDS = new Set(['mastery_scroll_3']);
 
 // Per-character displayed ELO. See top-of-file comment for the lie about sub-1320.
 const BOT_ELOS = {
-  mastery_scroll_23: 300,   // Tun Tun Tun Sahur     (actual: 1320)
+  mastery_scroll_24: 300,   // Tun Tun Tun Sahur     (actual: 1320)
   mastery_scroll_1:  400,   // 6/7 Kid               (actual: 1320)
-  mastery_scroll_14: 500,   // iShowSpeed            (actual: 1320)
-  mastery_scroll_3:  600,   // CaseOh                (actual: 1320)
-  mastery_scroll_12: 700,   // George Floyd          (actual: 1320)
-  mastery_scroll_11: 800,   // Freddy Fazbear        (actual: 1320)
-  mastery_scroll_6:  900,   // Diddy                 (actual: 1320)
-  mastery_scroll_15: 1000,  // Kai Cenat             (actual: 1320)
-  mastery_scroll_8:  1100,  // Donald Trump          (actual: 1320)
-  mastery_scroll_16: 1100,  // Khaby Lame            (actual: 1320)
-  mastery_scroll_4:  1200,  // Charlie Kirk          (actual: 1320)
-  mastery_scroll_9:  1300,  // Drake                 (actual: 1320)
-  mastery_scroll_19: 1400,  // Ninja                 (actual: 1400)
-  mastery_scroll_21: 1500,  // State Trooper         (actual: 1500)
-  mastery_scroll_18: 1600,  // MrBeast               (actual: 1600)
-  mastery_scroll_7:  1700,  // Doakes                (actual: 1700)
-  mastery_scroll_20: 1800,  // Roy Lee               (actual: 1800)
-  mastery_scroll_13: 1900,  // Hillary Clinton       (actual: 1900)
-  mastery_scroll_5:  2000,  // Dexter                (actual: 2000)
-  mastery_scroll_10: 2400,  // Elon Musk             (actual: 2400)
-  mastery_scroll_17: 2500,  // Mark Zuckerberg       (actual: 2500)
-  mastery_scroll_24: 2800,  // Walter White          (actual: 2800)
-  mastery_scroll_22: 3050,  // Stephen Hawking       (actual: 3050)
+  mastery_scroll_15: 500,   // iShowSpeed            (actual: 1320)
+  mastery_scroll_4:  600,   // CaseOh                (actual: 1320)
+  mastery_scroll_13: 700,   // George Floyd          (actual: 1320)
+  mastery_scroll_12: 800,   // Freddy Fazbear        (actual: 1320)
+  mastery_scroll_7:  900,   // Diddy                 (actual: 1320)
+  mastery_scroll_16: 1000,  // Kai Cenat             (actual: 1320)
+  mastery_scroll_9:  1100,  // Donald Trump          (actual: 1320)
+  mastery_scroll_17: 1100,  // Khaby Lame            (actual: 1320)
+  mastery_scroll_5:  1200,  // Charlie Kirk          (actual: 1320)
+  mastery_scroll_2:  1250,  // Adolf Hitler          (actual: 1320)
+  mastery_scroll_10: 1300,  // Drake                 (actual: 1320)
+  mastery_scroll_20: 1400,  // Ninja                 (actual: 1400)
+  mastery_scroll_22: 1500,  // State Trooper         (actual: 1500)
+  mastery_scroll_19: 1600,  // MrBeast               (actual: 1600)
+  mastery_scroll_8:  1700,  // Doakes                (actual: 1700)
+  mastery_scroll_21: 1800,  // Roy Lee               (actual: 1800)
+  mastery_scroll_14: 1900,  // Hillary Clinton       (actual: 1900)
+  mastery_scroll_6:  2000,  // Dexter                (actual: 2000)
+  mastery_scroll_11: 2400,  // Elon Musk             (actual: 2400)
+  mastery_scroll_18: 2500,  // Mark Zuckerberg       (actual: 2500)
+  mastery_scroll_25: 2800,  // Walter White          (actual: 2800)
+  mastery_scroll_23: 3050,  // Stephen Hawking       (actual: 3050)
 };
 
 export const EPSTEIN_BOT_ID = 'epstein';

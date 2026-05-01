@@ -21,7 +21,7 @@ This changes constantly (every second from the CPS tick, every cookie click, eve
 
 - `tokens` (bought with real money via Stripe, or won from `/spin`)
 - `account_tier` (bought with tokens)
-- `mastery_scroll_1`..`mastery_scroll_24` (won from gambling)
+- `mastery_scroll_1`..`mastery_scroll_25` (won from gambling)
 - `chess_beaten_bots`
 - `login_streak` / `last_login_date` / `hourly_streak` / `last_hourly_claim` / `fivemin_streak` / `last_5min_claim`
 - `redeemed` (one-time-redeem flags)
