@@ -1,21 +1,34 @@
+import { apply_building_buffs, apply_global_modifiers } from '../mastery_scrolls/scroll_effects';
 import { store } from '../shared/store';
 import {
   increment_game_data_field,
   update_game_data_field,
 } from '../shared/store/sessionSlice';
 import { api_save_game } from './api';
-import { SCROLL_EFFECTS } from '../mastery_scrolls/scroll_effects';
 
+// CPS calculation runs as a 3-stage compiler-like pipeline:
+//
+//   Stage 1 — collect raw per-building cps entries (count × base cps).
+//   Stage 2 — apply per-building scroll buffs.        (scroll_effects.js)
+//   Stage 3 — sum, then apply global cps modifiers.   (scroll_effects.js)
+//
+// Splitting it like this keeps each kind of buff in its own stage: a Diddy
+// multiplier (per-building, stage 2) doesn't get tangled up with a Shadow
+// Clone Jutsu multiplier (global, stage 3). New buffs slot into the right
+// stage as a single if-block — no orchestration code changes here.
 export function recalculate_cps() {
   const { game_data, buildings, premium_game_data } = store.getState().session;
   const pgd = premium_game_data ?? {};
-  const cps = Object.entries(game_data.buildings).reduce((total, [key, count]) => {
-    let building_cps = (buildings[key]?.cps ?? 0) * count;
-    for (const effect of Object.values(SCROLL_EFFECTS)) {
-      building_cps = effect(key, building_cps, pgd);
-    }
-    return total + building_cps;
-  }, 0);
+
+  const raw_entries = Object.entries(game_data.buildings).map(([key, count]) => ({
+    key,
+    count,
+    cps: (buildings[key]?.cps ?? 0) * count,
+  }));
+  const buffed_entries = apply_building_buffs(raw_entries, pgd);
+  const subtotal = buffed_entries.reduce((sum, entry) => sum + entry.cps, 0);
+  const cps = apply_global_modifiers(subtotal, pgd);
+
   store.dispatch(update_game_data_field({ key: 'cps', value: cps }));
 }
 
