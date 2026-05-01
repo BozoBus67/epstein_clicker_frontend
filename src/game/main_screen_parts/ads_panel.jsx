@@ -23,6 +23,18 @@ export default function Ads_Panel() {
     return () => clearInterval(interval);
   }, []);
 
+  // Preload + force-decode every ad image at mount. Without this, each
+  // rotation has to fetch (cache miss the first time) and synchronously
+  // decode the new image on the main thread — visible as a brief stutter
+  // in the cps counter and any other animation. With it, subsequent swaps
+  // are essentially free.
+  useEffect(() => {
+    ADS.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
+
   return (
     <div style={{
       flex: '1 1 0', height: '100%', position: 'relative', overflow: 'hidden',
@@ -32,9 +44,9 @@ export default function Ads_Panel() {
       {!dismissed && (
         <>
           <img
-            key={index}
             src={ADS[index]}
             draggable={false}
+            decoding="async"
             style={{ maxWidth: '80%', maxHeight: '65%', objectFit: 'contain', animation: 'ad-pulse 5s ease-in-out infinite' }}
           />
           <span style={{
