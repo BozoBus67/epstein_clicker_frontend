@@ -55,7 +55,7 @@ function Scroll_Panel({ scroll_id, count, image }) {
       onMouseLeave={() => set_tooltip_pos(null)}
       style={{
         width: '180px', borderRadius: '10px', overflow: 'visible',
-        background: theme.panel, border: `2px solid ${theme.panel_border}`,
+        background: theme.panel, border: '2px solid #000',
         display: 'flex', flexDirection: 'column', flexShrink: 0,
         position: 'relative',
       }}
