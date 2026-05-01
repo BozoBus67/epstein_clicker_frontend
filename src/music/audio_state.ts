@@ -23,6 +23,11 @@ import { songs } from './music_glob';
 
 export let playlist_entries: [string, string][] = Object.entries(songs);
 
+// True only when the build was opted into music bundling (Electron). The
+// vite config validates VITE_INCLUDE_MUSIC at build time, so by the time
+// this runs the value is guaranteed to be 'true' or 'false'.
+export const music_available: boolean = import.meta.env.VITE_INCLUDE_MUSIC === 'true';
+
 const playlist_subscribers = new Set<() => void>();
 
 export function subscribe_playlist(cb: () => void): () => void {

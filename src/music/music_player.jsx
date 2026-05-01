@@ -4,6 +4,7 @@ import {
   current_song_url, set_current_song_url,
   current_volume,
   playlist_entries, subscribe_playlist,
+  music_available,
 } from './audio_state';
 import { useTierGate } from '../shared/hooks';
 import { useTheme } from '../shared/theme';
@@ -66,10 +67,24 @@ export default function Music_Player() {
     }
   };
 
+  // When music isn't bundled (web build), we skip the tier gate entirely —
+  // the panel just informs the user the feature is desktop-only, so there's
+  // nothing to "unlock" by upgrading.
+  const handle_button_click = () => {
+    if (!music_available) {
+      setOpen(!open);
+      return;
+    }
+    gate(() => setOpen(!open));
+  };
+
   return (
     <div className="music-player-container" style={{ position: 'relative' }}>
-      <Music_Player_Button onClick={() => gate(() => setOpen(!open))} />
-      {open && <Music_Player_Panel entries={playlist_entries} on_song_click={on_song_click} current_url={current_url} />}
+      <Music_Player_Button onClick={handle_button_click} />
+      {open && (music_available
+        ? <Music_Player_Panel entries={playlist_entries} on_song_click={on_song_click} current_url={current_url} />
+        : <Music_Unavailable_Panel />
+      )}
       {lock_modal}
     </div>
   );
@@ -151,6 +166,32 @@ function Music_Player_Panel({ entries, on_song_click, current_url }) {
           </button>
         );
       })}
+    </div>
+  );
+}
+
+// Shown in place of Music_Player_Panel on web builds, where the mp3s aren't
+// bundled. Mirrors the panel's outer styling so the popover footprint is
+// the same whether the feature is available or not.
+function Music_Unavailable_Panel() {
+  return (
+    <div style={{
+      position: 'absolute',
+      top: '100%',
+      right: 0,
+      width: '260px',
+      background: 'white',
+      border: '1px solid #ddd',
+      borderRadius: '8px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+      padding: '14px 12px',
+      zIndex: 100,
+      fontSize: '13px',
+      color: '#111',
+      textAlign: 'center',
+      lineHeight: 1.4,
+    }}>
+      Music isn't available in the browser yet — try the desktop app.
     </div>
   );
 }
