@@ -10,7 +10,7 @@ import { api_daily_checkin, api_fivemin_checkin, api_hourly_checkin } from './ap
 import { CPS_TICK_MS, FIVEMIN_CHECKIN_MS, HOURLY_CHECKIN_MS, SAVE_INTERVAL_MS } from './constants';
 import Gamble_Modal from './gambling/gamble_modal';
 import Roulette_Modal from './gambling/roulette_modal';
-import { save_game_data } from './game_utils';
+import { recalculate_cps, save_game_data } from './game_utils';
 import Main_Body from './main_screen_parts/main_body';
 import Top_Bar from './main_screen_parts/top_bar';
 
@@ -18,6 +18,7 @@ export default function Main_Screen() {
   const dispatch = useDispatch();
   const is_logged_in = useSelector(state => state.session.is_logged_in);
   const game_data = useSelector(state => state.session.game_data);
+  const premium_game_data = useSelector(state => state.session.premium_game_data);
 
   const game_data_ref = useRef(game_data);
   const [daily_reward_data, set_daily_reward_data] = useState(null);
@@ -42,6 +43,18 @@ export default function Main_Screen() {
   useEffect(() => {
     game_data_ref.current = game_data;
   }, [game_data]);
+
+  // CPS depends on building counts and on which scrolls the user owns.
+  // Recalc whenever either changes — without this, scroll-driven buffs (e.g.
+  // Shadow Clone Jutsu's ×1000) wouldn't take effect until the user happened
+  // to buy another building, which is the only other place recalculate_cps
+  // currently fires from. Reads game_data.buildings (a stable Immer ref that
+  // only changes when buildings are bought) so the effect doesn't loop on
+  // its own cps-update dispatch.
+  useEffect(() => {
+    if (!game_data) return;
+    recalculate_cps();
+  }, [game_data?.buildings, premium_game_data]);
 
   // Auto-save every minute.
   useEffect(() => {
