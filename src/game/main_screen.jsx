@@ -142,9 +142,9 @@ export default function Main_Screen() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh' }}>
-      {daily_reward_data && <Reward_Popup title="Daily Reward!" streak_label="Day" data={daily_reward_data} on_close={() => set_daily_reward_data(null)} />}
-      {hourly_reward_data && <Reward_Popup title="Hourly Reward!" streak_label="Hour" data={hourly_reward_data} on_close={() => set_hourly_reward_data(null)} />}
-      {fivemin_reward_data && <Reward_Popup title="5 Minute Reward!" streak_label="x" data={fivemin_reward_data} on_close={() => set_fivemin_reward_data(null)} />}
+      {daily_reward_data && <Reward_Popup title="Daily Reward!" data={daily_reward_data} on_close={() => set_daily_reward_data(null)} />}
+      {hourly_reward_data && <Reward_Popup title="Hourly Reward!" data={hourly_reward_data} on_close={() => set_hourly_reward_data(null)} />}
+      {fivemin_reward_data && <Reward_Popup title="5 Minute Reward!" data={fivemin_reward_data} on_close={() => set_fivemin_reward_data(null)} />}
       {show_gamble && <Gamble_Modal on_close={() => set_show_gamble(false)} />}
       {show_roulette && <Roulette_Modal on_close={() => set_show_roulette(false)} />}
       <Section name="top bar">
@@ -200,13 +200,13 @@ function Settings_Button() {
   );
 }
 
-function Reward_Popup({ title, streak_label, data, on_close }) {
+function Reward_Popup({ title, data, on_close }) {
   const theme = useTheme();
   useEscapeKey(on_close);
   return (
     <Modal_Overlay panel_style={{ alignItems: 'center', textAlign: 'center', minWidth: '280px' }}>
       <h2 style={{ color: theme.accent, margin: 0, fontSize: '28px', fontWeight: 'bold' }}>{title}</h2>
-      <p style={{ margin: 0 }}>Streak: {streak_label} {data.streak}</p>
+      <p style={{ margin: 0 }}>Streak: {data.streak}</p>
       <p style={{ margin: 0 }}>Tokens granted: {data.tokens_granted}</p>
       <button
         type="button"
