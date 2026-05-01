@@ -33,7 +33,7 @@ export default function Sign_Up_Screen() {
       dispatch(login({ user: data.user }));
       navigate('/game');
     } catch (err) {
-      set_error(err?.detail || 'An unknown error occurred — please try again.');
+      set_error(err?.detail || 'Error: An unknown error occurred — please try again.');
     } finally {
       set_loading(false);
     }

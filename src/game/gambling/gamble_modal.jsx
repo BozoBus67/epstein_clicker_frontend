@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
+import { Modal_Overlay } from '../../shared/components';
 import { SCROLL_NAMES } from '../../shared/constants';
 import { useEscapeKey } from '../../shared/hooks';
+import { SCROLL_FACES } from '../../shared/scroll_faces';
 import { increment_premium_game_data_field, update_premium_game_data_field } from '../../shared/store/sessionSlice';
 import { useTheme } from '../../shared/theme';
 import { api_spin } from '../api';
-import { SCROLL_FACES } from '../../shared/scroll_faces';
 import { SLOT_FRAME_MS, LEVER_RESET_MS } from './constants';
 
 export default function Gamble_Modal({ on_close }) {
@@ -30,7 +31,7 @@ export default function Gamble_Modal({ on_close }) {
       set_subset_indices(data.subset_indices);
       set_frame(0);
     } catch (err) {
-      toast.error(err?.detail || 'Spin failed.');
+      toast.error(err?.detail || 'Error: Spin failed.');
     }
   };
 
@@ -60,38 +61,30 @@ export default function Gamble_Modal({ on_close }) {
     : Array(5).fill(null);
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
+    <Modal_Overlay panel_style={{
+      width: '580px', height: '280px', padding: 0, gap: '20px', minWidth: 0,
+      alignItems: 'center', justifyContent: 'center', position: 'relative',
     }}>
-      <div style={{ position: 'relative' }}>
-        <div style={{
-          background: theme.panel, border: `2px solid ${theme.panel_border}`, borderRadius: '12px',
-          width: '580px', height: '280px', display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center', gap: '20px', color: theme.text,
-        }}>
-          <span style={{ color: theme.accent, fontWeight: 'bold', fontSize: '15px' }}>
-            Tokens: {(premium_game_data?.tokens ?? 0).toLocaleString()}
-          </span>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            {current_digits.map((d, i) => (
-              <Slot_Card key={i} face_index={d === null || subset_indices === null ? null : subset_indices[d]} />
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={on_close}
-            disabled={is_spinning}
-            style={{ background: theme.button_neutral_bg, color: theme.button_neutral_text, border: 'none', borderRadius: '6px', padding: '8px 20px', cursor: is_spinning ? 'default' : 'pointer' }}
-          >
-            Close
-          </button>
-        </div>
-        <div style={{ position: 'absolute', right: 0, top: '50%' }}>
-          <Lever on_pull={handle_pull} />
-        </div>
+      <span style={{ color: theme.accent, fontWeight: 'bold', fontSize: '15px' }}>
+        Tokens: {(premium_game_data?.tokens ?? 0).toLocaleString()}
+      </span>
+      <div style={{ display: 'flex', gap: '16px' }}>
+        {current_digits.map((d, i) => (
+          <Slot_Card key={i} face_index={d === null || subset_indices === null ? null : subset_indices[d]} />
+        ))}
       </div>
-    </div>
+      <button
+        type="button"
+        onClick={on_close}
+        disabled={is_spinning}
+        style={{ background: theme.button_neutral_bg, color: theme.button_neutral_text, border: 'none', borderRadius: '6px', padding: '8px 20px', cursor: is_spinning ? 'default' : 'pointer' }}
+      >
+        Close
+      </button>
+      <div style={{ position: 'absolute', right: 0, top: '50%' }}>
+        <Lever on_pull={handle_pull} />
+      </div>
+    </Modal_Overlay>
   );
 }
 

@@ -13,7 +13,7 @@ import Refresh_Button from './refresh_button';
 export default function Async_Refresh_Button({
   on_click,
   success_message = 'Reloaded.',
-  error_message = 'Reload failed.',
+  error_message = 'Error: Reload failed.',
   ...rest
 }) {
   const [loading, set_loading] = useState(false);

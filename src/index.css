@@ -18,10 +18,6 @@ body {
   background: #1a1a2e;
 }
 
-h1, h2, h3 {
-  font-family: 'Cinzel', serif;
-}
-
 input, select, textarea {
   font-family: 'Nunito', system-ui, sans-serif;
 }

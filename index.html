@@ -10,8 +10,20 @@
          window.onYouTubeIframeAPIReady once it's ready. Used by music_player.jsx. -->
     <script src="https://www.youtube.com/iframe_api" async></script>
   </head>
-  <body>
-    <div id="app"></div>
+  <body style="margin: 0;">
+    <!-- Pre-React loading state. Visible from the moment the HTML lands until
+         React mounts and replaces the contents of #app. Covers Phase 2 of
+         startup: the browser downloading + parsing the JS bundle. Inline-
+         styled deliberately, no external CSS — so it shows up before
+         anything else has had a chance to load. -->
+    <div id="app">
+      <div style="display: flex; flex-direction: column; width: 100vw; height: 100vh; justify-content: center; align-items: center; background: #1a1a2e; color: #facc15; font-family: system-ui, -apple-system, sans-serif; font-weight: bold; font-size: 18px; letter-spacing: 0.05em; gap: 12px; text-align: center; padding: 0 24px; box-sizing: border-box;">
+        <div>Loading the app...</div>
+        <div style="font-size: 13px; font-weight: normal; color: #aaa; letter-spacing: 0; max-width: 480px; line-height: 1.4;">
+          Your browser is downloading and unpacking the app bundle. First visit (or after clearing cache) can take a few seconds.
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/renderer.jsx"></script>
   </body>
 </html>

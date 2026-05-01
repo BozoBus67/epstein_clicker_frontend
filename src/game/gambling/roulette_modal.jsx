@@ -28,7 +28,7 @@ export default function Roulette_Modal({ on_close }) {
       dispatch(update_premium_game_data_field({ key: 'tokens', value: data.tokens_remaining }));
       const winning_index = SCROLL_IDS.indexOf(data.scroll_id);
       if (winning_index === -1) {
-        toast.error(`Unknown scroll: ${data.scroll_id}`);
+        toast.error(`Error: Unknown scroll: ${data.scroll_id}`);
         return;
       }
       pending_win_ref.current = data.scroll_id;
@@ -38,7 +38,7 @@ export default function Roulette_Modal({ on_close }) {
       set_is_spinning(true);
       set_rotation(target);
     } catch (err) {
-      toast.error(err?.detail || 'Spin failed.');
+      toast.error(err?.detail || 'Error: Spin failed.');
     }
   };
 

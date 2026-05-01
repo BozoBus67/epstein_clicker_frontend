@@ -34,7 +34,7 @@ export default function Main_Screen() {
       // Auto-save fires every minute, so dedupe via toast id — a single
       // persistent error indicator is better than 60 stacked failure toasts
       // when the network is flaky.
-      toast.error(e?.detail || 'Save failed.', { id: 'save-error' });
+      toast.error(e?.detail || 'Error: Save failed.', { id: 'save-error' });
     }
   };
 
@@ -71,7 +71,7 @@ export default function Main_Screen() {
         if (!data.already_checked_in) set_daily_reward_data(data);
         if (data.premium_game_data) dispatch(update_premium_game_data(data.premium_game_data));
       } catch (e) {
-        toast.error(e?.detail || 'Daily check-in failed.', { id: 'daily-checkin-error' });
+        toast.error(e?.detail || 'Error: Daily check-in failed.', { id: 'daily-checkin-error' });
       }
     };
     do_checkin();
@@ -89,7 +89,7 @@ export default function Main_Screen() {
         if (!data.already_checked_in) set_reward(data);
         if (data.premium_game_data) dispatch(update_premium_game_data(data.premium_game_data));
       } catch (e) {
-        toast.error(e?.detail || 'Check-in failed.', { id: error_id });
+        toast.error(e?.detail || 'Error: Check-in failed.', { id: error_id });
       }
     };
 
@@ -192,7 +192,7 @@ function Reward_Popup({ title, streak_label, data, on_close }) {
   useEscapeKey(on_close);
   return (
     <Modal_Overlay panel_style={{ alignItems: 'center', textAlign: 'center', minWidth: '280px' }}>
-      <h2 style={{ color: theme.accent, margin: 0 }}>{title}</h2>
+      <h2 style={{ color: theme.accent, margin: 0, fontSize: '28px', fontWeight: 'bold' }}>{title}</h2>
       <p style={{ margin: 0 }}>Streak: {streak_label} {data.streak}</p>
       <p style={{ margin: 0 }}>Tokens granted: {data.tokens_granted}</p>
       <button

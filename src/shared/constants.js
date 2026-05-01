@@ -85,7 +85,7 @@ export const SCROLL_DESCRIPTIONS = {
   mastery_scroll_18: 'Not yet implemented',
   mastery_scroll_19: 'Not yet implemented',
   mastery_scroll_20: 'Not yet implemented',
-  mastery_scroll_21: 'Not yet implemented',
+  mastery_scroll_21: 'Unlocks light mode',
   mastery_scroll_22: 'Not yet implemented',
   mastery_scroll_23: 'Not yet implemented',
   mastery_scroll_24: 'Not yet implemented',

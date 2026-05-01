@@ -22,7 +22,7 @@ export default function Auction_House_Screen() {
   const refresh = () => api_get_listings().then(set_listings);
 
   useEffect(() => {
-    refresh().catch(e => toast.error(e?.detail || 'Failed to load listings.', { id: 'load-listings-error' }));
+    refresh().catch(e => toast.error(e?.detail || 'Error: Failed to load listings.', { id: 'load-listings-error' }));
   }, []);
 
   return (
@@ -105,7 +105,7 @@ function Refresh_Listings_Button({ on_click }) {
     <Async_Refresh_Button
       on_click={on_click}
       success_message="Listings refreshed."
-      error_message="Failed to refresh listings."
+      error_message="Error: Failed to refresh listings."
       title="Refresh listings"
       style={{ position: 'fixed', bottom: '24px', left: '24px' }}
     />
@@ -187,7 +187,7 @@ function Create_Listing_Modal({ on_close, on_created }) {
       toast.success('Listing created!');
       on_created();
     } catch (e) {
-      toast.error(e?.detail || 'Something went wrong.');
+      toast.error(e?.detail || 'Error: Something went wrong.');
     } finally {
       set_loading(false);
     }
@@ -261,7 +261,7 @@ function Buy_Listing_Modal({ listing, on_close, on_bought }) {
       toast.success('Purchase complete!');
       on_bought();
     } catch (e) {
-      toast.error(e?.detail || 'Something went wrong.');
+      toast.error(e?.detail || 'Error: Something went wrong.');
     } finally {
       set_loading(false);
     }
@@ -291,7 +291,7 @@ function Cancel_Listing_Modal({ listing, on_close, on_cancelled }) {
       toast.success('Listing cancelled, items refunded');
       on_cancelled();
     } catch (e) {
-      toast.error(e?.detail || 'Something went wrong.');
+      toast.error(e?.detail || 'Error: Something went wrong.');
     } finally {
       set_loading(false);
     }

@@ -34,13 +34,15 @@ function notify(): void {
 
 // Fetches once at app boot from App.jsx. Errors set playlist_load_error
 // so the panel can surface a real message instead of silently empty.
-// Shuffled on load so each session starts on a different track; the
-// tier-gated Shuffle_Button only gates *manual re-shuffles*, not this.
+// Sorted alphabetically by title on load so the order is stable across
+// sessions. Manual shuffling stays available via the tier-gated
+// Shuffle_Button.
 export async function load_playlist(): Promise<void> {
   try {
     const data: { video_id: string; title: string }[] = await api_get_playlist();
-    playlist_entries = data.map(({ title, video_id }) => [title, video_id]);
-    shuffle_in_place(playlist_entries);
+    playlist_entries = data
+      .map(({ title, video_id }) => [title, video_id] as Playlist_Entry)
+      .sort(([a], [b]) => a.localeCompare(b));
     playlist_load_error = null;
   } catch (e: any) {
     playlist_load_error = e?.detail || 'Failed to load playlist.';

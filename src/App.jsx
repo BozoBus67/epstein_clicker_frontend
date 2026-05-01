@@ -22,19 +22,31 @@ export default function App() {
   const [checking_session, set_checking_session] = useState(true);
 
   useEffect(() => {
-    restore_session(dispatch).finally(() => set_checking_session(false));
+    // Phase 3 startup. Two paths:
+    //   - No cached session → render Auth_Shell immediately, fetch metadata
+    //     in the background (Auth_Shell doesn't read it).
+    //   - Cached session → wait for /me to validate the JWT before flipping
+    //     the gate, since Game_Shell needs a logged-in user to render.
+    // Metadata always loads in the background regardless — by the time the
+    // user finishes typing their password, it's almost certainly done.
+    bootstrap_metadata(dispatch);
+    bootstrap_session(dispatch)
+      .catch(err => console.error('[bootstrap] session restore failed:', err))
+      .finally(() => set_checking_session(false));
     // Fire-and-forget: builds the persistent YT.Player iframe under <body>.
     // Lives independently of any screen so audio survives navigation.
     init_yt_player();
   }, []);
 
-  if (checking_session) return <Loading_Screen />;
-
+  // Toaster mounts above the loading gate so the slow-backend toast (and any
+  // other bootstrap-time feedback) actually has somewhere to render.
   return (
     <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Themed_Toaster />
       <Error_Boundary>
-        {is_logged_in ? <Game_Shell /> : <Auth_Shell />}
+        {checking_session
+          ? <Loading_Screen />
+          : (is_logged_in ? <Game_Shell /> : <Auth_Shell />)}
       </Error_Boundary>
     </HashRouter>
   );
@@ -100,28 +112,40 @@ function Themed_Toaster() {
   );
 }
 
-// Bootstrap the app's Redux state on mount: fetch the metadata that the
-// frontend needs in memory regardless of auth (account tiers, building defs,
-// scroll defs), then attempt to restore the user's session via /me. Silent
-// failure on /me means we sign the user out — they'll see the auth shell.
-async function restore_session(dispatch) {
-  const [{ data: { session } }, account_tiers, buildings, scrolls] = await Promise.all([
-    supabase.auth.getSession(),
-    get('/account_tiers'),
-    get('/get_building_metadata'),
-    get('/get_scroll_metadata'),
-    load_playlist(),
-  ]);
-  dispatch(set_account_tiers(account_tiers));
-  dispatch(set_buildings(buildings));
-  dispatch(set_scrolls(scrolls));
+// Fetches the static metadata Game_Shell needs (account tiers, building defs,
+// scroll defs, music playlist). Fire-and-forget — Auth_Shell doesn't read any
+// of these, so we don't block the loading screen on them. By the time a user
+// finishes typing their password, these promises are virtually always done.
+// Errors don't propagate; they're logged for debugging and Game_Shell renders
+// with empty fallbacks (which is fine — the user can hit the refresh button).
+async function bootstrap_metadata(dispatch) {
+  try {
+    const [account_tiers, buildings, scrolls] = await Promise.all([
+      get('/account_tiers'),
+      get('/get_building_metadata'),
+      get('/get_scroll_metadata'),
+      load_playlist(),
+    ]);
+    dispatch(set_account_tiers(account_tiers));
+    dispatch(set_buildings(buildings));
+    dispatch(set_scrolls(scrolls));
+  } catch (err) {
+    console.error('[bootstrap] metadata fetch failed:', err);
+  }
+}
+
+// Validates the cached Supabase session (if any) against /me. Cleared session
+// → returns immediately so Auth_Shell renders right away. Cached-but-invalid
+// session → local-only sign-out so we don't make a doomed /logout call (see
+// auth/README.md).
+async function bootstrap_session(dispatch) {
+  const { data: { session } } = await supabase.auth.getSession();
   if (!session) return;
   try {
     const data = await api_me();
     dispatch(login({ user: data.user }));
     notify_migration(data.migration_info);
   } catch {
-    // Local-scope so we don't make a doomed /logout call. See auth/README.md.
     await supabase.auth.signOut({ scope: 'local' });
   }
 }

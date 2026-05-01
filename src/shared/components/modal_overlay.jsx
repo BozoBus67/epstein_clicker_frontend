@@ -16,7 +16,7 @@ export default function Modal_Overlay({ children, panel_style }) {
       display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
     }}>
       <div style={{
-        background: theme.panel,
+        background: theme.modal_panel,
         border: `2px solid ${theme.panel_border}`,
         borderRadius: '12px',
         padding: '32px',

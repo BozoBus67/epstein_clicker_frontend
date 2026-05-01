@@ -65,23 +65,38 @@ const STATUS_FALLBACK_MESSAGES = {
   504: 'Server is waking up — try again in a moment.',
 };
 
+// Two paths here, deliberately distinguished — see the README's "Error
+// messages and logs" principle.
+//
+//  - Backend returned a `detail` → it's a deliberate user-readable message
+//    about a business rule (e.g. "Buy the previous tier first"). NOT a
+//    system error. Display it verbatim, no "Error:" prefix, no HTTP suffix.
+//
+//  - No `detail` (or network failure) → genuinely unexpected. Prefix with
+//    "Error:" so users (and we) can tell something actually went wrong vs.
+//    being told no by the backend on purpose. Suffix the HTTP status too —
+//    someone fluent in HTTP can immediately tell auth (401), permission
+//    (403), server error (5xx) apart without opening DevTools.
 export function make_error(res, data) {
   const backend_detail = data?.detail;
+  if (backend_detail) {
+    const err = new Error(backend_detail);
+    err.detail = backend_detail;
+    err.status = res.status;
+    err.backend_detail = backend_detail;
+    return err;
+  }
   const fallback = STATUS_FALLBACK_MESSAGES[res.status] ?? 'Request failed.';
-  const message = backend_detail || fallback;
-  // Suffix the HTTP status so it's visible in any toast or error display —
-  // someone fluent in HTTP can immediately tell auth (401), permission (403),
-  // server error (5xx), etc. apart without opening DevTools.
-  const detail = `${message} (HTTP ${res.status})`;
+  const detail = `Error: ${fallback} (HTTP ${res.status})`;
   const err = new Error(detail);
   err.detail = detail;
   err.status = res.status;
-  err.backend_detail = backend_detail ?? null;  // raw backend message without the suffix, for tests/logging
+  err.backend_detail = null;
   return err;
 }
 
 function network_error() {
-  const err = new Error('Cannot reach server. Check your connection or try again.');
+  const err = new Error('Error: Cannot reach server. Check your connection or try again.');
   err.detail = err.message;
   return err;
 }

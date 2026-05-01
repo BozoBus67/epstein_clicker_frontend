@@ -86,7 +86,7 @@ export default function Buy_Premium_Screen() {
       toast.success(`Upgraded to ${ACCOUNT_TIER_NAMES[selected.id]}!`);
       set_selected(null);
     } catch (e) {
-      toast.error(e?.message || 'Purchase failed.');
+      toast.error(e?.message || 'Error: Purchase failed.');
     } finally {
       set_loading(false);
     }

@@ -65,7 +65,7 @@ export default function Login_Details_Screen() {
       toast.success('Login details updated.');
       navigate('/game/settings');
     } catch (e) {
-      toast.error(e?.message || 'Something went wrong.');
+      toast.error(e?.message || 'Error: Something went wrong.');
     } finally {
       set_loading(false);
     }

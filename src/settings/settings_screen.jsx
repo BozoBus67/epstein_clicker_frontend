@@ -25,7 +25,7 @@ export default function Settings_Screen() {
       dispatch(update_game_data(data.game_data));
       toast.success('Game reset.');
     } catch (e) {
-      toast.error(e?.detail || 'Reset failed.');
+      toast.error(e?.detail || 'Error: Reset failed.');
     }
     set_show_reset_confirmation(false);
   };
@@ -63,53 +63,96 @@ function Settings_Screen_Body({ on_reset_click }) {
     <>
       <Change_Login_Details_Button />
       <Get_Discord_Button />
-      <Theme_Toggle_Button />
+      <Theme_Picker />
       <Reset_Save_Button on_click={on_reset_click} />
       <Log_Out_Button />
     </>
   );
 }
 
-function Theme_Toggle_Button() {
+// Themes available + their display labels. Order matters — radios render in
+// this sequence. Locked themes (light needs State Trooper, dark needs George
+// Floyd) surface a backend 403 as a toast on click; we don't filter the list
+// client-side because scroll counts can change at any time and the backend is
+// the source of truth for what's unlocked.
+const THEMES = ['default', 'light', 'dark'];
+const THEME_LABELS = { default: 'Default 🏛️', light: 'Light ☀', dark: 'Dark ☾' };
+
+// Shared style for the regular settings buttons (Change Login Details, Get
+// Discord, Reset Save). Reads from the active palette so each theme's buttons
+// look themed instead of hardcoded gray.
+function neutral_button_style(theme) {
+  return {
+    padding: '8px 24px',
+    borderRadius: '8px',
+    background: theme.button_neutral_bg,
+    color: theme.button_neutral_text,
+    border: `2px solid ${theme.panel_border}`,
+    fontWeight: 'bold',
+    cursor: 'pointer',
+  };
+}
+
+function Theme_Picker() {
   const dispatch = useDispatch();
   const pgd = useSelector(state => state.session.premium_game_data);
   const theme = useTheme();
-  const current = pgd?.theme ?? 'light';
-  const next = current === 'light' ? 'dark' : 'light';
+  const current = pgd?.theme ?? 'default';
 
-  const handle = async () => {
+  const set_theme = async (name) => {
+    if (name === current) return;
     try {
-      await api_set_theme(next);
-      dispatch(update_premium_game_data_field({ key: 'theme', value: next }));
+      await api_set_theme(name);
+      dispatch(update_premium_game_data_field({ key: 'theme', value: name }));
     } catch (err) {
-      toast.error(err?.detail || err?.message || 'Failed to set theme');
+      toast.error(err?.detail || err?.message || 'Error: Failed to set theme.');
     }
   };
 
   return (
-    <button
-      type="button"
-      onClick={handle}
-      style={{
-        padding: '8px 24px', borderRadius: '8px',
-        background: theme.accent, color: theme.accent_text,
-        border: `2px solid ${theme.panel_border}`, fontWeight: 'bold', cursor: 'pointer',
-      }}
-    >
-      Theme: {current === 'light' ? 'Light ☀' : 'Dark ☾'} (click to toggle)
-    </button>
+    <div style={{
+      display: 'flex',
+      gap: '4px',
+      padding: '4px',
+      borderRadius: '10px',
+      background: theme.panel_secondary,
+      border: `2px solid ${theme.panel_border}`,
+    }}>
+      {THEMES.map(name => {
+        const active = name === current;
+        return (
+          <button
+            key={name}
+            type="button"
+            onClick={() => set_theme(name)}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              background: active ? theme.accent : 'transparent',
+              color: active ? theme.accent_text : theme.text,
+              border: 'none',
+              fontWeight: 'bold',
+              cursor: active ? 'default' : 'pointer',
+            }}
+          >
+            {THEME_LABELS[name]}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
 function Change_Login_Details_Button() {
   const navigate = useNavigate();
+  const theme = useTheme();
   const { gate, lock_modal } = useTierGate(3);
   return (
     <>
       <button
         type="button"
         onClick={() => gate(() => navigate('/game/settings/login-details'))}
-        className="bg-gray-500 text-white py-2 px-6 rounded-lg hover:bg-gray-600 active:bg-gray-700 transition"
+        style={neutral_button_style(theme)}
       >
         Change Login Details
       </button>
@@ -119,6 +162,7 @@ function Change_Login_Details_Button() {
 }
 
 function Get_Discord_Button() {
+  const theme = useTheme();
   const { gate, lock_modal } = useTierGate(5);
   const [discord, set_discord] = useState(null);
 
@@ -127,7 +171,7 @@ function Get_Discord_Button() {
       const data = await api_get_my_discord();
       set_discord(data.discord);
     } catch (e) {
-      toast.error(e?.detail || e?.message || 'Failed to fetch Discord');
+      toast.error(e?.detail || e?.message || 'Error: Failed to fetch Discord.');
     }
   };
 
@@ -136,7 +180,7 @@ function Get_Discord_Button() {
       <button
         type="button"
         onClick={() => gate(handle_click)}
-        className="bg-gray-500 text-white py-2 px-6 rounded-lg hover:bg-gray-600 active:bg-gray-700 transition"
+        style={neutral_button_style(theme)}
       >
         Get My Discord
       </button>
@@ -147,11 +191,12 @@ function Get_Discord_Button() {
 }
 
 function Reset_Save_Button({ on_click }) {
+  const theme = useTheme();
   return (
     <button
       type="button"
       onClick={on_click}
-      className="bg-gray-500 text-white py-2 px-6 rounded-lg hover:bg-gray-600 active:bg-gray-700 transition"
+      style={neutral_button_style(theme)}
     >
       Reset Save
     </button>
@@ -166,14 +211,26 @@ function Log_Out_Button() {
     stop_player();
     await supabase.auth.signOut();
     dispatch(logout());
-    navigate('/login');
+    // No navigate needed — Auth_Shell's catch-all (Auth_Default_Redirect) sees
+    // we're at /game/settings (not at /), so it lands on /login automatically.
+    // First-time visitors arriving at / still get /signup the same way.
   };
 
+  // Log Out stays red across all themes — "danger" should look like danger
+  // regardless of palette, and a themed log-out button would lose that signal.
   return (
     <button
       type="button"
       onClick={handle_logout}
-      className="bg-red-500 text-white py-2 px-6 rounded-lg hover:bg-red-600 active:bg-red-700 transition"
+      style={{
+        padding: '8px 24px',
+        borderRadius: '8px',
+        background: '#ef4444',
+        color: 'white',
+        border: 'none',
+        fontWeight: 'bold',
+        cursor: 'pointer',
+      }}
     >
       Log Out
     </button>

@@ -62,7 +62,7 @@ export default function Chess_Game_Screen() {
             key: 'chess_beaten_bots',
             value: data.chess_beaten_bots,
           })))
-          .catch(e => toast.error(e?.detail || 'Failed to save chess progress.'));
+          .catch(e => toast.error(e?.detail || 'Error: Failed to save chess progress.'));
       }
     } else if (chess.isDraw() || chess.isStalemate() || chess.isThreefoldRepetition()) {
       set_outcome('draw');
@@ -84,7 +84,7 @@ export default function Chess_Game_Screen() {
       set_position(chess.fen());
       check_outcome();
     } catch (e) {
-      toast.error(e?.message || 'Chess engine failed to move.', { id: 'engine-move-error' });
+      toast.error(e?.message || 'Error: Chess engine failed to move.', { id: 'engine-move-error' });
     } finally {
       set_is_thinking(false);
     }

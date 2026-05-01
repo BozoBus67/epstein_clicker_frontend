@@ -24,7 +24,7 @@ Error messages and logs should be as specific as possible. Identify which subsys
 
 ### Comments stay short — long context belongs in a README
 
-Don't clutter a file that is primarily code with long comments. Comments that are longer than 3 lines should go in the subfolder's README. A comment is a comment. 
+Don't clutter a file that is primarily code with long comments. Comments that are longer than 3 lines should go in the subfolder's README. A comment is a comment. The sole exception to this rule is App.jsx. 
 
 No "File map" sections, AI likes to do this for some reason. The folder should be organized well enough that the list of files themselves is self-documenting. 
 
@@ -59,7 +59,11 @@ In VS Code, you can press `Cmd+K Cmd+0` to collapse every function. The result i
 
 Both inline styles and Tailwind are used in this project. Either is fine. The most important aspect is again readability. 
 
-## Specifics
+### Feature vs Error
+
+React toasts are used frequently in this project. They are used both for feature purposes, and to log errors. This may be changed in the future. 
+
+If a toast starts with Error: ... it's an error, if not then it's a feature. 
 
 ### Code
 
