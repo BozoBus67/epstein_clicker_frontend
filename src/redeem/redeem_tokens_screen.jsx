@@ -63,7 +63,7 @@ function Redeem_Tokens_Screen_Body({ on_open_poisson_modal, on_open_promotion_mo
   };
   return (
     <>
-      <h1 style={{ color: theme.accent, marginBottom: '8px' }}>One time offers!</h1>
+      <h1 style={{ color: theme.accent, marginBottom: '8px', fontWeight: 'bold' }}>One time offers!</h1>
       <p style={{ color: theme.text_muted, marginBottom: '24px' }}>Placeholder description text.</p>
       <button
         type="button"
