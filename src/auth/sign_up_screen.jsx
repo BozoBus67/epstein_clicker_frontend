@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import jeffery_epstein_blurry from '../assets/game_screen/jeffery_epstein_blurry.png';
+import jeffrey_epstein_blurry from '../assets/game_screen/jeffrey_epstein_blurry.png';
 import { login } from '../shared/store/sessionSlice';
 import { supabase } from '../shared/supabase_client';
 import { api_signup } from './api';
@@ -46,7 +46,7 @@ export default function Sign_Up_Screen() {
       height: '100vh',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundImage: `url(${jeffery_epstein_blurry})`,
+      backgroundImage: `url(${jeffrey_epstein_blurry})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
     }}>
