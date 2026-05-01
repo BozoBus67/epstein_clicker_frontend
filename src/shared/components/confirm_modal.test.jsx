@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { configureStore } from '@reduxjs/toolkit';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import sessionReducer, { login } from '../store/sessionSlice';
 import Confirm_Modal from './confirm_modal';
 

@@ -85,3 +85,7 @@ For things that read-then-modify (like incrementing a counter), use the incremen
 ### Side benefit
 
 Before the fix, modals had `pgd_ref` workarounds (`useRef` + `useEffect` to keep the ref pointing at the latest pgd snapshot) so async handlers could spread the *latest* state at dispatch time. Once we switched to field reducers, those refs became unnecessary — the reducer reads state directly. Keep an eye out for that pattern in any other folders; if you see a ref tracking redux state, it's probably leftover scaffolding from this same race.
+
+### Regression test
+
+The "two field updates targeting different keys both apply" scenario is locked in by `sessionSlice.test.js` (see the **lost-update race regression** `describe` block). Anyone refactoring the field-granular reducers in a way that re-introduces the bug will fail those tests.

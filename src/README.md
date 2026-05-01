@@ -34,3 +34,17 @@ Codebase-wide rules for the Vite/React frontend. Per-feature READMEs in each fol
 - **Redux for cross-component server-backed state** — `session.session_data`, `session.game_data`, `session.premium_game_data` are mirrored from the backend. Updates dispatch through `update_*` reducers in `shared/store/sessionSlice.js`.
 - **`useState` for local form/UI state** — anything that doesn't need to persist or be shared across components.
 - **localStorage only via Supabase auth** — the Supabase client owns the session token in localStorage. Don't use localStorage directly for app data; round-trip through the backend so it persists per-account, not per-browser.
+- **Field-granular reducers** — when updating one field on `game_data` or `premium_game_data`, prefer `update_*_field({ key, value })` or `increment_*_field({ key, amount })` over the whole-object `update_*_data` reducers. The whole-object pattern (spread + override) is race-prone for async updates. See `shared/store/README.md` for the full story.
+
+## Testing
+
+Tests use [vitest](https://vitest.dev/) — Vite's native test runner — with `@testing-library/react` for component tests. Run:
+
+- `npm test` — watch mode (default; reruns affected tests as you edit).
+- `npm test -- run` — one-shot CI-style run.
+- `npx vitest list` — show every test file vitest discovered.
+- `npx vitest --ui` — visual dashboard (requires `@vitest/ui`).
+
+Convention: tests live colocated next to source as `*.test.js` / `*.test.jsx`. The "index" of tests is the auto-discovered set — there's no manual manifest by design.
+
+What's tested in Tier 1 (today): reducers, pure utility functions, and core shared components (`Confirm_Modal`). Tier 2 (later) adds screen-level component tests + game logic tests as need arises.

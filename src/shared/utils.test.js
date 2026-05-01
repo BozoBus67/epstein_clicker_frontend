@@ -1,13 +1,18 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { tier_num, notify_migration } from './utils';
 import toast from 'react-hot-toast';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { notify_migration, tier_num } from './utils';
 
 // react-hot-toast doesn't actually render anything when called from a test
-// without a Toaster mounted, so we just spy on it and assert call counts /
-// arguments.
-vi.mock('react-hot-toast', () => ({
-  default: Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn() }),
-}));
+// without a Toaster mounted, so we replace it with spies and assert call
+// counts / arguments. The library exposes both a callable default
+// (`toast(...)`) and named methods (`toast.success(...)`, `toast.error(...)`),
+// so the mock has to be a function with those methods attached.
+vi.mock('react-hot-toast', () => {
+  const mock_toast = vi.fn();
+  mock_toast.success = vi.fn();
+  mock_toast.error = vi.fn();
+  return { default: mock_toast };
+});
 
 beforeEach(() => {
   vi.clearAllMocks();

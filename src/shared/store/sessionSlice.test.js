@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
 import { configureStore } from '@reduxjs/toolkit';
+import { beforeEach, describe, expect, it } from 'vitest';
 import sessionReducer, {
   login,
   logout,
