@@ -17,8 +17,25 @@ export function useAnimatedQuantity(quantity, cps) {
   const base_ref = useRef({ quantity, cps, time: performance.now() });
   const last_paint_ref = useRef(0);
 
+  // When quantity/cps change (click, grant, building purchase), commit the
+  // displayed value immediately instead of waiting up to DISPLAY_TICK_MS for
+  // the RAF gate to fire. Two flutter sources this fixes:
+  //   1. Click-then-stale: click bumps redux but displayed lagged 0–50ms.
+  //   2. Backwards step: CPS interpolation gets ahead of redux quantity, and
+  //      naive rebase would snap displayed downward to the smaller real
+  //      value. We pin to max(projected, quantity) on additive changes; on
+  //      decreases (spending cookies on a building) we snap to the new
+  //      smaller value, since the user genuinely has fewer cookies now.
   useEffect(() => {
-    base_ref.current = { quantity, cps, time: performance.now() };
+    const now = performance.now();
+    const old = base_ref.current;
+    const projected = old.quantity + old.cps * (now - old.time) / 1000;
+    const new_displayed = quantity >= old.quantity
+      ? Math.max(Math.floor(projected), quantity)
+      : quantity;
+    base_ref.current = { quantity: new_displayed, cps, time: now };
+    set_displayed(new_displayed);
+    last_paint_ref.current = now;
   }, [quantity, cps]);
 
   useEffect(() => {
