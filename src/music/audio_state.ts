@@ -35,20 +35,35 @@ function notify(): void {
 // Fetches once at app boot from App.jsx. Errors set playlist_load_error
 // so the panel can surface a real message instead of silently empty.
 // Sorted alphabetically by title on load so the order is stable across
-// sessions. Manual shuffling stays available via the tier-gated
-// Shuffle_Button.
+// sessions, with songs whose title starts with a special character (`[`,
+// `(`, `!`, `"`, `★`, etc.) bucketed at the end — Unicode collation
+// would otherwise put them first, which makes the panel start with weird
+// noise. Manual shuffling stays available via the tier-gated Shuffle_Button.
 export async function load_playlist(): Promise<void> {
   try {
     const data: { video_id: string; title: string }[] = await api_get_playlist();
     playlist_entries = data
       .map(({ title, video_id }) => [title, video_id] as Playlist_Entry)
-      .sort(([a], [b]) => a.localeCompare(b));
+      .sort(([a], [b]) => {
+        const a_normal = starts_with_letter_or_digit(a);
+        const b_normal = starts_with_letter_or_digit(b);
+        if (a_normal && !b_normal) return -1;
+        if (!a_normal && b_normal) return 1;
+        return a.localeCompare(b);
+      });
     playlist_load_error = null;
   } catch (e: any) {
     playlist_load_error = e?.detail || 'Failed to load playlist.';
     playlist_entries = [];
   }
   notify();
+}
+
+// Unicode-aware: \p{L} matches any letter (including accented / non-Latin)
+// and \p{N} matches any number. Anything else (punctuation, symbols, brackets,
+// emoji) returns false → bucketed at the end of the playlist.
+function starts_with_letter_or_digit(s: string): boolean {
+  return /^[\p{L}\p{N}]/u.test(s);
 }
 
 function shuffle_in_place<T>(arr: T[]): void {

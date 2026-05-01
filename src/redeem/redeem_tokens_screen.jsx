@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { Back_Arrow_Button, Modal_Overlay } from '../shared/components';
+import { useEscapeKey } from '../shared/hooks';
 import { increment_premium_game_data_field, update_premium_game_data_field } from '../shared/store/sessionSlice';
 import { useTheme } from '../shared/theme';
 import { api_redeem_promotion_oath, api_redeem_tokens } from './api';
@@ -86,6 +87,7 @@ function Redeem_Modal({ on_close, on_success }) {
   const [answers, set_answers] = useState(['', '', '']);
   const [loading, set_loading] = useState(false);
   const theme = useTheme();
+  useEscapeKey(on_close, !loading);
 
   const set_answer = (i, val) =>
     set_answers(prev => prev.map((a, idx) => idx === i ? val : a));
@@ -163,6 +165,7 @@ function Promotion_Oath_Modal({ on_close, on_success }) {
   const [error, set_error] = useState('');
   const [loading, set_loading] = useState(false);
   const theme = useTheme();
+  useEscapeKey(on_close, !loading);
 
   const handle_claim = async () => {
     if (!agreed) {
