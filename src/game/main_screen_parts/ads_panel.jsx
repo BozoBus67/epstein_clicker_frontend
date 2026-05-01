@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import * as Constants from '../../shared/constants';
 import { useTierGate } from '../../shared/hooks';
 import { AD_ROTATION_MS } from '../constants';
@@ -7,6 +8,7 @@ import cc_bg from '../../assets/game_screen/cookie_clicker_background_art.jpg';
 
 export default function Ads_Panel() {
   const { gate, lock_modal } = useTierGate(2);
+  const kirk_mode = useSelector(state => state.session.premium_game_data?.kirk_mode ?? false);
 
   const [index, set_index] = useState(() => Math.floor(Math.random() * ADS.length));
   const [corner, set_corner] = useState(() => Math.floor(Math.random() * AD_CLOSE_BUTTON_CORNERS.length));
@@ -23,17 +25,29 @@ export default function Ads_Panel() {
     return () => clearInterval(interval);
   }, []);
 
-  // Preload + force-decode every ad image at mount. Without this, each
-  // rotation has to fetch (cache miss the first time) and synchronously
-  // decode the new image on the main thread — visible as a brief stutter
-  // in the cps counter and any other animation. With it, subsequent swaps
-  // are essentially free.
+  // Preload + force-decode every ad image at mount (both originals and
+  // kirkified variants). Without this, each rotation has to fetch (cache
+  // miss the first time) and synchronously decode the new image on the
+  // main thread — visible as a brief stutter in the cps counter and any
+  // other animation. With it, subsequent swaps are essentially free.
   useEffect(() => {
-    ADS.forEach(src => {
-      const img = new Image();
-      img.src = src;
-    });
+    for (const ad of ADS) {
+      const a = new Image();
+      a.src = ad.original;
+      if (ad.kirkified) {
+        const b = new Image();
+        b.src = ad.kirkified;
+      }
+    }
   }, []);
+
+  const ad = ADS[index];
+  // If Kirk Mode is on AND this ad has a kirkified variant, swap to it.
+  // If Kirk Mode is on but this ad has no kirkified counterpart, fall back
+  // to the original AND surface a note in the ad-text caption.
+  const use_kirkified = kirk_mode && !!ad.kirkified;
+  const missing_kirkified = kirk_mode && !ad.kirkified;
+  const img_src = use_kirkified ? ad.kirkified : ad.original;
 
   return (
     <div style={{
@@ -44,7 +58,7 @@ export default function Ads_Panel() {
       {!dismissed && (
         <>
           <img
-            src={ADS[index]}
+            src={img_src}
             draggable={false}
             decoding="async"
             style={{ maxWidth: '80%', maxHeight: '65%', objectFit: 'contain', animation: 'ad-pulse 5s ease-in-out infinite' }}
@@ -55,6 +69,7 @@ export default function Ads_Panel() {
             textAlign: 'center',
           }}>
             {Constants.AD_TEXT}
+            {missing_kirkified && ' (this image was unable to be kirkified)'}
           </span>
         </>
       )}

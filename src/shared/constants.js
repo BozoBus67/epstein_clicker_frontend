@@ -68,7 +68,7 @@ export const SCROLL_DESCRIPTIONS = {
   mastery_scroll_1:  'Not yet implemented',
   mastery_scroll_2:  `${QUANTITY_NAME} per second multiplied by 1000`,
   mastery_scroll_3:  'Not yet implemented',
-  mastery_scroll_4:  'Not yet implemented',
+  mastery_scroll_4:  'Unlocks Kirk Mode (toggle in settings) — kirkifies all clickbait ads',
   mastery_scroll_5:  'Not yet implemented',
   mastery_scroll_6:  'Diddy Factory, Baby Oil Factory, and Mega Diddy Factory production ×2500',
   mastery_scroll_7:  'Not yet implemented',

@@ -11,3 +11,6 @@ export const api_get_my_discord = () =>
 
 export const api_set_theme = (theme) =>
   patch_auth('/me/theme', { theme });
+
+export const api_set_kirk_mode = (enabled) =>
+  patch_auth('/me/kirk_mode', { enabled });

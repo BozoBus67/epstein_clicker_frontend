@@ -9,7 +9,7 @@ import { stop_player } from '../music/audio_state';
 import { supabase } from '../shared/supabase_client';
 import { useTheme } from '../shared/theme';
 import { api_reset_game } from '../game';
-import { api_get_my_discord, api_set_theme } from './api';
+import { api_get_my_discord, api_set_kirk_mode, api_set_theme } from './api';
 
 export default function Settings_Screen() {
   const dispatch = useDispatch();
@@ -64,6 +64,7 @@ function Settings_Screen_Body({ on_reset_click }) {
       <Change_Login_Details_Button />
       <Get_Discord_Button />
       <Theme_Picker />
+      <Kirk_Mode_Toggle />
       <Reset_Save_Button on_click={on_reset_click} />
       <Log_Out_Button />
     </>
@@ -140,6 +141,35 @@ function Theme_Picker() {
         );
       })}
     </div>
+  );
+}
+
+// Kirk Mode toggle. Reads pgd.kirk_mode from Redux, flips via PATCH /me/kirk_mode.
+// The backend gates "enable" behind owning a Charlie Kirk scroll and surfaces
+// 403 with a useful detail message — we just toast it on failure.
+function Kirk_Mode_Toggle() {
+  const dispatch = useDispatch();
+  const theme = useTheme();
+  const enabled = useSelector(state => state.session.premium_game_data?.kirk_mode ?? false);
+
+  const handle = async () => {
+    const next = !enabled;
+    try {
+      await api_set_kirk_mode(next);
+      dispatch(update_premium_game_data_field({ key: 'kirk_mode', value: next }));
+    } catch (err) {
+      toast.error(err?.detail || err?.message || 'Error: Failed to set Kirk Mode.');
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handle}
+      style={neutral_button_style(theme)}
+    >
+      Kirk Mode: {enabled ? 'On' : 'Off'} (click to toggle)
+    </button>
   );
 }
 
