@@ -7,11 +7,20 @@ import tailwindcss from '@tailwindcss/vite';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(({ mode }) => {
-  // Read VITE_INCLUDE_MUSIC from .env (Electron dev/build) or process.env
-  // (Vercel sets it via the dashboard). When unset/false, we swap the mp3
-  // glob for an empty stub so the music folder is excluded from web builds.
+  // VITE_INCLUDE_MUSIC must be set to exactly 'true' or 'false' — anything
+  // else (missing, typo, mistakenly empty) fails the build immediately so a
+  // misconfigured env doesn't silently produce the wrong artifact.
+  // 'true'  → bundle src/assets/music/*.mp3 into the build (Electron)
+  // 'false' → swap music_glob for an empty stub (web/Vercel builds)
   const env = loadEnv(mode, __dirname, '');
-  const include_music = env.VITE_INCLUDE_MUSIC === 'true';
+  const raw_include_music = env.VITE_INCLUDE_MUSIC;
+  if (raw_include_music !== 'true' && raw_include_music !== 'false') {
+    throw new Error(
+      `VITE_INCLUDE_MUSIC must be 'true' or 'false', got ${JSON.stringify(raw_include_music)}. ` +
+      `Set it in .env (Electron) or in the deploy platform's env vars (Vercel).`
+    );
+  }
+  const include_music = raw_include_music === 'true';
 
   return {
     plugins: [
