@@ -1,3 +1,5 @@
+> ⚠️ AI-generated, not yet proofread by a human. Treat as tech debt.
+
 # Auction House
 
 In-game marketplace where users list cookies or tokens and buy/cancel listings posted by others.

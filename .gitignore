@@ -1,5 +1,19 @@
+# Dependencies
 node_modules
+
+# Env / secrets
 .env
 .env.backup
+
+# Build outputs
 .vite
 dist
+out
+coverage
+
+# OS / editor noise
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*

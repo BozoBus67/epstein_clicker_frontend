@@ -1,3 +1,5 @@
+> ⚠️ AI-generated, not yet proofread by a human. Treat as tech debt.
+
 # Auth
 
 Login and signup screens, and the `/me` API call used by the rest of the app to rehydrate session state.

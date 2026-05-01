@@ -1,3 +1,5 @@
+> ⚠️ AI-generated, not yet proofread by a human. Treat as tech debt.
+
 # Game
 
 The main clicker screen and everything that runs on it: the cookie click loop, the rotating ad panel, building purchases, the slot machine and roulette modals, and the assorted background timers (auto-save, daily/hourly/5-minute check-ins, CPS tick).

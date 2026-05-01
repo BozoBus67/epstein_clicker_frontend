@@ -1,3 +1,5 @@
+> ⚠️ AI-generated, not yet proofread by a human. Treat as tech debt.
+
 # Redux store
 
 Single Redux Toolkit slice (`sessionSlice.js`) holding everything the frontend mirrors from the backend: session data, game state, premium game data, account tier list, building metadata, scroll metadata.

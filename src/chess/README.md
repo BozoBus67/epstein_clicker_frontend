@@ -1,3 +1,5 @@
+> ⚠️ AI-generated, not yet proofread by a human. Treat as tech debt.
+
 # Chess
 
 Single-player chess against a roster of themed bots, all running in-browser via Stockfish.
