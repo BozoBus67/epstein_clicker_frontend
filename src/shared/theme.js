@@ -8,7 +8,8 @@
 // `panel` is the background for in-game panels (auction slots, building rows,
 // the cookie-click panel). `modal_panel` is the background for popup modals
 // specifically (gambling, roulette, confirms, reward popups). They diverge in
-// the `default` theme: panels stay flat, modals get the temple texture.
+// the `default` theme: panels stay flat, modals get the cookie-clicker
+// background art (with a dark scrim layered on top for text legibility).
 //
 // The active theme is persisted server-side in premium_game_data.theme; see
 // PATCH /me/theme for the gating logic.
