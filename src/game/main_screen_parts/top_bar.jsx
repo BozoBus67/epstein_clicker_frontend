@@ -122,7 +122,6 @@ function Buy_Tokens_Confirm_Modal({ on_close }) {
 
   return (
     <Modal_Overlay panel_style={{ width: '480px' }}>
-      <h2 style={{ color: theme.accent, margin: 0, textAlign: 'center' }}>Buy Tokens</h2>
       <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', color: theme.text, fontSize: '14px', lineHeight: 1.4 }}>
         <input
           type="checkbox"
