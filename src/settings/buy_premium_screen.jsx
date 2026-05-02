@@ -147,10 +147,14 @@ function Buy_Premium_Screen_Body({ tiers, current_tier, on_select }) {
 function Tier_Card({ tier, current_tier, on_click }) {
   const perks = TIER_PERKS[tier.id] ?? [];
   const is_owned = tier_num(tier.id) <= current_tier;
+  const [hovered, set_hovered] = useState(false);
+  const interactive = !is_owned;
 
   return (
     <div
-      onClick={is_owned ? undefined : on_click}
+      onClick={interactive ? on_click : undefined}
+      onMouseEnter={() => set_hovered(true)}
+      onMouseLeave={() => set_hovered(false)}
       style={{
         width: '240px',
         height: '520px',
@@ -163,13 +167,19 @@ function Tier_Card({ tier, current_tier, on_click }) {
         gap: '12px',
         flexShrink: 0,
         background: '#ffffff',
-        cursor: is_owned ? 'default' : 'pointer',
-        transition: 'transform 0.15s, box-shadow 0.15s',
+        cursor: interactive ? 'pointer' : 'default',
+        // Hover affordance lives in inline style (Tailwind hover: utilities
+        // weren't reliably picked up here, which made the cards visually
+        // dead even though onClick was wired up).
+        transform: interactive && hovered ? 'scale(1.04)' : 'scale(1)',
+        boxShadow: interactive && hovered
+          ? '0 8px 24px rgba(0,0,0,0.35)'
+          : '0 2px 6px rgba(0,0,0,0.15)',
+        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
         textAlign: 'left',
         opacity: 1,
         userSelect: 'none',
       }}
-      className={is_owned ? '' : 'hover:scale-105 hover:shadow-xl'}
     >
       <div style={{ fontWeight: 'bold', fontSize: '18px', color: '#111', width: '100%', textAlign: 'center' }}>
         {ACCOUNT_TIER_NAMES[tier.id]}
