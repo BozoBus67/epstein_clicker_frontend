@@ -142,9 +142,12 @@ export default function Main_Screen() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh' }}>
-      {daily_reward_data && <Reward_Popup title="Daily Reward!" data={daily_reward_data} on_close={() => set_daily_reward_data(null)} />}
-      {hourly_reward_data && <Reward_Popup title="Hourly Reward!" data={hourly_reward_data} on_close={() => set_hourly_reward_data(null)} />}
+      {/* Order matters: each popup is a full-screen Modal_Overlay, so the */}
+      {/* LAST one rendered sits on top and is dismissed first. We want the */}
+      {/* user to see daily → hourly → fivemin (longest cadence first). */}
       {fivemin_reward_data && <Reward_Popup title="5 Minute Reward!" data={fivemin_reward_data} on_close={() => set_fivemin_reward_data(null)} />}
+      {hourly_reward_data && <Reward_Popup title="Hourly Reward!" data={hourly_reward_data} on_close={() => set_hourly_reward_data(null)} />}
+      {daily_reward_data && <Reward_Popup title="Daily Reward!" data={daily_reward_data} on_close={() => set_daily_reward_data(null)} />}
       {show_gamble && <Gamble_Modal on_close={() => set_show_gamble(false)} />}
       {show_roulette && <Roulette_Modal on_close={() => set_show_roulette(false)} />}
       <Section name="top bar">
