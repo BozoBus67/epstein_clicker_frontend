@@ -60,6 +60,7 @@ function Scroll_Panel({ scroll, count }) {
         background: theme.panel, border: '2px solid #000',
         display: 'flex', flexDirection: 'column', flexShrink: 0,
         position: 'relative',
+        userSelect: 'none', WebkitUserSelect: 'none',
       }}
     >
       <div style={{ width: '100%', height: '180px', overflow: 'hidden', borderRadius: '8px 8px 0 0' }}>
@@ -71,7 +72,7 @@ function Scroll_Panel({ scroll, count }) {
       }}>
         <span style={{ color: theme.accent, fontWeight: 'bold', fontSize: '13px', lineHeight: 1.2 }}>{scroll.display_name}</span>
         <span style={{ fontSize: '12px' }}>Owned: <b>{count}</b></span>
-        <span style={{ fontSize: '12px', color: tier_color }}>{tier > 0 ? `Tier ${tier}` : 'No tier'}</span>
+        <span style={{ fontSize: '12px', color: tier_color }}>Tier {tier}</span>
         {next
           ? <span style={{ fontSize: '11px', color: theme.text_muted }}>{count}/{next.needed} → Tier {next.tier}</span>
           : <span style={{ fontSize: '11px', color: theme.accent }}>Max Tier</span>
