@@ -16,10 +16,18 @@ body {
   color: #e0e0f0;
   overflow: hidden;
   background: #1a1a2e;
+  /* Disable text selection across the whole app — the UI is not a document, */
+  /* and dragging across building cards / scrolls / etc. blue-highlighting */
+  /* labels just looks broken. Inputs and textareas re-enable selection so */
+  /* typed values stay editable. */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 input, select, textarea {
   font-family: 'Nunito', system-ui, sans-serif;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 @keyframes epstein-particle {
