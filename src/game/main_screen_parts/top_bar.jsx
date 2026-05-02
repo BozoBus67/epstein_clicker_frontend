@@ -49,7 +49,7 @@ function Account_Refresh_Button() {
       on_click={() => refresh_user_data(dispatch)}
       success_message="Reloaded account data and attempted account migration."
       error_message="Failed to reload account data."
-      size={40}
+      size={34}
       title="Reload account data"
       style={{
         border: `2px solid ${theme.accent}`,
