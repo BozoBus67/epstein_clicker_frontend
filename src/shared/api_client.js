@@ -65,6 +65,29 @@ const STATUS_FALLBACK_MESSAGES = {
   504: 'Server is waking up — try again in a moment.',
 };
 
+// FastAPI returns 422 validation errors as `detail: [{type, loc, msg, input}, ...]`.
+// React-hot-toast and any other JSX consumer that gets handed that array directly
+// crashes with "Objects are not valid as a React child (#31)". Normalize the
+// array into a human-readable string at the boundary so every downstream call
+// site can assume `err.detail` is a string.
+function normalize_detail(detail) {
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) {
+    return detail
+      .map(d => {
+        const where = Array.isArray(d?.loc) ? d.loc.join('.') : '';
+        const msg = d?.msg ?? 'validation error';
+        return where ? `${msg} (${where})` : msg;
+      })
+      .join('; ');
+  }
+  // Some backend wraps a single error object instead of an array. Same shape, single entry.
+  if (detail && typeof detail === 'object') {
+    return detail.msg ?? JSON.stringify(detail);
+  }
+  return String(detail);
+}
+
 // Two paths here, deliberately distinguished — see the README's "Error
 // messages and logs" principle.
 //
@@ -78,8 +101,9 @@ const STATUS_FALLBACK_MESSAGES = {
 //    someone fluent in HTTP can immediately tell auth (401), permission
 //    (403), server error (5xx) apart without opening DevTools.
 export function make_error(res, data) {
-  const backend_detail = data?.detail;
-  if (backend_detail) {
+  const raw_detail = data?.detail;
+  if (raw_detail) {
+    const backend_detail = normalize_detail(raw_detail);
     const err = new Error(backend_detail);
     err.detail = backend_detail;
     err.status = res.status;
