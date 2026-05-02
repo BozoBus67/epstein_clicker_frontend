@@ -42,8 +42,8 @@ export default function Top_Bar({ on_gamble_click, on_roulette_click }) {
       <Nav_Button label="Buy Premium" on_click={() => cookies_gate(() => navigate('/game/buy-premium'))} />
       <Nav_Button label="Gamble Tokens" on_click={() => cookies_gate(on_gamble_click)} />
       <Nav_Button label="Roulette" on_click={() => cookies_gate(on_roulette_click)} />
-      <Nav_Button label="Redeem Tokens" on_click={() => cookies_gate(() => navigate('/game/redeem-tokens'))} />
-      <Nav_Button label="Mastery Scrolls" on_click={() => cookies_gate(() => navigate('/game/mastery-scrolls'))} />
+      <Nav_Button label="Redeem Tokens" to="/game/redeem-tokens" />
+      <Nav_Button label="Mastery Scrolls" to="/game/mastery-scrolls" />
       <Auction_House_Nav_Button cookies_gate={cookies_gate} />
       <Nav_Button label="Play Chess" on_click={() => cookies_gate(() => navigate('/game/play-chess'))} />
       <Audio_Controls />
