@@ -8,7 +8,7 @@ import { api_me } from './auth';
 import { init_yt_player, load_playlist } from './music/audio_state';
 import { get, post_auth } from './shared/api_client';
 import { Error_Boundary, Loading_Screen } from './shared/components';
-import { login, set_account_tiers, set_buildings, set_scrolls } from './shared/store/sessionSlice';
+import { login, set_account_tiers, set_buildings } from './shared/store/sessionSlice';
 import { supabase } from './shared/supabase_client';
 import { useTheme } from './shared/theme';
 import { notify_migration } from './shared/utils';
@@ -113,22 +113,25 @@ function Themed_Toaster() {
 }
 
 // Fetches the static metadata Game_Shell needs (account tiers, building defs,
-// scroll defs, music playlist). Fire-and-forget — Auth_Shell doesn't read any
-// of these, so we don't block the loading screen on them. By the time a user
-// finishes typing their password, these promises are virtually always done.
-// Errors don't propagate; they're logged for debugging and Game_Shell renders
-// with empty fallbacks (which is fine — the user can hit the refresh button).
+// music playlist). Fire-and-forget — Auth_Shell doesn't read any of these,
+// so we don't block the loading screen on them. By the time a user finishes
+// typing their password, these promises are virtually always done. Errors
+// don't propagate; they're logged for debugging and Game_Shell renders with
+// empty fallbacks (which is fine — the user can hit the refresh button).
+//
+// Scroll metadata is NOT fetched here — it lives entirely in the frontend
+// registry at shared/scroll_registry.js. The backend's MASTERY_SCROLLS dict
+// is the source of truth for *which slugs are valid* (enforced at write
+// time), but the user-facing strings live frontend-side.
 async function bootstrap_metadata(dispatch) {
   try {
-    const [account_tiers, buildings, scrolls] = await Promise.all([
+    const [account_tiers, buildings] = await Promise.all([
       get('/account_tiers'),
       get('/get_building_metadata'),
-      get('/get_scroll_metadata'),
       load_playlist(),
     ]);
     dispatch(set_account_tiers(account_tiers));
     dispatch(set_buildings(buildings));
-    dispatch(set_scrolls(scrolls));
   } catch (err) {
     console.error('[bootstrap] metadata fetch failed:', err);
   }

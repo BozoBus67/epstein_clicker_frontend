@@ -9,7 +9,6 @@ const sessionSlice = createSlice({
     premium_game_data: null,
     account_tiers: [],
     buildings: {},
-    scrolls: {},
   },
   reducers: {
     login(state, action) {
@@ -61,9 +60,6 @@ const sessionSlice = createSlice({
     set_buildings(state, action) {
       state.buildings = Object.fromEntries(action.payload.map(b => [b.key, b]));
     },
-    set_scrolls(state, action) {
-      state.scrolls = action.payload;
-    },
     patch_session_data(state, action) {
       if (state.session_data) Object.assign(state.session_data, action.payload);
     },
@@ -81,7 +77,6 @@ export const {
   increment_premium_game_data_field,
   set_account_tiers,
   set_buildings,
-  set_scrolls,
   patch_session_data,
 } = sessionSlice.actions;
 
