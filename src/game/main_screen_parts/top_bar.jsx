@@ -3,13 +3,22 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Async_Refresh_Button, Modal_Overlay, Nav_Button } from '../../shared/components';
 import { ACCOUNT_TIER_NAMES } from '../../shared/constants';
-import { useEscapeKey, useTierGate } from '../../shared/hooks';
+import { useCookiesGate, useEscapeKey, useTierGate } from '../../shared/hooks';
+
+const COOKIES_GATE = 1000;
 import { useTheme } from '../../shared/theme';
 import { refresh_user_data } from '../../shared/utils';
 import Audio_Controls from '../../music';
 
 export default function Top_Bar({ on_gamble_click, on_roulette_click }) {
   const theme = useTheme();
+  const navigate = useNavigate();
+  // Soft gate: every nav button below requires the player to have at least
+  // COOKIES_GATE cookies. Pushes fresh accounts to play the actual game for
+  // a few clicks before all the side activities open up. Reload + tier/token
+  // displays + audio controls are always available.
+  const { gate: cookies_gate, lock_modal: cookies_lock_modal } = useCookiesGate(COOKIES_GATE);
+
   return (
     <div style={{
       width: '100%',
@@ -25,17 +34,18 @@ export default function Top_Bar({ on_gamble_click, on_roulette_click }) {
       boxSizing: 'border-box',
       flexShrink: 0,
     }}>
+      {cookies_lock_modal}
       <Account_Refresh_Button />
       <Account_Tier_Display />
       <Token_Display />
-      <Buy_Tokens_Button />
-      <Nav_Button label="Buy Premium" to="/game/buy-premium" />
-      <Nav_Button label="Gamble Tokens" on_click={on_gamble_click} />
-      <Nav_Button label="Roulette" on_click={on_roulette_click} />
-      <Nav_Button label="Redeem Tokens" to="/game/redeem-tokens" />
-      <Nav_Button label="Mastery Scrolls" to="/game/mastery-scrolls" />
-      <Auction_House_Nav_Button />
-      <Nav_Button label="Play Chess" to="/game/play-chess" />
+      <Buy_Tokens_Button cookies_gate={cookies_gate} />
+      <Nav_Button label="Buy Premium" on_click={() => cookies_gate(() => navigate('/game/buy-premium'))} />
+      <Nav_Button label="Gamble Tokens" on_click={() => cookies_gate(on_gamble_click)} />
+      <Nav_Button label="Roulette" on_click={() => cookies_gate(on_roulette_click)} />
+      <Nav_Button label="Redeem Tokens" on_click={() => cookies_gate(() => navigate('/game/redeem-tokens'))} />
+      <Nav_Button label="Mastery Scrolls" on_click={() => cookies_gate(() => navigate('/game/mastery-scrolls'))} />
+      <Auction_House_Nav_Button cookies_gate={cookies_gate} />
+      <Nav_Button label="Play Chess" on_click={() => cookies_gate(() => navigate('/game/play-chess'))} />
       <Audio_Controls />
     </div>
   );
@@ -86,11 +96,11 @@ function Token_Display() {
   );
 }
 
-function Buy_Tokens_Button() {
+function Buy_Tokens_Button({ cookies_gate }) {
   const [show_modal, set_show_modal] = useState(false);
   return (
     <>
-      <Nav_Button label="Buy Tokens" on_click={() => set_show_modal(true)} />
+      <Nav_Button label="Buy Tokens" on_click={() => cookies_gate(() => set_show_modal(true))} />
       {show_modal && <Buy_Tokens_Confirm_Modal on_close={() => set_show_modal(false)} />}
     </>
   );
@@ -162,12 +172,13 @@ function Buy_Tokens_Confirm_Modal({ on_close }) {
   );
 }
 
-function Auction_House_Nav_Button() {
+function Auction_House_Nav_Button({ cookies_gate }) {
   const navigate = useNavigate();
-  const { gate, lock_modal } = useTierGate(2);
+  const { gate: tier_gate, lock_modal } = useTierGate(2);
+  // Two stacked gates: cookies first (universal), then tier (auction-house-specific).
   return (
     <>
-      <Nav_Button label="Auction House" on_click={() => gate(() => navigate('/game/auction-house'))} />
+      <Nav_Button label="Auction House" on_click={() => cookies_gate(() => tier_gate(() => navigate('/game/auction-house')))} />
       {lock_modal}
     </>
   );

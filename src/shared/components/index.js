@@ -1,6 +1,7 @@
 export { default as Async_Refresh_Button } from './async_refresh_button';
 export { default as Back_Arrow_Button } from './back_arrow_button';
 export { default as Confirm_Modal } from './confirm_modal';
+export { default as Cookies_Locked_Modal } from './cookies_locked_modal';
 export { default as Error_Boundary } from './error_boundary';
 export { default as Loading_Screen } from './loading_screen';
 export { default as Modal_Overlay } from './modal_overlay';
