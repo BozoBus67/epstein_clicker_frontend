@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Async_Refresh_Button, Nav_Button } from '../../shared/components';
+import { Async_Refresh_Button, Modal_Overlay, Nav_Button } from '../../shared/components';
 import { ACCOUNT_TIER_NAMES } from '../../shared/constants';
-import { useTierGate } from '../../shared/hooks';
+import { useEscapeKey, useTierGate } from '../../shared/hooks';
 import { useTheme } from '../../shared/theme';
 import { refresh_user_data } from '../../shared/utils';
 import Audio_Controls from '../../music';
@@ -86,14 +87,80 @@ function Token_Display() {
 }
 
 function Buy_Tokens_Button() {
+  const [show_modal, set_show_modal] = useState(false);
+  return (
+    <>
+      <Nav_Button label="Buy Tokens" on_click={() => set_show_modal(true)} />
+      {show_modal && <Buy_Tokens_Confirm_Modal on_close={() => set_show_modal(false)} />}
+    </>
+  );
+}
+
+// Honour-system disclaimer gate before kicking the user out to Stripe. Mirrors
+// the Promotion_Oath_Modal pattern in redeem/redeem_tokens_screen.jsx — the
+// "Buy tokens" button is always pressable; clicking without the box checked
+// surfaces an inline red error rather than being disabled, so the user knows
+// WHY nothing happened.
+function Buy_Tokens_Confirm_Modal({ on_close }) {
   const user_id = useSelector(state => state.session.session_data?.id);
-  const handle_click = () => {
+  const theme = useTheme();
+  const [agreed, set_agreed] = useState(false);
+  const [error, set_error] = useState('');
+  useEscapeKey(on_close);
+
+  const handle_buy = () => {
+    if (!agreed) {
+      set_error('You must agree to the terms and conditions.');
+      return;
+    }
     const stripe_link = import.meta.env.VITE_STRIPE_PAYMENT_LINK;
     const url = `${stripe_link}?client_reference_id=${user_id}`;
     if (window.api?.openExternal) window.api.openExternal(url);
     else window.open(url, '_blank', 'noopener,noreferrer');
+    on_close();
   };
-  return <Nav_Button label="Buy Tokens" on_click={handle_click} />;
+
+  return (
+    <Modal_Overlay panel_style={{ width: '480px' }}>
+      <h2 style={{ color: theme.accent, margin: 0, textAlign: 'center' }}>Buy Tokens</h2>
+      <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', color: theme.text, fontSize: '14px', lineHeight: 1.4 }}>
+        <input
+          type="checkbox"
+          checked={agreed}
+          onChange={(e) => set_agreed(e.target.checked)}
+          style={{ marginTop: '4px', flexShrink: 0 }}
+        />
+        <span>
+          I admit that I am about to spend real money to buy fictional tokens on a random crud app called literally Epstein Clicker. I make bad financial decisions and the creator of this game is not responsible if I go bankrupt.
+        </span>
+      </label>
+      {error && (
+        <p style={{ color: '#f87171', margin: 0, fontSize: '14px', textAlign: 'center' }}>{error}</p>
+      )}
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+        <button
+          type="button"
+          onClick={handle_buy}
+          style={{
+            padding: '8px 24px', background: theme.accent, color: theme.accent_text,
+            border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer',
+          }}
+        >
+          Buy Tokens
+        </button>
+        <button
+          type="button"
+          onClick={on_close}
+          style={{
+            padding: '8px 24px', background: theme.button_neutral_bg, color: theme.button_neutral_text,
+            border: 'none', borderRadius: '6px', cursor: 'pointer',
+          }}
+        >
+          Close
+        </button>
+      </div>
+    </Modal_Overlay>
+  );
 }
 
 function Auction_House_Nav_Button() {
