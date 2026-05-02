@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
-import { Back_Arrow_Button, X_Button } from '../shared/components';
-import { useEscapeKey } from '../shared/hooks';
+import { Subscreen } from '../shared/components';
 import { supabase } from '../shared/supabase_client';
 import { patch_session_data } from '../shared/store/sessionSlice';
 import { useTheme } from '../shared/theme';
@@ -21,8 +20,6 @@ export default function Login_Details_Screen() {
   const [password, set_password] = useState('');
   const [confirm_password, set_confirm_password] = useState('');
   const [loading, set_loading] = useState(false);
-
-  useEscapeKey(() => navigate('/game/settings'), !loading);
 
   const handle_submit = async () => {
     const username_changed = username.trim() !== current_username;
@@ -71,33 +68,21 @@ export default function Login_Details_Screen() {
     }
   };
 
-  const theme = useTheme();
   return (
-    <div style={{
-      display: 'flex', width: '100vw', height: '100vh', justifyContent: 'center', alignItems: 'center',
-      background: theme.bg, backgroundSize: theme.bg_size, backgroundPosition: theme.bg_position, color: theme.text,
-    }}>
-      <Login_Details_Screen_Topbar />
-      <Login_Details_Screen_Body
-        username={username} set_username={set_username}
-        email={email} set_email={set_email}
-        old_password={old_password} set_old_password={set_old_password}
-        password={password} set_password={set_password}
-        confirm_password={confirm_password} set_confirm_password={set_confirm_password}
-        loading={loading}
-        on_submit={handle_submit}
-        on_cancel={() => navigate('/game/settings')}
-      />
-    </div>
-  );
-}
-
-function Login_Details_Screen_Topbar() {
-  return (
-    <>
-      <Back_Arrow_Button to="/game/settings" />
-      <X_Button to="/game/settings" />
-    </>
+    <Subscreen back_to="/game/settings" disabled={loading}>
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <Login_Details_Screen_Body
+          username={username} set_username={set_username}
+          email={email} set_email={set_email}
+          old_password={old_password} set_old_password={set_old_password}
+          password={password} set_password={set_password}
+          confirm_password={confirm_password} set_confirm_password={set_confirm_password}
+          loading={loading}
+          on_submit={handle_submit}
+          on_cancel={() => navigate('/game/settings')}
+        />
+      </div>
+    </Subscreen>
   );
 }
 

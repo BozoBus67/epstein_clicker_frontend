@@ -1,13 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { ACCOUNT_TIER_NAMES } from '../shared/constants';
 import { tier_num } from '../shared/utils';
 import { update_premium_game_data } from '../shared/store/sessionSlice';
 import { api_buy_account_tier } from './api';
-import { Back_Arrow_Button, Confirm_Modal, X_Button } from '../shared/components';
-import { useTheme } from '../shared/theme';
+import { Confirm_Modal, Subscreen } from '../shared/components';
+import { useEscapeKey } from '../shared/hooks';
 
 const TIER_PERKS = {
   account_tier_1: [
@@ -57,7 +56,6 @@ const TIER_IMAGES = Object.fromEntries(
 );
 
 export default function Buy_Premium_Screen() {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const account_tiers = useSelector(state => state.session.account_tiers);
   const current_tier_str = useSelector(state => state.session.premium_game_data?.account_tier ?? 'account_tier_0');
@@ -67,16 +65,11 @@ export default function Buy_Premium_Screen() {
   const [selected, set_selected] = useState(null);
   const [loading, set_loading] = useState(false);
 
-  useEffect(() => {
-    const handle_key = (e) => {
-      if (e.key === 'Escape') {
-        if (selected) set_selected(null);
-        else navigate('/game');
-      }
-    };
-    window.addEventListener('keydown', handle_key);
-    return () => window.removeEventListener('keydown', handle_key);
-  }, [navigate, selected]);
+  // Two-stage escape handling: when the confirm modal is open, esc closes
+  // the modal first; only when no modal is open does Subscreen's own esc
+  // handler fire and navigate back to /game. The `disabled` prop below is
+  // what lets the two handlers compose instead of fighting.
+  useEscapeKey(() => set_selected(null), !!selected && !loading);
 
   const handle_confirm = async () => {
     set_loading(true);
@@ -92,14 +85,8 @@ export default function Buy_Premium_Screen() {
     }
   };
 
-  const theme = useTheme();
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh', overflow: 'hidden',
-      background: theme.bg, backgroundSize: theme.bg_size, backgroundPosition: theme.bg_position,
-      color: theme.text,
-    }}>
-      <Buy_Premium_Screen_Topbar />
+    <Subscreen title="Buy Premium" disabled={!!selected || loading}>
       <Buy_Premium_Screen_Body
         tiers={paid_tiers}
         current_tier={current_tier}
@@ -113,16 +100,7 @@ export default function Buy_Premium_Screen() {
           loading={loading}
         />
       )}
-    </div>
-  );
-}
-
-function Buy_Premium_Screen_Topbar() {
-  return (
-    <>
-      <Back_Arrow_Button to="/game" />
-      <X_Button to="/game" />
-    </>
+    </Subscreen>
   );
 }
 

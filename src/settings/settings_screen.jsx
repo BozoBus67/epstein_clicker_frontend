@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useEscapeKey, useTierGate } from '../shared/hooks';
+import { useTierGate } from '../shared/hooks';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { logout, update_game_data, update_premium_game_data_field } from '../shared/store/sessionSlice';
-import { Back_Arrow_Button, Confirm_Modal, Modal_Overlay, X_Button } from '../shared/components';
+import { Confirm_Modal, Modal_Overlay, Subscreen } from '../shared/components';
 import { stop_player } from '../music/audio_state';
 import { supabase } from '../shared/supabase_client';
 import { useTheme } from '../shared/theme';
@@ -13,11 +13,7 @@ import { api_get_my_discord, api_set_kirk_mode, api_set_theme } from './api';
 
 export default function Settings_Screen() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const theme = useTheme();
   const [show_reset_confirmation, set_show_reset_confirmation] = useState(false);
-
-  useEscapeKey(() => navigate('/game'), !show_reset_confirmation);
 
   const handle_reset_confirm = async () => {
     try {
@@ -31,30 +27,20 @@ export default function Settings_Screen() {
   };
 
   return (
-    <div style={{
-      display: 'flex', width: '100vw', height: '100vh', justifyContent: 'center', alignItems: 'center',
-      flexDirection: 'column', gap: '24px',
-      background: theme.bg, backgroundSize: theme.bg_size, backgroundPosition: theme.bg_position,
-      color: theme.text,
-    }}>
-      <Settings_Screen_Topbar />
-      <Settings_Screen_Body on_reset_click={() => set_show_reset_confirmation(true)} />
+    <Subscreen back_to="/game" disabled={show_reset_confirmation}>
+      <div style={{
+        flex: 1, display: 'flex', flexDirection: 'column',
+        justifyContent: 'center', alignItems: 'center', gap: '24px',
+      }}>
+        <Settings_Screen_Body on_reset_click={() => set_show_reset_confirmation(true)} />
+      </div>
       {show_reset_confirmation && (
         <Reset_Save_Confirmation_Panel
           on_confirm={handle_reset_confirm}
           on_cancel={() => set_show_reset_confirmation(false)}
         />
       )}
-    </div>
-  );
-}
-
-function Settings_Screen_Topbar() {
-  return (
-    <>
-      <Back_Arrow_Button to="/game" />
-      <X_Button to="/game" />
-    </>
+    </Subscreen>
   );
 }
 

@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
-import { Async_Refresh_Button, Confirm_Modal, Modal_Overlay, Page_Header } from '../shared/components';
+import { Async_Refresh_Button, Confirm_Modal, Modal_Overlay, Subscreen } from '../shared/components';
 import { useEscapeKey } from '../shared/hooks';
 import { increment_game_data_field, update_game_data, update_premium_game_data } from '../shared/store/sessionSlice';
 import { useTheme } from '../shared/theme';
@@ -12,7 +12,6 @@ import { api_buy_listing, api_cancel_listing, api_create_listing, api_get_listin
 import { CURRENCIES, opposite_currency } from './auction_house_utils';
 
 export default function Auction_House_Screen() {
-  const theme = useTheme();
   const [listings, set_listings] = useState([]);
 
   // Returns the underlying promise so each caller can choose its own error UX:
@@ -26,20 +25,12 @@ export default function Auction_House_Screen() {
   }, []);
 
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh',
-      background: theme.bg, backgroundSize: theme.bg_size, backgroundPosition: theme.bg_position, color: theme.text,
-    }}>
-      <Auction_House_Screen_Topbar />
+    <Subscreen title="Auction House">
       <Auction_House_Screen_Body listings={listings} on_action_done={refresh} />
       <Refresh_Listings_Button on_click={refresh} />
       <Create_Listing_Manager on_action_done={refresh} />
-    </div>
+    </Subscreen>
   );
-}
-
-function Auction_House_Screen_Topbar() {
-  return <Page_Header title="Auction House" />;
 }
 
 // Renders the listings grid AND owns the "which listing is selected" state plus the

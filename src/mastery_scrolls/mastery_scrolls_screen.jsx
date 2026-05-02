@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { Page_Header } from '../shared/components';
+import { Subscreen } from '../shared/components';
 import { useKirkifiedFace } from '../shared/kirkified_faces';
 import { SCROLL_REGISTRY } from '../shared/scroll_registry';
 import { SCROLL_FACE_PAIRS } from '../shared/scroll_faces';
@@ -14,21 +14,11 @@ const SCROLLS_BY_DISPLAY_NAME = [...SCROLL_REGISTRY].sort((a, b) =>
 
 export default function Mastery_Scrolls_Screen() {
   const premium_game_data = useSelector(state => state.session.premium_game_data);
-  const theme = useTheme();
-
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', width: '100vw', height: '100vh',
-      background: theme.bg, backgroundSize: theme.bg_size, backgroundPosition: theme.bg_position, color: theme.text,
-    }}>
-      <Mastery_Scrolls_Screen_Topbar />
+    <Subscreen title="Mastery Scrolls">
       <Mastery_Scrolls_Screen_Body premium_game_data={premium_game_data} />
-    </div>
+    </Subscreen>
   );
-}
-
-function Mastery_Scrolls_Screen_Topbar() {
-  return <Page_Header title="Mastery Scrolls" />;
 }
 
 function Mastery_Scrolls_Screen_Body({ premium_game_data }) {

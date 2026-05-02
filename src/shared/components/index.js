@@ -8,5 +8,5 @@ export { default as Nav_Button } from './nav_button';
 export { default as Page_Header } from './page_header';
 export { default as Refresh_Button } from './refresh_button';
 export { default as Section } from './section';
+export { default as Subscreen } from './subscreen';
 export { default as Tier_Locked_Modal } from './tier_locked_modal';
-export { default as X_Button } from './x_button';
