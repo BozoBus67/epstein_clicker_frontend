@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { Modal_Overlay } from '../../shared/components';
-import { SCROLL_NAMES } from '../../shared/constants';
 import { useEscapeKey } from '../../shared/hooks';
-import { SCROLL_FACES } from '../../shared/scroll_faces';
+import { SCROLL_FACE_BY_SLUG } from '../../shared/scroll_faces';
+import { SCROLL_BY_ID, SCROLL_IDS } from '../../shared/scroll_registry';
 import { increment_premium_game_data_field, update_premium_game_data_field } from '../../shared/store/sessionSlice';
 import { useTheme } from '../../shared/theme';
 import { api_spin } from '../api';
@@ -41,7 +41,7 @@ export default function Gamble_Modal({ on_close }) {
     pending_wins_ref.current = [];
     for (const win of wins) {
       dispatch(increment_premium_game_data_field({ key: win.scroll_id, amount: win.amount }));
-      toast.success(`Won ${win.amount}× ${SCROLL_NAMES[win.scroll_id] ?? win.scroll_id}!`);
+      toast.success(`Won ${win.amount}× ${SCROLL_BY_ID[win.scroll_id]?.display_name ?? win.scroll_id}!`);
     }
   };
 
@@ -70,7 +70,7 @@ export default function Gamble_Modal({ on_close }) {
       </span>
       <div style={{ display: 'flex', gap: '16px' }}>
         {current_digits.map((d, i) => (
-          <Slot_Card key={i} face_index={d === null || subset_indices === null ? null : subset_indices[d]} />
+          <Slot_Card key={i} slug={d === null || subset_indices === null ? null : SCROLL_IDS[subset_indices[d]]} />
         ))}
       </div>
       <button
@@ -88,15 +88,15 @@ export default function Gamble_Modal({ on_close }) {
   );
 }
 
-function Slot_Card({ face_index }) {
+function Slot_Card({ slug }) {
   const theme = useTheme();
   return (
     <div style={{
       width: '90px', height: '90px', borderRadius: '8px', overflow: 'hidden',
       border: `2px solid ${theme.panel_border}`, background: theme.panel_secondary,
     }}>
-      {face_index !== null && (
-        <img src={SCROLL_FACES[face_index]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      {slug !== null && (
+        <img src={SCROLL_FACE_BY_SLUG[slug]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       )}
     </div>
   );

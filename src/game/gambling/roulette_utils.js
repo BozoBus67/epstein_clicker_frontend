@@ -1,10 +1,10 @@
-import { SCROLL_NAMES } from '../../shared/constants';
+import { SCROLL_IDS } from '../../shared/scroll_registry';
 
 // Roulette wheel geometry. The wheel is divided into one segment per scroll;
 // the SVG is sized in pixels and the geometry is computed once at module load
 // rather than on every render.
 
-export const SCROLL_IDS = Object.keys(SCROLL_NAMES);
+export { SCROLL_IDS };
 
 const N = SCROLL_IDS.length;
 

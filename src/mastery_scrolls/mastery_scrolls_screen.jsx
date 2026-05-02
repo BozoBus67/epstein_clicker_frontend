@@ -1,14 +1,18 @@
 import { useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Page_Header } from '../shared/components';
-import { SCROLL_NAMES, SCROLL_DESCRIPTIONS } from '../shared/constants';
-import { SCROLL_FACES } from '../shared/scroll_faces';
+import { SCROLL_REGISTRY } from '../shared/scroll_registry';
+import { SCROLL_FACE_BY_SLUG } from '../shared/scroll_faces';
 import { useTheme } from '../shared/theme';
 import { TOOLTIP_W, get_tier, get_next_tier, get_tooltip_style } from './utils';
 
+// Display order: alphabetical by display_name. Computed once at module load.
+const SCROLLS_BY_DISPLAY_NAME = [...SCROLL_REGISTRY].sort((a, b) =>
+  a.display_name.localeCompare(b.display_name)
+);
+
 export default function Mastery_Scrolls_Screen() {
   const premium_game_data = useSelector(state => state.session.premium_game_data);
-  const scrolls = useSelector(state => state.session.scrolls);
   const theme = useTheme();
 
   return (
@@ -17,7 +21,7 @@ export default function Mastery_Scrolls_Screen() {
       background: theme.bg, backgroundSize: theme.bg_size, backgroundPosition: theme.bg_position, color: theme.text,
     }}>
       <Mastery_Scrolls_Screen_Topbar />
-      <Mastery_Scrolls_Screen_Body premium_game_data={premium_game_data} scrolls={scrolls} />
+      <Mastery_Scrolls_Screen_Body premium_game_data={premium_game_data} />
     </div>
   );
 }
@@ -26,21 +30,19 @@ function Mastery_Scrolls_Screen_Topbar() {
   return <Page_Header title="Mastery Scrolls" />;
 }
 
-function Mastery_Scrolls_Screen_Body({ premium_game_data, scrolls }) {
+function Mastery_Scrolls_Screen_Body({ premium_game_data }) {
   return (
     <div style={{ flex: 1, overflowY: 'auto', padding: '24px 40px' }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-        {Object.entries(scrolls).map(([id], i) => (
-          <Scroll_Panel key={id} scroll_id={id} count={premium_game_data?.[id] ?? 0} image={SCROLL_FACES[i]} />
+        {SCROLLS_BY_DISPLAY_NAME.map(scroll => (
+          <Scroll_Panel key={scroll.id} scroll={scroll} count={premium_game_data?.[scroll.id] ?? 0} />
         ))}
       </div>
     </div>
   );
 }
 
-function Scroll_Panel({ scroll_id, count, image }) {
-  const display_name = SCROLL_NAMES[scroll_id];
-  const description = SCROLL_DESCRIPTIONS[scroll_id];
+function Scroll_Panel({ scroll, count }) {
   const tier = get_tier(count);
   const next = get_next_tier(count);
   const theme = useTheme();
@@ -61,13 +63,13 @@ function Scroll_Panel({ scroll_id, count, image }) {
       }}
     >
       <div style={{ width: '100%', height: '180px', overflow: 'hidden', borderRadius: '8px 8px 0 0' }}>
-        <img src={image} draggable={false} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
+        <img src={SCROLL_FACE_BY_SLUG[scroll.id]} draggable={false} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
       </div>
       <div style={{
         padding: '10px 12px', display: 'flex', flexDirection: 'column',
         alignItems: 'center', gap: '4px', textAlign: 'center', color: theme.text,
       }}>
-        <span style={{ color: theme.accent, fontWeight: 'bold', fontSize: '13px', lineHeight: 1.2 }}>{display_name}</span>
+        <span style={{ color: theme.accent, fontWeight: 'bold', fontSize: '13px', lineHeight: 1.2 }}>{scroll.display_name}</span>
         <span style={{ fontSize: '12px' }}>Owned: <b>{count}</b></span>
         <span style={{ fontSize: '12px', color: tier_color }}>{tier > 0 ? `Tier ${tier}` : 'No tier'}</span>
         {next
@@ -82,7 +84,7 @@ function Scroll_Panel({ scroll_id, count, image }) {
           padding: '8px 12px', width: `${TOOLTIP_W}px`, textAlign: 'center',
           color: theme.text, fontSize: '12px', pointerEvents: 'none', zIndex: 9999,
         }}>
-          {description}
+          {scroll.description}
         </div>
       )}
     </div>

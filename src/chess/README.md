@@ -39,7 +39,7 @@ We **intentionally** lie about the displayed ELO for bots below 1320. The "6/7 K
 - The character names fit better with low numbers ("CaseOh, ELO 1320" reads weirdly).
 - The discovery that all the early bots are secretly the same is funnier than a fix.
 
-The `BOT_ELOS` map in `constants.js` documents the displayed-vs-actual for each bot inline. To rebalance the bots that genuinely differ in strength, edit values in the **1320–3190** range. Below 1320 is purely cosmetic — you can change those numbers, but the gameplay stays identical.
+Each scroll's `chess_elo` field in `shared/scroll_registry.js` is the displayed ELO. To rebalance bots that genuinely differ in strength, edit values in the **1320–3190** range. Below 1320 is purely cosmetic — you can change those numbers, but the gameplay stays identical.
 
 ELO bands at a glance:
 
@@ -49,7 +49,9 @@ ELO bands at a glance:
 
 ## Bot roster
 
-Each mastery-scroll character (except a couple excluded ones, see `EXCLUDED_SCROLL_IDS` in `constants.js`) becomes a chess bot. The displayed face and name come from `SCROLL_NAMES` and the alphabetical-filename convention used by all the master-scroll faces.
+Bots are derived from `shared/scroll_registry.js` — every scroll with a non-null `chess_elo` becomes a bot. Currently the only excluded scroll is `blurry_epstein` (display name "Shadow Clone Jutsu"), which has no character flavor and gets `chess_elo: null`. To add or exclude a bot, edit the registry, not `chess/constants.js`.
+
+Each bot's face image is looked up by slug via `SCROLL_FACE_BY_SLUG[scroll.id]` — the slug equals the image filename basename in `assets/master_scroll_faces/`.
 
 Epstein is a special hardcoded extra bot — locked until every regular bot is beaten, then becomes the final boss at the Stockfish ceiling.
 
@@ -59,4 +61,4 @@ Beaten bots are stored **per-account** in `premium_game_data.chess_beaten_bots` 
 
 When a player checkmates the engine, the frontend `POST /chess/mark_bot_beaten` with the bot's `id`. The backend appends to the array (idempotent — re-beating an already-beaten bot is a no-op) and returns the updated list. The frontend dispatches the new list into Redux. The bot-select screen reads the list directly from Redux state.
 
-The endpoint validates that `bot_id` is a real mastery scroll id or the special `"epstein"` boss before writing — junk IDs get a 400.
+The endpoint validates that `bot_id` is a real scroll slug or the special `"epstein"` boss before writing — junk IDs get a 400.

@@ -7,8 +7,12 @@
 // "children trafficked" to "cookies", BUILDING_NAMES from "Diddy Factory" to
 // "Mine", ACCOUNT_TIER_NAMES from "Jewish+++" to "Premium+++", etc.
 //
-// Underlying mechanics (building costs, scroll effects, ELO bands, etc.)
-// live elsewhere and don't reference any of this. Strings only.
+// Mastery-scroll names/descriptions live in `scroll_registry.js`. They're
+// keyed by stable slug there rather than positional id, and own their own
+// chess metadata too — see that file for why.
+//
+// Underlying mechanics (building costs, ELO bands, etc.) live elsewhere
+// and don't reference any of this. Strings only.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const QUANTITY_NAME = 'children trafficked';
@@ -29,34 +33,9 @@ export const BUILDING_NAMES = {
   building_13: 'World Influence Grid',
 };
 
-export const SCROLL_NAMES = {
-  mastery_scroll_1:  '6/7 Kid',
-  mastery_scroll_2:  'Adolf Hitler',
-  mastery_scroll_3:  'Shadow Clone Jutsu',
-  mastery_scroll_4:  'CaseOh',
-  mastery_scroll_5:  'Charlie Kirk',
-  mastery_scroll_6:  'Dexter',
-  mastery_scroll_7:  'Diddy',
-  mastery_scroll_8:  'Doakes',
-  mastery_scroll_9:  'Donald Trump',
-  mastery_scroll_10: 'Drake',
-  mastery_scroll_11: 'Elon Musk',
-  mastery_scroll_12: 'Freddy Fazbear',
-  mastery_scroll_13: 'George Floyd',
-  mastery_scroll_14: 'Hillary Clinton',
-  mastery_scroll_15: 'iShowSpeed',
-  mastery_scroll_16: 'Kai Cenat',
-  mastery_scroll_17: 'Khaby Lame',
-  mastery_scroll_18: 'Mark Zuckerberg',
-  mastery_scroll_19: 'MrBeast',
-  mastery_scroll_20: 'Ninja',
-  mastery_scroll_21: 'Roy Lee',
-  mastery_scroll_22: 'State Trooper',
-  mastery_scroll_23: 'Stephen Hawking',
-  mastery_scroll_24: 'Tun Tun Tun Sahur',
-  mastery_scroll_25: 'Walter White',
-};
-
+// Tier thresholds for owned-count → tier badge. Descending so callers can
+// return on first match (highest matching tier wins). Mirrored in
+// backend/data/scrolls.py — keep both in sync.
 export const SCROLL_TIERS = [
   { min: 100, tier: 5 },
   { min: 25,  tier: 4 },
@@ -64,34 +43,6 @@ export const SCROLL_TIERS = [
   { min: 4,   tier: 2 },
   { min: 1,   tier: 1 },
 ];
-
-export const SCROLL_DESCRIPTIONS = {
-  mastery_scroll_1:  'Not yet implemented',
-  mastery_scroll_2:  'Not yet implemented',
-  mastery_scroll_3:  `${QUANTITY_NAME} per second multiplied by 1000`,
-  mastery_scroll_4:  'Not yet implemented',
-  mastery_scroll_5:  'Unlocks Kirk Mode (toggle in settings) — kirkifies all clickbait ads',
-  mastery_scroll_6:  'Not yet implemented',
-  mastery_scroll_7:  'Diddy Factory, Baby Oil Factory, and Mega Diddy Factory production ×2500',
-  mastery_scroll_8:  'Not yet implemented',
-  mastery_scroll_9:  'Not yet implemented',
-  mastery_scroll_10: 'Not yet implemented',
-  mastery_scroll_11: 'Not yet implemented',
-  mastery_scroll_12: 'Not yet implemented',
-  mastery_scroll_13: 'Unlocks dark mode',
-  mastery_scroll_14: 'Not yet implemented',
-  mastery_scroll_15: 'Not yet implemented',
-  mastery_scroll_16: 'Not yet implemented',
-  mastery_scroll_17: 'Not yet implemented',
-  mastery_scroll_18: 'Not yet implemented',
-  mastery_scroll_19: 'Not yet implemented',
-  mastery_scroll_20: 'Not yet implemented',
-  mastery_scroll_21: 'Not yet implemented',
-  mastery_scroll_22: 'Unlocks light mode',
-  mastery_scroll_23: 'Not yet implemented',
-  mastery_scroll_24: 'Not yet implemented',
-  mastery_scroll_25: 'Not yet implemented',
-};
 
 export const AD_TEXT = 'HOT GIRLS IN YOUR AREA WANT TO S3X';
 export const BAKERY_SUBSTITUTE_NAME = 'Island';

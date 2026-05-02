@@ -80,7 +80,7 @@ describe('sessionSlice — field-granular premium_game_data reducers', () => {
     store = make_store();
     store.dispatch(login({ user: {
       game_data: {},
-      premium_game_data: { tokens: 100, mastery_scroll_1: 3, theme: 'light' },
+      premium_game_data: { tokens: 100, '6_7_kid': 3, theme: 'light' },
     } }));
   });
 
@@ -89,7 +89,7 @@ describe('sessionSlice — field-granular premium_game_data reducers', () => {
     const pgd = store.getState().session.premium_game_data;
     expect(pgd.theme).toBe('dark');
     expect(pgd.tokens).toBe(100);              // untouched
-    expect(pgd.mastery_scroll_1).toBe(3);      // untouched
+    expect(pgd['6_7_kid']).toBe(3);            // untouched
   });
 
   it('increment_premium_game_data_field is atomic (read+write inside reducer)', () => {
@@ -98,8 +98,8 @@ describe('sessionSlice — field-granular premium_game_data reducers', () => {
   });
 
   it('increment_premium_game_data_field treats missing field as 0', () => {
-    store.dispatch(increment_premium_game_data_field({ key: 'mastery_scroll_99', amount: 1 }));
-    expect(store.getState().session.premium_game_data.mastery_scroll_99).toBe(1);
+    store.dispatch(increment_premium_game_data_field({ key: 'unknown_slug', amount: 1 }));
+    expect(store.getState().session.premium_game_data.unknown_slug).toBe(1);
   });
 });
 
@@ -117,18 +117,18 @@ describe('sessionSlice — lost-update race regression', () => {
     const store = make_store();
     store.dispatch(login({ user: {
       game_data: {},
-      premium_game_data: { tokens: 100, mastery_scroll_1: 0, mastery_scroll_2: 0 },
+      premium_game_data: { tokens: 100, '6_7_kid': 0, adolf_hitler: 0 },
     } }));
 
     // Two "concurrent" field updates that, with the old whole-object pattern,
     // would have clobbered each other.
     store.dispatch(update_premium_game_data_field({ key: 'tokens', value: 200 }));
-    store.dispatch(increment_premium_game_data_field({ key: 'mastery_scroll_1', amount: 5 }));
+    store.dispatch(increment_premium_game_data_field({ key: '6_7_kid', amount: 5 }));
 
     const pgd = store.getState().session.premium_game_data;
     expect(pgd.tokens).toBe(200);          // first dispatch applied
-    expect(pgd.mastery_scroll_1).toBe(5);  // second dispatch ALSO applied (didn't get clobbered)
-    expect(pgd.mastery_scroll_2).toBe(0);  // unrelated field untouched
+    expect(pgd['6_7_kid']).toBe(5);        // second dispatch ALSO applied (didn't get clobbered)
+    expect(pgd.adolf_hitler).toBe(0);      // unrelated field untouched
   });
 
   it('many concurrent increments on the same field all sum correctly', () => {
