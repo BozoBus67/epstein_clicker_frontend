@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { Modal_Overlay } from '../../shared/components';
 import { useEscapeKey } from '../../shared/hooks';
-import { SCROLL_FACE_BY_SLUG } from '../../shared/scroll_faces';
+import { useKirkifiedFace } from '../../shared/kirkified_faces';
+import { SCROLL_FACE_PAIRS } from '../../shared/scroll_faces';
 import { SCROLL_BY_ID, SCROLL_IDS } from '../../shared/scroll_registry';
 import { increment_premium_game_data_field, update_premium_game_data_field } from '../../shared/store/sessionSlice';
 import { useTheme } from '../../shared/theme';
@@ -90,13 +91,17 @@ export default function Gamble_Modal({ on_close }) {
 
 function Slot_Card({ slug }) {
   const theme = useTheme();
+  // Silent fallback: if Kirk Mode is on but this scroll has no kirkified
+  // variant, use the original. The mastery-scrolls page surfaces the missing
+  // note explicitly; on a transient slot reel it'd just be visual noise.
+  const { url } = useKirkifiedFace(slug !== null ? SCROLL_FACE_PAIRS[slug] : null);
   return (
     <div style={{
       width: '90px', height: '90px', borderRadius: '8px', overflow: 'hidden',
       border: `2px solid ${theme.panel_border}`, background: theme.panel_secondary,
     }}>
-      {slug !== null && (
-        <img src={SCROLL_FACE_BY_SLUG[slug]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      {url && (
+        <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       )}
     </div>
   );

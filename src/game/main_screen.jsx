@@ -178,19 +178,20 @@ function Settings_Button() {
         onMouseLeave={() => set_hovered(false)}
         style={{
           position: 'fixed',
-          bottom: '16px',
-          left: '16px',
-          width: '44px',
-          height: '44px',
-          border: `2px solid ${theme.accent}`,
-          borderRadius: '8px',
-          background: theme.panel,
+          bottom: '12px',
+          left: '12px',
+          width: '64px',
+          height: '64px',
+          border: 'none',
+          background: 'transparent',
           color: theme.accent,
-          fontSize: '24px',
+          fontSize: '52px',
           lineHeight: 1,
+          padding: 0,
           cursor: 'pointer',
-          transform: hovered ? 'scale(1.08)' : 'scale(1)',
-          transition: 'all 0.1s ease',
+          transform: hovered ? 'scale(1.12)' : 'scale(1)',
+          transition: 'transform 0.1s ease',
+          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
         }}
       >
         ⚙️

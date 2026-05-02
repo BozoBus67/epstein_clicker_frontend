@@ -6,31 +6,18 @@
 //
 // Each ad is paired with an optional "kirkified" version sourced from
 // assets/clickbait_faces_kirkified/ by stem-name match. So `vishnu_1.jpg`
-// pairs with `vishnu_1_kirkified.jpg` if it exists. When Kirk Mode is on,
-// the ad panel swaps to the kirkified image; when there's no match, it
-// shows the original alongside a "this image was unable to be kirkified"
-// note. Adding a kirkified variant later: drop the file in the kirkified
+// pairs with `vishnu_1_kirkified.jpg` if it exists. The pairing logic lives
+// in shared/kirkified_faces.js — same helper that powers the master-scroll
+// faces. Adding a kirkified variant later: drop the file in the kirkified
 // folder using the `<original_stem>_kirkified.jpg` naming and it pairs up
-// automatically — no code change needed.
+// automatically.
+
+import { pair_by_stem } from '../../shared/kirkified_faces';
 
 const ad_modules = import.meta.glob('../../assets/clickbait_faces/*.{png,jpg}', { eager: true });
 const kirkified_modules = import.meta.glob('../../assets/clickbait_faces_kirkified/*.jpg', { eager: true });
 
-function basename_no_ext(path) {
-  const file = path.split('/').pop();
-  return file.replace(/\.(png|jpg|jpeg|webp)$/i, '');
-}
-
-const kirkified_by_stem = {};
-for (const [path, mod] of Object.entries(kirkified_modules)) {
-  const stem = basename_no_ext(path).replace(/_kirkified$/, '');
-  kirkified_by_stem[stem] = mod.default;
-}
-
-export const ADS = Object.entries(ad_modules).map(([path, mod]) => ({
-  original: mod.default,
-  kirkified: kirkified_by_stem[basename_no_ext(path)] ?? null,
-}));
+export const ADS = Object.values(pair_by_stem(ad_modules, kirkified_modules));
 
 // Where to place the ad's close-X button. Each rotation picks a random corner
 // to make the close button slightly harder to catch — leaning into the

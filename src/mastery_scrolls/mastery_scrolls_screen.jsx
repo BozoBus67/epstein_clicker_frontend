@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Page_Header } from '../shared/components';
+import { useKirkifiedFace } from '../shared/kirkified_faces';
 import { SCROLL_REGISTRY } from '../shared/scroll_registry';
-import { SCROLL_FACE_BY_SLUG } from '../shared/scroll_faces';
+import { SCROLL_FACE_PAIRS } from '../shared/scroll_faces';
 import { useTheme } from '../shared/theme';
 import { TOOLTIP_W, get_tier, get_next_tier, get_tooltip_style } from './utils';
 
@@ -49,6 +50,7 @@ function Scroll_Panel({ scroll, count }) {
   const tier_color = tier > 0 ? theme.accent : theme.text_muted;
   const [tooltip_pos, set_tooltip_pos] = useState(null);
   const card_ref = useRef(null);
+  const { url: face_url, missing_kirkified } = useKirkifiedFace(SCROLL_FACE_PAIRS[scroll.id]);
 
   return (
     <div
@@ -71,7 +73,7 @@ function Scroll_Panel({ scroll, count }) {
       }}
     >
       <div style={{ width: '100%', height: '180px', overflow: 'hidden', borderRadius: '8px 8px 0 0' }}>
-        <img src={SCROLL_FACE_BY_SLUG[scroll.id]} draggable={false} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
+        <img src={face_url} draggable={false} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
       </div>
       <div style={{
         padding: '10px 12px', display: 'flex', flexDirection: 'column',
@@ -84,6 +86,11 @@ function Scroll_Panel({ scroll, count }) {
           ? <span style={{ fontSize: '11px', color: theme.text_muted }}>{count}/{next.needed} → Tier {next.tier}</span>
           : <span style={{ fontSize: '11px', color: theme.accent }}>Max Tier</span>
         }
+        {missing_kirkified && (
+          <span style={{ fontSize: '10px', fontStyle: 'italic', color: theme.text_muted, marginTop: '2px' }}>
+            (this image was unable to be kirkified)
+          </span>
+        )}
       </div>
       {tooltip_pos && (
         <div style={{

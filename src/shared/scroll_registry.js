@@ -46,7 +46,7 @@ const SCROLL_MECHANICS = [
   { id: 'roy_lee',             chess_elo: 1800 },
   { id: 'state_trooper_cop',   chess_elo: 1500 },
   { id: 'stephen_hawking',     chess_elo: 3050 },
-  { id: 'tun_tun_tun_sahur',   chess_elo: 300  },
+  { id: 'tung_tung_tung_sahur', chess_elo: 300 },
   { id: 'walter_white',        chess_elo: 2800 },
 ];
 

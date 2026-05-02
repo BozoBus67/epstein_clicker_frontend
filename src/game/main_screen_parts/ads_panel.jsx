@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import * as Constants from '../../shared/constants';
 import { useTierGate } from '../../shared/hooks';
+import { useKirkifiedFace } from '../../shared/kirkified_faces';
 import { AD_ROTATION_MS } from '../constants';
 import { ADS, AD_CLOSE_BUTTON_CORNERS, random_next_ad_index } from './main_body_utils';
 import cc_bg from '../../assets/game_screen/cookie_clicker_background_art.jpg';
 
 export default function Ads_Panel() {
   const { gate, lock_modal } = useTierGate(2);
-  const kirk_mode = useSelector(state => state.session.premium_game_data?.kirk_mode ?? false);
 
   const [index, set_index] = useState(() => Math.floor(Math.random() * ADS.length));
   const [corner, set_corner] = useState(() => Math.floor(Math.random() * AD_CLOSE_BUTTON_CORNERS.length));
@@ -42,12 +41,10 @@ export default function Ads_Panel() {
   }, []);
 
   const ad = ADS[index];
-  // If Kirk Mode is on AND this ad has a kirkified variant, swap to it.
-  // If Kirk Mode is on but this ad has no kirkified counterpart, fall back
-  // to the original AND surface a note in the ad-text caption.
-  const use_kirkified = kirk_mode && !!ad.kirkified;
-  const missing_kirkified = kirk_mode && !ad.kirkified;
-  const img_src = use_kirkified ? ad.kirkified : ad.original;
+  // Same Kirk-Mode-aware face logic the master-scroll cards use. When a
+  // kirkified variant is missing, the helper returns the original AND sets
+  // missing_kirkified so we surface the note in the ad-text caption.
+  const { url: img_src, missing_kirkified } = useKirkifiedFace(ad);
 
   return (
     <div style={{
@@ -63,14 +60,20 @@ export default function Ads_Panel() {
             decoding="async"
             style={{ maxWidth: '80%', maxHeight: '65%', objectFit: 'contain', animation: 'ad-pulse 5s ease-in-out infinite' }}
           />
-          <span style={{
-            fontWeight: 'bold', fontSize: '15px', color: '#fff',
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
             background: 'rgba(0,0,0,0.65)', borderRadius: '6px', padding: '4px 12px',
             textAlign: 'center',
           }}>
-            {Constants.AD_TEXT}
-            {missing_kirkified && ' (this image was unable to be kirkified)'}
-          </span>
+            <span style={{ fontWeight: 'bold', fontSize: '15px', color: '#fff' }}>
+              {Constants.AD_TEXT}
+            </span>
+            {missing_kirkified && (
+              <span style={{ fontSize: '12px', fontStyle: 'italic', color: '#ddd' }}>
+                (this image was unable to be kirkified)
+              </span>
+            )}
+          </div>
         </>
       )}
       {!dismissed && (

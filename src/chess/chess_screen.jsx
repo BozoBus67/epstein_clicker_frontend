@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Back_Arrow_Button } from '../shared/components';
 import { useTheme } from '../shared/theme';
-import { BOTS, REGULAR_BOT_IDS, EPSTEIN_BOT_ID } from './constants';
+import { BOTS, EPSTEIN_BOT_ID, REGULAR_BOT_IDS, useBotFace } from './constants';
 
 export default function Chess_Screen() {
   const theme = useTheme();
@@ -63,17 +63,18 @@ function Bot_Card({ bot, locked, beaten }) {
       }}
       className={locked ? '' : 'hover:scale-105'}
     >
-      <Bot_Card_Image face={bot.face} locked={locked} />
+      <Bot_Card_Image bot_id={bot.id} locked={locked} />
       <Bot_Card_Footer bot={bot} locked={locked} beaten={beaten} />
     </div>
   );
 }
 
-function Bot_Card_Image({ face, locked }) {
+function Bot_Card_Image({ bot_id, locked }) {
+  const { url } = useBotFace(bot_id);
   return (
     <div style={{ width: '100%', height: '180px', overflow: 'hidden', position: 'relative' }}>
       <img
-        src={face}
+        src={url}
         draggable={false}
         style={{
           width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top',

@@ -69,7 +69,7 @@ export const SCROLL_DISPLAY_NAMES = {
   roy_lee:               'Roy Lee',
   state_trooper_cop:     'State Trooper',
   stephen_hawking:       'Stephen Hawking',
-  tun_tun_tun_sahur:     'Tun Tun Tun Sahur',
+  tung_tung_tung_sahur:  'Tung Tung Tung Sahur',
   walter_white:          'Walter White',
 };
 
@@ -97,7 +97,7 @@ export const SCROLL_DESCRIPTIONS = {
   roy_lee:               'Not yet implemented',
   state_trooper_cop:     'Unlocks light mode',
   stephen_hawking:       'Not yet implemented',
-  tun_tun_tun_sahur:     'Not yet implemented',
+  tung_tung_tung_sahur:  'Not yet implemented',
   walter_white:          'Not yet implemented',
 };
 

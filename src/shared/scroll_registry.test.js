@@ -10,7 +10,8 @@
 
 import { describe, expect, it } from 'vitest';
 import { SCROLL_DESCRIPTIONS, SCROLL_DISPLAY_NAMES, SCROLL_TIERS } from './constants';
-import { SCROLL_FACE_BY_SLUG } from './scroll_faces';
+import { pick_face } from './kirkified_faces';
+import { SCROLL_FACE_PAIRS } from './scroll_faces';
 import { SCROLL_BY_ID, SCROLL_IDS, SCROLL_REGISTRY } from './scroll_registry';
 
 const SLUG_PATTERN = /^[a-z0-9]+(_[a-z0-9]+)*$/;
@@ -56,14 +57,35 @@ describe('scroll_registry — drift against constants.js', () => {
 });
 
 describe('scroll_registry — drift against image assets', () => {
-  it('every registry id has a face image in master_scroll_faces/', () => {
-    const missing = SCROLL_IDS.filter(id => !SCROLL_FACE_BY_SLUG[id]);
+  it('every registry id has a default face image in master_scroll_faces/', () => {
+    const missing = SCROLL_IDS.filter(id => !SCROLL_FACE_PAIRS[id]?.original);
     expect(missing).toEqual([]);
   });
 
-  it('no orphan image files exist (every face has a registry entry)', () => {
-    const orphan = Object.keys(SCROLL_FACE_BY_SLUG).filter(slug => !SCROLL_BY_ID[slug]);
+  it('no orphan default-face files exist (every face has a registry entry)', () => {
+    const orphan = Object.keys(SCROLL_FACE_PAIRS).filter(slug => !SCROLL_BY_ID[slug]);
     expect(orphan).toEqual([]);
+  });
+});
+
+describe('kirkified_faces — pick_face behaviour', () => {
+  const pair_with_kirk = { original: 'orig.png', kirkified: 'kirk.jpg' };
+  const pair_without_kirk = { original: 'orig.png', kirkified: null };
+
+  it('returns original when kirk_mode is off', () => {
+    expect(pick_face(pair_with_kirk, false)).toEqual({ url: 'orig.png', missing_kirkified: false });
+  });
+
+  it('returns kirkified when kirk_mode is on and variant exists', () => {
+    expect(pick_face(pair_with_kirk, true)).toEqual({ url: 'kirk.jpg', missing_kirkified: false });
+  });
+
+  it('falls back to original AND flags missing when kirk_mode is on but no variant', () => {
+    expect(pick_face(pair_without_kirk, true)).toEqual({ url: 'orig.png', missing_kirkified: true });
+  });
+
+  it('returns null url and false flag when given a missing pair (defensive)', () => {
+    expect(pick_face(undefined, true)).toEqual({ url: null, missing_kirkified: false });
   });
 });
 

@@ -11,7 +11,7 @@ import Audio_Controls from '../music';
 import { update_premium_game_data_field } from '../shared/store/sessionSlice';
 import { useTheme } from '../shared/theme';
 import { api_mark_chess_bot_beaten } from './api';
-import { BOTS } from './constants';
+import { BOTS, useBotFace } from './constants';
 import { Engine } from './engine';
 
 export default function Chess_Game_Screen() {
@@ -144,6 +144,7 @@ export default function Chess_Game_Screen() {
 
 function Bot_Header({ bot, engine_ready, engine_error, thinking, outcome }) {
   const theme = useTheme();
+  const { url: face_url } = useBotFace(bot.id);
   const status =
     outcome === 'win'  ? 'You won!' :
     outcome === 'loss' ? 'You lost.' :
@@ -156,7 +157,7 @@ function Bot_Header({ bot, engine_ready, engine_error, thinking, outcome }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: theme.text }}>
       <img
-        src={bot.face}
+        src={face_url}
         style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', objectPosition: 'center top', border: `3px solid ${theme.accent}` }}
       />
       <div style={{ display: 'flex', flexDirection: 'column' }}>

@@ -1,14 +1,15 @@
-// Scroll image lookup, keyed by slug (filename basename). Convention: a file
-// `master_scroll_faces/<slug>.<ext>` is the face for scroll `<slug>`. The
-// extension is whatever the image happens to be (.webp, .jpg, .png, .jpeg);
-// the basename — and ONLY the basename — is the contract.
+// Scroll image lookup, keyed by slug. Convention: a file
+// `master_scroll_faces/<slug>.<ext>` is the default face for scroll <slug>.
+// An optional kirkified counterpart at
+// `master_scroll_faces_kirkified/<slug>_kirkified.<ext>` is paired in
+// automatically — see `kirkified_faces.js` for the pairing rules.
+//
+// Consumers should reach for `useKirkifiedFace(SCROLL_FACE_PAIRS[slug])` to
+// get the right URL for the current Kirk Mode setting.
 
-const face_modules = import.meta.glob('../assets/master_scroll_faces/*', { eager: true });
+import { pair_by_stem } from './kirkified_faces';
 
-export const SCROLL_FACE_BY_SLUG = Object.fromEntries(
-  Object.entries(face_modules).map(([path, mod]) => {
-    const filename = path.split('/').pop();
-    const slug = filename.replace(/\.[^/.]+$/, '');
-    return [slug, mod.default];
-  })
-);
+const default_modules = import.meta.glob('../assets/master_scroll_faces/*', { eager: true });
+const kirkified_modules = import.meta.glob('../assets/master_scroll_faces_kirkified/*', { eager: true });
+
+export const SCROLL_FACE_PAIRS = pair_by_stem(default_modules, kirkified_modules);

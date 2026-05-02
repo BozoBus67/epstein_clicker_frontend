@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { Modal_Overlay } from '../../shared/components';
 import { useEscapeKey } from '../../shared/hooks';
-import { SCROLL_FACE_BY_SLUG } from '../../shared/scroll_faces';
+import { useKirkifiedFace } from '../../shared/kirkified_faces';
+import { SCROLL_FACE_PAIRS } from '../../shared/scroll_faces';
 import { SCROLL_BY_ID } from '../../shared/scroll_registry';
 import { increment_premium_game_data_field, update_premium_game_data_field } from '../../shared/store/sessionSlice';
 import { useTheme } from '../../shared/theme';
@@ -104,7 +105,7 @@ function Wheel({ rotation, on_transition_end }) {
       >
         <circle cx={0} cy={0} r={WHEEL_RADIUS - 1} fill="#0f0f1a" stroke="#facc15" strokeWidth={2} />
         {SCROLL_IDS.map((id, i) => (
-          <Segment key={id} index={i} face={SCROLL_FACE_BY_SLUG[id]} />
+          <Segment key={id} index={i} slug={id} />
         ))}
         <circle cx={0} cy={0} r={22} fill="#facc15" stroke="#000" strokeWidth={2} />
       </svg>
@@ -113,7 +114,10 @@ function Wheel({ rotation, on_transition_end }) {
   );
 }
 
-function Segment({ index, face }) {
+function Segment({ index, slug }) {
+  // Silent fallback under Kirk Mode (see Slot_Card in gamble_modal.jsx for
+  // why no caption is surfaced on transient gambling animations).
+  const { url: face } = useKirkifiedFace(SCROLL_FACE_PAIRS[slug]);
   const half = SEGMENT_DEG / 2;
   const a0 = ((index * SEGMENT_DEG) - 90 - half) * (Math.PI / 180);
   const a1 = ((index * SEGMENT_DEG) - 90 + half) * (Math.PI / 180);

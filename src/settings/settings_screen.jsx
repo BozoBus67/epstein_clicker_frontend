@@ -151,6 +151,7 @@ function Kirk_Mode_Toggle() {
   const dispatch = useDispatch();
   const theme = useTheme();
   const enabled = useSelector(state => state.session.premium_game_data?.kirk_mode ?? false);
+  const [hovered, set_hovered] = useState(false);
 
   const handle = async () => {
     const next = !enabled;
@@ -163,13 +164,25 @@ function Kirk_Mode_Toggle() {
   };
 
   return (
-    <button
-      type="button"
-      onClick={handle}
-      style={neutral_button_style(theme)}
+    <div
+      style={{ position: 'relative', display: 'inline-block' }}
+      onMouseEnter={() => set_hovered(true)}
+      onMouseLeave={() => set_hovered(false)}
     >
-      Kirk Mode: {enabled ? 'On' : 'Off'} (click to toggle)
-    </button>
+      <button type="button" onClick={handle} style={neutral_button_style(theme)}>
+        Kirk Mode: {enabled ? 'On' : 'Off'}
+      </button>
+      {hovered && (
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 6px)', left: '50%', transform: 'translateX(-50%)',
+          background: theme.panel, border: `1px solid ${theme.panel_border}`, borderRadius: '6px',
+          padding: '4px 10px', whiteSpace: 'nowrap', fontSize: '12px',
+          color: theme.text_muted, opacity: 0.85, pointerEvents: 'none', zIndex: 10,
+        }}>
+          click to toggle
+        </div>
+      )}
+    </div>
   );
 }
 
