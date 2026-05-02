@@ -49,9 +49,15 @@ function Account_Refresh_Button() {
       on_click={() => refresh_user_data(dispatch)}
       success_message="Reloaded account data and attempted account migration."
       error_message="Failed to reload account data."
-      size={28}
+      size={40}
       title="Reload account data"
-      style={{ border: `1px solid ${theme.accent}`, color: theme.accent }}
+      style={{
+        border: `2px solid ${theme.accent}`,
+        background: theme.accent,
+        color: theme.accent_text ?? '#000',
+        fontWeight: 'bold',
+        boxShadow: `0 0 12px ${theme.accent}88, 0 2px 4px rgba(0,0,0,0.4)`,
+      }}
     />
   );
 }
