@@ -53,7 +53,14 @@ function Scroll_Panel({ scroll, count }) {
   return (
     <div
       ref={card_ref}
-      onMouseEnter={() => set_tooltip_pos(get_tooltip_style(card_ref.current.getBoundingClientRect()))}
+      // The null check guards a rare race: React can fire onMouseEnter after
+      // the component has been unmounted (e.g. user navigated away mid-hover),
+      // at which point card_ref.current is null and .getBoundingClientRect()
+      // would throw. Cheap insurance against a free crash.
+      onMouseEnter={() => {
+        if (!card_ref.current) return;
+        set_tooltip_pos(get_tooltip_style(card_ref.current.getBoundingClientRect()));
+      }}
       onMouseLeave={() => set_tooltip_pos(null)}
       style={{
         width: '180px', borderRadius: '10px', overflow: 'visible',
