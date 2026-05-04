@@ -1,4 +1,4 @@
-> ✅ Proofread and edited by a human.
+> ✅ Proofread and edited.
 
 This is the "global" README for this gitrepo. Many things at the beginning also apply to the backend. 
 
